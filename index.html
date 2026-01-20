@@ -8,7 +8,7 @@
         :root {
             --ep-orange: #ff3e00;
             --ep-ivory: #e8e4d9;
-            --ep-deep-green: #004f0b; /* Updated to your requested shade */
+            --ep-deep-green: #004f0b;
             --ep-black: #121212;
             --ep-white: #ffffff;
             --ep-border: #bcbaaf;
@@ -21,7 +21,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            padding: 20px;
             margin: 0;
         }
 
@@ -29,9 +29,9 @@
             background: var(--ep-ivory);
             border: 4px solid var(--ep-border);
             border-radius: 12px;
-            padding: 30px;
+            padding: 25px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
         }
 
@@ -39,46 +39,46 @@
             background: var(--ep-black);
             color: var(--ep-white);
             padding: 10px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-align: center;
             letter-spacing: 3px;
             margin-top: 0;
-            border-radius: 2px;
             text-transform: uppercase;
         }
 
-        /* The Lab Display */
         .lcd-display {
-            background: #0a0c0a; /* Darker background for the deep green */
+            background: #0a0c0a;
             color: var(--ep-deep-green);
-            padding: 15px;
+            padding: 12px;
             border-radius: 2px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             margin-bottom: 20px;
             border: 3px inset var(--ep-border);
-            height: 110px;
+            height: 90px;
             overflow-y: auto;
             box-shadow: inset 0 0 15px #000;
-            line-height: 1.4;
         }
 
         .section-label {
             font-weight: bold;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--ep-black);
             margin-bottom: 8px;
             display: block;
             text-transform: uppercase;
             border-bottom: 2px solid var(--ep-orange);
-            letter-spacing: 1px;
         }
 
-        .panel {
-            margin-bottom: 25px;
+        .panel { margin-bottom: 20px; border: 1px dashed var(--ep-border); padding: 10px; border-radius: 4px; }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
-        /* EP Series Styling for Buttons */
         button {
             background: var(--ep-black);
             color: var(--ep-white);
@@ -89,176 +89,175 @@
             text-transform: uppercase;
             cursor: pointer;
             width: 100%;
-            margin-bottom: 8px;
             border-bottom: 4px solid #000;
             border-radius: 2px;
-            transition: all 0.05s;
         }
 
-        button:active {
-            transform: translateY(2px);
-            border-bottom: 2px solid #000;
-        }
+        button:active { transform: translateY(2px); border-bottom: 2px solid #000; }
+        button.primary { background: var(--ep-orange); border-bottom-color: #b32c00; }
+        .connected-state { background: var(--ep-deep-green) !important; }
 
-        button.primary {
-            background: var(--ep-orange);
-            border-bottom: 4px solid #b32c00;
-        }
-
-        /* Status Colors */
-        .connected-state {
-            background: var(--ep-deep-green) !important;
-            color: var(--ep-white) !important;
-            border-bottom-color: #002d06 !important;
-        }
-
-        select {
+        label { font-size: 0.6rem; font-weight: bold; display: block; margin-bottom: 5px; color: #555;}
+        select, input {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             background: var(--ep-white);
             border: 2px solid var(--ep-black);
             font-family: inherit;
             margin-bottom: 10px;
-            border-radius: 2px;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            accent-color: var(--ep-orange);
-            margin: 15px 0;
-        }
-
-        .panic {
-            background: #777;
-            font-size: 0.65rem;
-            margin-top: 10px;
-            border-bottom-color: #444;
+            box-sizing: border-box;
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
 
-    <div class="chassis">
-        <h1>EP-40 PRODUCTION TOOLKIT</h1>
-        
-        <div class="lcd-display" id="log">
-            SYSTEM IDLE...<br>AWAITING USB-C CONNECTION
-        </div>
+<div class="chassis">
+    <h1>EP-40 // MODULAR RIDDIM LAB</h1>
+    
+    <div class="lcd-display" id="log">AWAITING DEVICE INITIALIZATION...</div>
 
-        <div class="panel">
-            <span class="section-label">01 // DEVICE CONTROL</span>
-            <button onclick="initMIDI()" class="primary" id="init-btn">Initialize Connection</button>
-        </div>
-
-        <div class="panel">
-            <span class="section-label">02 // AUTO-PROGRAMMER (1 BAR)</span>
-            <button onclick="autoProgram()">AUTO-WRITE DRUM BUILD</button>
-        </div>
-
-        <div class="panel">
-            <span class="section-label">03 // PATTERN INJECTOR</span>
-            <select id="pattern-type">
-                <option value="dembow">DEMBOW (3+3+2)</option>
-                <option value="stepper">STEPPER (4x4)</option>
-                <option value="skank">SKANK (OFFBEATS)</option>
-            </select>
-            <button onclick="injectRiddim()">INJECT LIVE PATTERN</button>
-        </div>
-
-        <div class="panel">
-            <span class="section-label">04 // ANALOG PERFORMANCE</span>
-            <label style="font-size: 0.6rem;">CC 74 : RESONANT FILTER</label>
-            <input type="range" id="macro-fader" min="0" max="127" value="64">
-        </div>
-
-        <button onclick="panic()" class="panic">Global MIDI Panic</button>
+    <div class="panel">
+        <button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button>
     </div>
 
-    <script>
-        let midiOut = null;
-        const logDisplay = document.getElementById('log');
+    <div class="panel">
+        <span class="section-label">01 // PROJECT CONFIG</span>
+        <div class="control-grid">
+            <div>
+                <label>TEMPO (BPM)</label>
+                <input type="number" id="tempo" value="110" min="40" max="240">
+            </div>
+            <div>
+                <label>LENGTH (BARS)</label>
+                <select id="bars">
+                    <option value="1">1 Bar</option>
+                    <option value="2">2 Bars</option>
+                    <option value="4">4 Bars</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
-        function log(m) {
-            const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            logDisplay.innerHTML += `<div>[${time}] ${m}</div>`;
-            logDisplay.scrollTop = logDisplay.scrollHeight;
+    <div class="panel">
+        <span class="section-label">02 // CORE FOUNDATION (PADS 1-2)</span>
+        <label>KICK & SNARE PATTERN</label>
+        <select id="core-pattern">
+            <option value="dembow">DEMBOW (3+3+2)</option>
+            <option value="stepper">STEPPER (4-on-floor)</option>
+            <option value="one_drop">ONE DROP (Reggae)</option>
+            <option value="none">-- NO KICK/SNARE --</option>
+        </select>
+    </div>
+
+    <div class="panel">
+        <span class="section-label">03 // TOP EMBELLISHMENT (PADS 3-12)</span>
+        <label>HI-HATS & PERCUSSION</label>
+        <select id="top-pattern">
+            <option value="straight_8">STRAIGHT 8ths (Hats)</option>
+            <option value="shuffler">SHUFFLED (Groove)</option>
+            <option value="perc_chaos">PERC SCATTER (Randomish)</option>
+            <option value="none">-- NO EMBELLISHMENT --</option>
+        </select>
+        <button onclick="runSession()" class="primary">INJECT HYBRID RIDDIM</button>
+    </div>
+
+    <div class="panel">
+        <span class="section-label">04 // ANALOG PERFORMANCE</span>
+        <input type="range" id="filter" min="0" max="127" value="64">
+    </div>
+
+    <button onclick="panic()" style="background:#777; font-size: 0.6rem; border-bottom-color:#444;">MIDI Panic</button>
+</div>
+
+<script>
+    let midiOut = null;
+    const logEl = document.getElementById('log');
+
+    const PAD = {
+        KICK: 36, SNARE: 37, HAT: 38, LTOM: 39, MTOM: 40, STOM: 41, 
+        RIDE: 42, CRASH: 43, KICK2: 44, SNARE2: 45, OHAT: 46, PERC: 47
+    };
+
+    function log(m) {
+        logEl.innerHTML += `<div>> ${m}</div>`;
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function initMIDI() {
+        const midi = await navigator.requestMIDIAccess();
+        midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+        if (midiOut) {
+            log(`SYNCED: ${midiOut.name}`);
+            document.getElementById('init-btn').classList.add('connected-state');
+            document.getElementById('init-btn').innerText = "HARDWARE READY";
         }
+    }
 
-        async function initMIDI() {
-            try {
-                const midi = await navigator.requestMIDIAccess();
-                const outputs = Array.from(midi.outputs.values());
-                midiOut = outputs.find(o => 
-                    o.name.toLowerCase().includes("ep") || 
-                    o.name.toLowerCase().includes("sample") ||
-                    o.name.toLowerCase().includes("audio")
-                );
+    function sendNote(note, vel, time) {
+        if (!midiOut) return;
+        midiOut.send([144, note, vel], time);
+        midiOut.send([128, note, 0], time + 100);
+    }
 
-                if (midiOut) {
-                    log(`DEVICE FOUND: ${midiOut.name}`);
-                    const btn = document.getElementById('init-btn');
-                    btn.innerText = "DEVICE CONNECTED";
-                    btn.classList.add('connected-state');
-                } else {
-                    log("SCANNING: No hardware found. Ensure USB-C is data-ready.");
-                }
-            } catch (err) {
-                log("PERMISSIONS: MIDI Access Denied.");
-            }
+    // PATTERN DEFINITIONS (Relative to beat starts)
+    const FOUNDATIONS = {
+        dembow: (off, ms) => {
+            [0, ms*0.75, ms*1.5, ms*2.25, ms*3, ms*3.75].forEach(t => sendNote(PAD.KICK, 110, off + t));
+            [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
+        },
+        stepper: (off, ms) => {
+            [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.KICK, 115, off + t));
+            [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
+        },
+        one_drop: (off, ms) => {
+            [ms, ms*3].forEach(t => sendNote(PAD.KICK, 110, off + t));
+            [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
         }
+    };
 
-        function sendNote(note, vel, time) {
-            if (!midiOut) return;
-            midiOut.send([144, note, vel], time); 
-            midiOut.send([128, note, 0], time + 150); 
+    const EMBELLISHMENTS = {
+        straight_8: (off, ms) => {
+            [0, ms*0.5, ms, ms*1.5, ms*2, ms*2.5, ms*3, ms*3.5].forEach(t => sendNote(PAD.HAT, 85, off + t));
+        },
+        shuffler: (off, ms) => {
+            [ms*0.33, ms*0.66, ms*1.33, ms*1.66, ms*2.33, ms*2.66, ms*3.33, ms*3.66].forEach(t => sendNote(PAD.PERC, 90, off + t));
+        },
+        perc_chaos: (off, ms) => {
+            [ms*0.25, ms*1.75, ms*2.5, ms*3.25].forEach((t, i) => sendNote(PAD.LTOM + i, 80, off + t));
         }
+    };
 
-        async function autoProgram() {
-            if (!midiOut) return log("ERR: No Device");
+    function runSession() {
+        if (!midiOut) return log("ERR: No Device");
+        
+        const bpm = parseInt(document.getElementById('tempo').value);
+        const bars = parseInt(document.getElementById('bars').value);
+        const core = document.getElementById('core-pattern').value;
+        const top = document.getElementById('top-pattern').value;
+        const msPerBeat = 60000 / bpm;
+        const now = window.performance.now();
+
+        log(`INJECTING ${bars} BARS...`);
+
+        for (let bar = 0; bar < bars; bar++) {
+            const barOffset = now + (bar * msPerBeat * 4);
             
-            log("AUTO-SEQ: Commencing Build...");
-            const bpm = 110;
-            const msPerBeat = 60000 / bpm; 
-            const now = window.performance.now();
-
-            midiOut.send([0xFA]); // Start
-
-            sendNote(36, 115, now + (msPerBeat * 0)); // Kick 1
-            sendNote(37, 105, now + (msPerBeat * 1)); // Snare 2
-            sendNote(36, 115, now + (msPerBeat * 2)); // Kick 3
-            sendNote(37, 105, now + (msPerBeat * 3)); // Snare 4
-
-            setTimeout(() => {
-                midiOut.send([0xFC]); // Stop
-                log("AUTO-SEQ: Buffer Written.");
-            }, msPerBeat * 4);
+            if (FOUNDATIONS[core]) FOUNDATIONS[core](barOffset, msPerBeat);
+            if (EMBELLISHMENTS[top]) EMBELLISHMENTS[top](barOffset, msPerBeat);
         }
+        
+        setTimeout(() => log("INJECTION COMPLETE"), msPerBeat * 4 * bars);
+    }
 
-        function injectRiddim() {
-            if (!midiOut) return log("ERR: No Device");
-            const type = document.getElementById('pattern-type').value;
-            const now = window.performance.now();
-            log(`MSG: Sending ${type.toUpperCase()}`);
+    document.getElementById('filter').oninput = (e) => {
+        if (midiOut) midiOut.send([176, 74, e.target.value]);
+    };
 
-            if (type === 'dembow') {
-                [0, 375, 750, 1125].forEach(t => sendNote(36, 100, now + t)); 
-            } else if (type === 'stepper') {
-                [0, 500, 1000, 1500].forEach(t => sendNote(36, 110, now + t));
-            } else if (type === 'skank') {
-                [250, 750, 1250, 1750].forEach(t => sendNote(48, 90, now + t));
-            }
-        }
-
-        document.getElementById('macro-fader').oninput = (e) => {
-            if (midiOut) midiOut.send([176, 74, e.target.value]);
-        };
-
-        function panic() {
-            if (midiOut) {
-                for(let i=0; i<16; i++) midiOut.send([176, 123, 0]);
-            }
-            log("LOG: Global Panic Executed.");
-        }
-    </script>
+    function panic() {
+        if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]);
+        log("ALL NOTES KILLED");
+    }
+</script>
 </body>
 </html>
