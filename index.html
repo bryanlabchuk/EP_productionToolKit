@@ -56,12 +56,7 @@
             padding: 20px; border-radius: 8px; margin-bottom: 25px; 
         }
         
-        .step-container { 
-            display: grid; 
-            grid-template-columns: repeat(8, 1fr); 
-            gap: 8px; 
-            margin-top: 15px; 
-        }
+        .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 15px; }
         
         .step-box { 
             aspect-ratio: 1 / 1; background: rgba(0,0,0,0.05); 
@@ -72,7 +67,7 @@
         .step-box.on { background: var(--accent); color: white; border-color: var(--accent); }
         .step-box.off { color: var(--text); opacity: 0.4; }
 
-        .config-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .config-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px; }
         label { font-size: 0.65rem; font-weight: bold; display: block; margin-bottom: 5px; }
         
         select, input { 
@@ -88,13 +83,14 @@
         }
         button:active { transform: translateY(2px); border-bottom-width: 2px; }
         button.primary { background: var(--accent); color: white; }
+        button.toggle-on { background: var(--lcd-text); color: var(--lcd-bg); border-color: var(--lcd-text); }
     </style>
 </head>
 <body id="main-body">
 
 <div class="chassis">
     <h1>EP-DC-OXO // DRUM COMPUTER</h1>
-    <div class="lcd-display" id="log">SYSTEM IDLE...</div>
+    <div class="lcd-display" id="log">SYSTEM READY...</div>
 
     <div class="panel" style="margin-bottom: 20px;">
         <button onclick="initMIDI()" class="primary" id="init-btn">INITIALIZE CONNECTION</button>
@@ -102,16 +98,18 @@
 
     <div class="config-row">
         <div><label>TEMPO</label><input type="number" id="tempo" value="120"></div>
-        <div><label>INJECTION LENGTH</label>
+        <div><label>LENGTH</label>
             <select id="global-bars">
-                <option value="1">1 Bar</option>
-                <option value="2">2 Bars</option>
-                <option value="4">4 Bars</option>
-                <option value="8">8 Bars</option>
+                <option value="1">1 Bar</option><option value="2">2 Bars</option>
+                <option value="4">4 Bars</option><option value="8">8 Bars</option>
                 <option value="16">16 Bars</option>
             </select>
         </div>
-        <div><label>SYSTEM RESET</label><button onclick="panic()" style="padding:10px; font-size:0.7rem; background:#444;">PANIC</button></div>
+        <div>
+            <label>FEEL</label>
+            <button id="human-btn" onclick="toggleHuman()" style="font-size:0.6rem; padding:10px;">HUMANIZATION: OFF</button>
+        </div>
+        <div><label>SYSTEM</label><button onclick="panic()" style="padding:10px; font-size:0.7rem; background:#444;">PANIC</button></div>
     </div>
 
     <div class="ep-grid" id="pad-grid"></div>
@@ -156,6 +154,7 @@
     let midiOut = null;
     let timer = null;
     let selectedPad = 0;
+    let humanize = false;
     
     const padNames = ["Bass 1", "Snare 1", "Hi-Hat", "L-Tom", "M-Tom", "S-Tom", "Ride", "Crash", "Bass 2", "Snare 2", "Open Hat", "Perc"];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
@@ -185,6 +184,14 @@
             document.getElementById('init-btn').innerText = "DEVICE SYNCED";
             log("CONNECTED: " + midiOut.name.toUpperCase());
         }
+    }
+
+    function toggleHuman() {
+        humanize = !humanize;
+        const btn = document.getElementById('human-btn');
+        btn.innerText = `HUMANIZATION: ${humanize ? 'ON' : 'OFF'}`;
+        btn.className = humanize ? 'toggle-on' : '';
+        log("FEEL: " + (humanize ? "ORGANIC" : "ROBOTIC"));
     }
 
     function selectPad(idx) {
@@ -237,8 +244,12 @@
             for (let p = 0; p < 12; p++) {
                 const pad = sequencerData[p];
                 if (pad.data[currentStep % pad.steps]) {
-                    midiOut.send([144, padNotes[p], 110]);
-                    setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100);
+                    // APPLY HUMANIZATION JITTER
+                    const jitter = humanize ? Math.random() * 25 : 0;
+                    setTimeout(() => {
+                        midiOut.send([144, padNotes[p], 110]);
+                        setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100);
+                    }, jitter);
                 }
             }
             currentStep++;
