@@ -78,6 +78,38 @@
             midiOut.send([128, note, 0], time + 100); // Note Off
         }
 
+        // NEW: AUTOMATED SEQUENCER LOGIC
+document.getElementById('auto-program-btn').onclick = async () => {
+    if (!midiOut) return log("Connect Hardware First");
+    
+    log("Starting Auto-Program...");
+    const bpm = 110;
+    const msPerBeat = 60000 / bpm; // ~545ms
+    const now = window.performance.now();
+
+    // 1. SEND MIDI START (System Real-Time)
+    midiOut.send([0xFA]); 
+    log("EP-40 Clock Started");
+
+    // 2. SCHEDULE THE HITS (Assuming 4/4 Time, 1 Bar)
+    // Pad 1 (Kick) = MIDI Note 36 | Pad 2 (Snare) = MIDI Note 37
+    
+    // Beat 1: Kick
+    sendNote(36, 110, now + (msPerBeat * 0));
+    // Beat 2: Snare
+    sendNote(37, 100, now + (msPerBeat * 1));
+    // Beat 3: Kick
+    sendNote(36, 110, now + (msPerBeat * 2));
+    // Beat 4: Snare
+    sendNote(37, 100, now + (msPerBeat * 3));
+
+    // 3. SEND MIDI STOP after 1 bar
+    setTimeout(() => {
+        midiOut.send([0xFC]);
+        log("Auto-Program Complete.");
+    }, msPerBeat * 4);
+};
+
         // MACRO FADER (CC 74 is usually Filter Cutoff)
         document.getElementById('macro-fader').oninput = (e) => {
             if (midiOut) midiOut.send([176, 74, e.target.value]);
