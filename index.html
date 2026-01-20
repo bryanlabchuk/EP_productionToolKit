@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EP-LAB MIDI Debugger</title>
+    <style>
+        body { background: #1a1a1a; color: #ff3e00; font-family: 'Courier New', monospace; padding: 30px; }
+        .console { background: #000; border: 1px solid #444; padding: 15px; height: 200px; overflow-y: scroll; margin-top: 20px; color: #00ff00; font-size: 12px; }
+        button { background: #ff3e00; color: white; border: none; padding: 15px 25px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .device-card { border: 2px solid #ff3e00; padding: 15px; display: inline-block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>EP-LAB // MIDI ENGINE</h1>
+    
+    <button id="connect-btn">1. INITIALIZE MIDI SYSTEM</button>
+
+    <div id="device-info" class="device-card" style="display:none;">
+        <strong>ACTIVE DEVICE:</strong> <span id="device-name">None</span>
+    </div>
+
+    <div class="console" id="log">--- SYSTEM LOG WAITING ---</div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        const connectBtn = document.getElementById('connect-btn');
+
+        function logger(msg) {
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        connectBtn.addEventListener('click', async () => {
+            logger("Requesting MIDI access...");
+            
+            try {
+                // Request access with SysEx support (needed for deep EP-series control)
+                const midi = await navigator.requestMIDIAccess({ sysex: true });
+                logger("Success: MIDI Access Granted.");
+
+                midi.onstatechange = (e) => {
+                    logger(`Device Change Detected: ${e.port.name} is now ${e.port.state}`);
+                    updateDeviceList(midi);
+                };
+
+                updateDeviceList(midi);
+            } catch (err) {
+                logger(`CRITICAL ERROR: ${err.message}`);
+                if (window.location.protocol === 'file:') {
+                    logger("LOCAL FILE DETECTED: Web MIDI only works on https://");
+                }
+            }
+        });
+
+        function updateDeviceList(midi) {
+            const outputs = Array.from(midi.outputs.values());
+            const epDevice = outputs.find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+
+            if (epDevice) {
+                document.getElementById('device-info').style.display = 'block';
+                document.getElementById('device-name').innerText = epDevice.name;
+                logger(`FOUND: ${epDevice.name} connected and ready.`);
+            } else {
+                logger("SCANNING: No EP-series device found. Check USB-C cable.");
+            }
+        }
+    </script>
+</body>
+</html>
