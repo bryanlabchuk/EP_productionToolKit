@@ -1,70 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>EP-LAB MIDI Debugger</title>
+    <title>EP-40 RIDDIM LAB</title>
     <style>
-        body { background: #1a1a1a; color: #ff3e00; font-family: 'Courier New', monospace; padding: 30px; }
-        .console { background: #000; border: 1px solid #444; padding: 15px; height: 200px; overflow-y: scroll; margin-top: 20px; color: #00ff00; font-size: 12px; }
-        button { background: #ff3e00; color: white; border: none; padding: 15px 25px; cursor: pointer; font-weight: bold; border-radius: 4px; }
-        .device-card { border: 2px solid #ff3e00; padding: 15px; display: inline-block; margin-top: 10px; }
+        :root { --ep-orange: #ff3e00; --ep-black: #1a1a1a; --ep-grey: #333; }
+        body { background: var(--ep-black); color: white; font-family: 'Courier New', monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .panel { background: var(--ep-grey); border: 2px solid var(--ep-orange); padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; margin-bottom: 15px; }
+        h1 { color: var(--ep-orange); margin-bottom: 5px; font-size: 1.5rem; }
+        .status { font-size: 0.8rem; margin-bottom: 20px; color: #00ff00; }
+        button { background: var(--ep-orange); color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; border-radius: 4px; }
+        select, input[type="range"] { width: 100%; margin: 10px 0; background: #000; color: var(--ep-orange); border: 1px solid var(--ep-orange); padding: 5px; }
+        .log { background: #000; font-size: 10px; padding: 10px; height: 80px; overflow-y: auto; color: #aaa; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <h1>EP-LAB // MIDI ENGINE</h1>
-    
-    <button id="connect-btn">1. INITIALIZE MIDI SYSTEM</button>
+    <h1>EP-40 // RIDDIM LAB</h1>
+    <div id="status" class="status">● WAITING FOR INITIALIZATION</div>
 
-    <div id="device-info" class="device-card" style="display:none;">
-        <strong>ACTIVE DEVICE:</strong> <span id="device-name">None</span>
+    <div class="panel">
+        <button id="init-btn">1. CONNECT HARDWARE</button>
     </div>
 
-    <div class="console" id="log">--- SYSTEM LOG WAITING ---</div>
+    <div class="panel">
+        <strong>2. RIDDIM INJECTOR</strong>
+        <select id="pattern-type">
+            <option value="dembow">DEMBOW (3+3+2)</option>
+            <option value="stepper">STEPPER (4-ON-FLOOR)</option>
+            <option value="skank">SKANK CHOP (OFFBEATS)</option>
+        </select>
+        <button id="inject-btn">FIRE PATTERN INTO EP</button>
+        <p style="font-size: 10px;">Set EP to Record Mode first!</p>
+    </div>
+
+    <div class="panel">
+        <strong>3. CHAOS FADER (LPF)</strong>
+        <input type="range" id="macro-fader" min="0" max="127" value="64">
+    </div>
+
+    <button id="panic-btn" style="background: #555;">! MIDI PANIC (STOP ALL) !</button>
+
+    <div class="log" id="log">System ready...</div>
 
     <script>
-        const logEl = document.getElementById('log');
-        const connectBtn = document.getElementById('connect-btn');
+        let midiOut = null;
+        const log = (m) => { document.getElementById('log').innerHTML += `<div>> ${m}</div>`; document.getElementById('log').scrollTop = 9999; };
 
-        function logger(msg) {
-            const time = new Date().toLocaleTimeString();
-            logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
-            logEl.scrollTop = logEl.scrollHeight;
-        }
-
-        connectBtn.addEventListener('click', async () => {
-            logger("Requesting MIDI access...");
-            
-            try {
-                // Request access with SysEx support (needed for deep EP-series control)
-                const midi = await navigator.requestMIDIAccess({ sysex: true });
-                logger("Success: MIDI Access Granted.");
-
-                midi.onstatechange = (e) => {
-                    logger(`Device Change Detected: ${e.port.name} is now ${e.port.state}`);
-                    updateDeviceList(midi);
-                };
-
-                updateDeviceList(midi);
-            } catch (err) {
-                logger(`CRITICAL ERROR: ${err.message}`);
-                if (window.location.protocol === 'file:') {
-                    logger("LOCAL FILE DETECTED: Web MIDI only works on https://");
-                }
-            }
-        });
-
-        function updateDeviceList(midi) {
+        document.getElementById('init-btn').onclick = async () => {
+            const midi = await navigator.requestMIDIAccess();
             const outputs = Array.from(midi.outputs.values());
-            const epDevice = outputs.find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
-
-            if (epDevice) {
-                document.getElementById('device-info').style.display = 'block';
-                document.getElementById('device-name').innerText = epDevice.name;
-                logger(`FOUND: ${epDevice.name} connected and ready.`);
-            } else {
-                logger("SCANNING: No EP-series device found. Check USB-C cable.");
+            midiOut = outputs.find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+            if (midiOut) {
+                document.getElementById('status').innerText = `● CONNECTED: ${midiOut.name}`;
+                log("Hardware Synced.");
             }
+        };
+
+        // RIDDIM LOGIC
+        document.getElementById('inject-btn').onclick = () => {
+            if (!midiOut) return log("Error: Connect Hardware First");
+            const type = document.getElementById('pattern-type').value;
+            const now = window.performance.now();
+            log(`Injecting ${type} pattern...`);
+
+            if (type === 'dembow') {
+                const kicks = [0, 375, 750, 1125]; // 3+3+2 feeling at 110bpm approx
+                kicks.forEach(t => sendNote(36, 100, now + t)); 
+            } else if (type === 'stepper') {
+                [0, 500, 1000, 1500].forEach(t => sendNote(36, 110, now + t));
+            } else if (type === 'skank') {
+                [250, 750, 1250, 1750].forEach(t => sendNote(48, 90, now + t));
+            }
+        };
+
+        function sendNote(note, vel, time) {
+            midiOut.send([144, note, vel], time); // Note On
+            midiOut.send([128, note, 0], time + 100); // Note Off
         }
+
+        // MACRO FADER (CC 74 is usually Filter Cutoff)
+        document.getElementById('macro-fader').oninput = (e) => {
+            if (midiOut) midiOut.send([176, 74, e.target.value]);
+        };
+
+        // PANIC
+        document.getElementById('panic-btn').onclick = () => {
+            if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); // All notes off
+            log("Panic: All notes killed.");
+        };
     </script>
 </body>
 </html>
