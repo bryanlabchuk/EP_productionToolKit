@@ -3,253 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP // UNIVERSAL TOOLKIT</title>
+    <title>EP // GRID COMMANDER PRO</title>
     <style>
-        /* THEME DEFINITIONS */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
-            --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.4);
-            --shadow: rgba(0,0,0,0.3);
+            --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.6);
         }
 
-        body.theme-40 {
-            --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; 
-            --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff;
-        }
+        body.theme-40 { --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #004f0b; --border: #c5c2b7; --panel-bg: #ffffff; }
+        body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
+        body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
 
-        body.theme-133 {
-            --bg: #bcbcbc; --accent: #ff3e00; --text: #000000;
-            --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0;
-        }
+        body { background: var(--bg); background-attachment: fixed; color: var(--text); font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; padding: 20px; transition: all 0.6s ease; }
+        .chassis { background: var(--bg); border: 4px solid var(--border); border-radius: 12px; padding: 20px; width: 100%; max-width: 650px; box-shadow: 15px 15px 0px rgba(0,0,0,0.2); }
+        h1 { background: var(--text); color: var(--bg); padding: 8px; font-size: 0.9rem; text-align: center; letter-spacing: 3px; margin: 0 0 15px 0; text-transform: uppercase; }
+        
+        .lcd-display { background: var(--lcd-bg); color: var(--lcd-text); padding: 10px; border-radius: 2px; font-size: 0.75rem; border: 3px inset var(--border); height: 50px; overflow-y: auto; margin-bottom: 15px; text-shadow: 0 0 5px var(--lcd-text); }
 
-        body.theme-1320 {
-            --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f;
-            --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad;
-        }
+        /* 4x3 Grid */
+        .ep-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+        .pad-btn { background: var(--panel-bg); border: 2px solid var(--border); padding: 15px 5px; border-radius: 4px; cursor: pointer; text-align: center; font-weight: bold; font-size: 0.7rem; transition: 0.2s; }
+        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent); color: white; box-shadow: 0 0 10px var(--accent); }
 
-        body {
-            background: var(--bg); background-attachment: fixed; color: var(--text);
-            font-family: 'Courier New', Courier, monospace; display: flex; 
-            flex-direction: column; align-items: center; padding: 40px 20px; margin: 0; 
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
+        /* Control Panel */
+        .editor-panel { background: var(--panel-bg); border: 2px solid var(--accent); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .editor-header { font-weight: bold; font-size: 0.8rem; border-bottom: 1px solid var(--accent); margin-bottom: 10px; padding-bottom: 5px; display: flex; justify-content: space-between; }
+        
+        .step-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+        .step-box { width: 30px; height: 30px; background: #fff; border: 1px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; cursor: pointer; }
+        .step-box.on { background: var(--accent); color: white; }
 
-        .chassis {
-            background: var(--bg); border: 2px solid var(--border); border-radius: 8px; 
-            padding: 30px; width: 100%; max-width: 500px;
-            box-shadow: 20px 20px 60px var(--shadow), -5px -5px 20px rgba(255,255,255,0.2);
-        }
+        .config-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        label { font-size: 0.6rem; font-weight: bold; display: block; margin-bottom: 2px; }
+        select, input { width: 100%; padding: 5px; font-family: inherit; font-size: 0.75rem; }
 
-        h1 {
-            background: var(--text); color: var(--bg); padding: 12px; font-size: 0.9rem; 
-            text-align: center; letter-spacing: 4px; margin: -30px -30px 25px -30px; 
-            text-transform: uppercase; font-weight: 900;
-        }
-
-        .lcd-display {
-            background: var(--lcd-bg); color: var(--lcd-text); padding: 15px; 
-            border-radius: 4px; font-size: 0.85rem; font-weight: bold; margin-bottom: 25px;
-            border: 4px solid #222; height: 90px; overflow-y: auto; 
-            box-shadow: inset 0 0 20px #000; text-shadow: 0 0 5px var(--lcd-text);
-        }
-
-        .instructions {
-            background: var(--panel-bg); border-left: 4px solid var(--accent);
-            padding: 15px; font-size: 0.75rem; margin-bottom: 25px; line-height: 1.5;
-        }
-
-        .section-label { font-weight: 800; font-size: 0.65rem; color: var(--text); margin-bottom: 12px; display: block; text-transform: uppercase; border-bottom: 1px solid var(--accent); }
-
-        .panel { margin-bottom: 20px; border-top: 1px solid rgba(0,0,0,0.1); padding: 15px 0; }
-
-        button {
-            background: var(--text); color: var(--bg); border: none; padding: 14px; 
-            font-family: inherit; font-weight: bold; text-transform: uppercase; 
-            cursor: pointer; width: 100%; border-radius: 4px; box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: all 0.1s;
-        }
-
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        .transport { display: flex; gap: 10px; }
+        button { background: var(--text); color: var(--bg); border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; flex: 1; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.4); }
+        button:active { transform: translateY(2px); border-bottom-width: 2px; }
         button.primary { background: var(--accent); color: white; }
-
-        select, input { width: 100%; padding: 10px; background: rgba(0,0,0,0.05); border: 1px solid var(--text); font-family: inherit; border-radius: 4px; margin-bottom: 10px; }
-
-        .pad-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
-        .pad-box { background: rgba(0,0,0,0.08); font-size: 0.55rem; text-align: center; padding: 6px; border-radius: 2px; }
     </style>
 </head>
 <body id="main-body">
 
 <div class="chassis">
-    <h1 id="main-header">EP // UNIVERSAL TOOLKIT</h1>
-    <div class="lcd-display" id="log">AWAITING DEVICE...<br>BOOTING EP_LAB INTERFACE V3.2</div>
+    <h1>EP // GRID COMMANDER PRO</h1>
+    <div class="lcd-display" id="log">AWAITING HARDWARE...</div>
 
-    <div class="instructions">
-        <strong>OPERATION:</strong> Set hardware to BPM / BARS (REC+PLAY). Match settings and click INJECT on the first downbeat.
-        <div class="pad-map">
-            <div class="pad-box">9:B2</div><div class="pad-box">10:S2</div><div class="pad-box">11:OH</div><div class="pad-box">12:PR</div>
-            <div class="pad-box">5:MT</div><div class="pad-box">6:ST</div><div class="pad-box">7:RD</div><div class="pad-box">8:CR</div>
-            <div class="pad-box">1:B1</div><div class="pad-box">2:S1</div><div class="pad-box">3:HH</div><div class="pad-box">4:LT</div>
+    <div class="config-row">
+        <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
+        <div><label>GLOBAL BARS</label>
+            <select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option></select>
         </div>
+        <div><label>MIDI DEVICE</label><button style="padding:5px; font-size:0.6rem;" onclick="initMIDI()" id="init-btn">CONNECT</button></div>
     </div>
 
-    <div class="panel"><button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button></div>
+    <div class="ep-grid" id="pad-grid"></div>
 
-    <div class="panel">
-        <span class="section-label">Config // BPM & Length</span>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div><label style="font-size:0.6rem;">TEMPO</label><input type="number" id="tempo" value="120"></div>
-            <div><label style="font-size:0.6rem;">BARS</label>
-                <select id="bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option></select>
+    <div class="editor-panel" id="editor" style="visibility: hidden;">
+        <div class="editor-header">
+            <span id="editor-title">PAD 1: BASS 1</span>
+            <span id="step-count-display">Steps: 16</span>
+        </div>
+        
+        <div class="config-row">
+            <div>
+                <label>STEP LENGTH</label>
+                <select id="step-select" onchange="updateStepCount(this.value)">
+                    <option value="4">4 Steps</option>
+                    <option value="8">8 Steps</option>
+                    <option value="16" selected>16 Steps</option>
+                    <option value="32">32 Steps</option>
+                </select>
+            </div>
+            <div>
+                <label>PRESET PATTERNS</label>
+                <select id="preset-select" onchange="applyPreset(this.value)">
+                    <option value="custom">-- CUSTOM --</option>
+                    <option value="4floor">4-ON-FLOOR (XOOO)</option>
+                    <option value="backbeat">BACKBEAT (OOXO)</option>
+                    <option value="eighths">8TH NOTES (XOXO)</option>
+                    <option value="sixteenths">16TH NOTES (XXXX)</option>
+                    <option value="dembow">DEMBOW PUSH</option>
+                    <option value="syncop">SYNCOPATED</option>
+                    <option value="offbeat">OFF-BEATS</option>
+                    <option value="triplet">TRIPLET FEEL</option>
+                </select>
+            </div>
+            <div>
+                <label>CLEAR</label>
+                <button style="padding:4px; font-size:0.6rem; background:#777;" onclick="clearCurrentPad()">RESET PAD</button>
             </div>
         </div>
+
+        <div class="step-container" id="step-ui"></div>
     </div>
 
-    <div class="panel">
-        <span class="section-label">Foundation // Core Rhythms</span>
-        <select id="core-pattern">
-            <optgroup label="REGGAE/DANCEHALL">
-                <option value="dembow">Dembow (3+3+2)</option>
-                <option value="one_drop">One Drop Reggae</option>
-                <option value="steely">Steely & Clevie</option>
-            </optgroup>
-            <optgroup label="HIP-HOP/FUNK">
-                <option value="boom_bap">Boom Bap Classic</option>
-                <option value="dilla">Dilla Wonky Swing</option>
-                <option value="stepper">Classic Stepper</option>
-            </optgroup>
-            <optgroup label="ELECTRONIC">
-                <option value="four_floor">House (4x4)</option>
-                <option value="uk_garage">2-Step Garage</option>
-                <option value="jungle_kick">Jungle Foundation</option>
-            </optgroup>
-            <option value="none">-- NO CORE --</option>
-        </select>
+    <div class="transport">
+        <button onclick="startSequencer()" class="primary">INJECT TO EP</button>
+        <button onclick="stopSequencer()" style="background:#444;">STOP</button>
+        <button onclick="panic()" style="background:#777; flex:0.5">PANIC</button>
     </div>
-
-    <div class="panel">
-        <span class="section-label">Embellish // Top Layers</span>
-        <select id="top-pattern">
-            <optgroup label="REGGAE/DANCEHALL">
-                <option value="shuffler">Dancehall Shuffler</option>
-                <option value="afrobeat">Afro-Percussion</option>
-            </optgroup>
-            <optgroup label="HIP-HOP/FUNK">
-                <option value="straight_8">8th Note Hats</option>
-                <option value="straight_16">16th Note Hats</option>
-                <option value="triplet">Hi-Hat Triplets</option>
-            </optgroup>
-            <optgroup label="ELECTRONIC">
-                <option value="offbeat_hat">Offbeat House Hats</option>
-                <option value="perc_chaos">Breakbeat Toms</option>
-                <option value="rim_shot">UKG Rimshots</option>
-            </optgroup>
-            <option value="none">-- NO TOP --</option>
-        </select>
-        
-        <div style="display: flex; gap: 12px; margin-top: 15px;">
-            <button onclick="runSession()" class="primary" style="flex: 2;">Inject Riddim</button>
-            <button onclick="stopSession()" style="flex: 1; background: #333;">Stop</button>
-        </div>
-    </div>
-
-    <button onclick="panic()" style="background:#555; font-size: 0.6rem; border-bottom: none; margin-top: 10px;">Global Reset</button>
 </div>
 
 <script>
     let midiOut = null;
-    let isPlaying = false; // The Circuit Breaker Flag
-    const logEl = document.getElementById('log');
+    let timer = null;
+    let selectedPad = 0;
+    
+    const padNames = ["Bass 1", "Snare 1", "Hi-Hat", "L-Tom", "M-Tom", "S-Tom", "Ride", "Crash", "Bass 2", "Snare 2", "Open Hat", "Perc"];
+    const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
+    
+    // Memory for all 12 pads
+    let sequencerData = Array.from({length: 12}, () => ({
+        steps: 16,
+        data: Array(32).fill(false)
+    }));
 
-    const PAD = { KICK: 36, SNARE: 37, HAT: 38, LTOM: 39, MTOM: 40, STOM: 41, RIDE: 42, CRASH: 43, KICK2: 44, SNARE2: 45, OHAT: 46, PERC: 47 };
+    const presets = {
+        "4floor": [0,4,8,12],
+        "backbeat": [4,12],
+        "eighths": [0,2,4,6,8,10,12,14],
+        "sixteenths": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+        "dembow": [0,3,6,8,11,14],
+        "syncop": [0,3,7,10,13],
+        "offbeat": [1,3,5,7,9,11,13,15],
+        "triplet": [0,2,5,8,10,13]
+    };
 
-    function log(m) { logEl.innerHTML += `<div>> ${m}</div>`; logEl.scrollTop = logEl.scrollHeight; }
+    // UI Init
+    const gridEl = document.getElementById('pad-grid');
+    [8,9,10,11,4,5,6,7,0,1,2,3].forEach(idx => {
+        const btn = document.createElement('div');
+        btn.className = 'pad-btn';
+        btn.id = `btn-${idx}`;
+        btn.innerHTML = `${idx + 1}<br><small>${padNames[idx]}</small>`;
+        btn.onclick = () => selectPad(idx);
+        gridEl.appendChild(btn);
+    });
+
+    function selectPad(idx) {
+        selectedPad = idx;
+        document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
+        document.getElementById(`btn-${idx}`).classList.add('active-pad');
+        document.getElementById('editor').style.visibility = 'visible';
+        document.getElementById('editor-title').innerText = `PAD ${idx+1}: ${padNames[idx].toUpperCase()}`;
+        document.getElementById('step-select').value = sequencerData[idx].steps;
+        renderSteps();
+    }
+
+    function renderSteps() {
+        const container = document.getElementById('step-ui');
+        container.innerHTML = '';
+        const count = sequencerData[selectedPad].steps;
+        document.getElementById('step-count-display').innerText = `Steps: ${count}`;
+
+        for (let i = 0; i < count; i++) {
+            const step = document.createElement('div');
+            step.className = `step-box ${sequencerData[selectedPad].data[i] ? 'on' : ''}`;
+            step.innerText = i + 1;
+            step.onclick = () => {
+                sequencerData[selectedPad].data[i] = !sequencerData[selectedPad].data[i];
+                step.classList.toggle('on');
+                document.getElementById('preset-select').value = 'custom';
+            };
+            container.appendChild(step);
+        }
+    }
+
+    function updateStepCount(val) {
+        sequencerData[selectedPad].steps = parseInt(val);
+        renderSteps();
+    }
+
+    function applyPreset(p) {
+        if (p === 'custom') return;
+        sequencerData[selectedPad].data.fill(false);
+        if (presets[p]) {
+            presets[p].forEach(s => { if(s < sequencerData[selectedPad].steps) sequencerData[selectedPad].data[s] = true; });
+        }
+        renderSteps();
+    }
+
+    function clearCurrentPad() {
+        sequencerData[selectedPad].data.fill(false);
+        renderSteps();
+    }
+
+    function log(m) { const l = document.getElementById('log'); l.innerHTML += `<div>> ${m}</div>`; l.scrollTop = l.scrollHeight; }
 
     async function initMIDI() {
-        try {
-            const midi = await navigator.requestMIDIAccess();
-            midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
-            if (midiOut) {
-                const name = midiOut.name.toLowerCase();
-                const body = document.getElementById('main-body');
-                const header = document.getElementById('main-header');
-                if (name.includes("1320")) body.className = "theme-1320";
-                else if (name.includes("133")) body.className = "theme-133";
-                else body.className = "theme-40";
-                document.getElementById('init-btn').innerText = "DEVICE SYNCED";
-                log("CONNECTED: " + midiOut.name);
-            }
-        } catch(e) { log("ERR: MIDI Access Denied."); }
-    }
-
-    // THE CORE FIX: Note sending now checks the isPlaying flag
-    function sendNote(note, vel, timeOffset) {
-        if (!midiOut || !isPlaying) return;
-        
-        const now = window.performance.now();
-        const scheduledTime = now + timeOffset;
-
-        midiOut.send([144, note, vel], scheduledTime);
-        midiOut.send([128, note, 0], scheduledTime + 100);
-    }
-
-    const FOUNDATIONS = {
-        dembow: (off, ms) => { [0, ms*0.75, ms*1.5, ms*2.25, ms*3, ms*3.75].forEach(t => sendNote(PAD.KICK, 110, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
-        one_drop: (off, ms) => { [ms, ms*3].forEach(t => { sendNote(PAD.KICK, 110, off + t); sendNote(PAD.SNARE, 105, off + t); }); },
-        steely: (off, ms) => { [0, ms*1.5, ms*2].forEach(t => sendNote(PAD.KICK, 110, off + t)); [ms, ms*2.5, ms*3.5].forEach(t => sendNote(PAD.SNARE, 100, off + t)); },
-        boom_bap: (off, ms) => { [0, ms*1.2, ms*2, ms*2.1].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
-        dilla: (off, ms) => { [0, ms*0.9, ms*1.8, ms*2].forEach(t => sendNote(PAD.KICK, 110, off + t)); [ms*1.1, ms*3.1].forEach(t => sendNote(PAD.SNARE, 95, off + t)); },
-        four_floor: (off, ms) => { [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 100, off + t)); },
-        uk_garage: (off, ms) => { [0, ms*1.5].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
-        jungle_kick: (off, ms) => { [0, ms*1.25, ms*2.5].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
-        stepper: (off, ms) => { [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); }
-    };
-
-    const EMBELLISHMENTS = {
-        straight_8: (off, ms) => { [0, ms*0.5, ms, ms*1.5, ms*2, ms*2.5, ms*3, ms*3.5].forEach(t => sendNote(PAD.HAT, 85, off + t)); },
-        straight_16: (off, ms) => { for(let i=0; i<16; i++) sendNote(PAD.HAT, 70, off + (i * ms * 0.25)); },
-        triplet: (off, ms) => { for(let i=0; i<12; i++) sendNote(PAD.HAT, 90, off + (i * ms * 0.33)); },
-        shuffler: (off, ms) => { [ms*0.33, ms*1.33, ms*2.33, ms*3.33].forEach(t => sendNote(PAD.PERC, 90, off + t)); },
-        perc_chaos: (off, ms) => { [ms*0.2, ms*1.4, ms*2.6, ms*3.8].forEach((t, i) => sendNote(PAD.LTOM + (i%3), 85, off + t)); },
-        rim_shot: (off, ms) => { [ms*0.75, ms*2.25, ms*3.75].forEach(t => sendNote(PAD.SNARE2, 80, off + t)); },
-        offbeat_hat: (off, ms) => { [ms*0.5, ms*1.5, ms*2.5, ms*3.5].forEach(t => sendNote(PAD.HAT, 100, off + t)); },
-        afrobeat: (off, ms) => { [ms*0.5, ms*1.25, ms*2.5, ms*3.75].forEach(t => sendNote(PAD.PERC, 95, off + t)); }
-    };
-
-    function runSession() {
-        if (!midiOut) return log("ERR: Connect Hardware");
-        
-        isPlaying = true;
-        const bpm = parseInt(document.getElementById('tempo').value);
-        const msPerBeat = 60000 / bpm;
-        const bars = parseInt(document.getElementById('bars').value);
-        const core = document.getElementById('core-pattern').value;
-        const top = document.getElementById('top-pattern').value;
-
-        log(`INJECTING ${bars} BARS...`);
-        midiOut.send([0xFA]); // Hardware Start
-
-        for (let bar = 0; bar < bars; bar++) {
-            const barOffset = (bar * msPerBeat * 4);
-            if (FOUNDATIONS[core]) FOUNDATIONS[core](barOffset, msPerBeat);
-            if (EMBELLISHMENTS[top]) EMBELLISHMENTS[top](barOffset, msPerBeat);
-        }
-    }
-
-    function stopSession() {
-        isPlaying = false; // Trigger the circuit breaker
+        const midi = await navigator.requestMIDIAccess();
+        midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
         if (midiOut) {
-            midiOut.send([0xFC]); // Hardware Stop
-            for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); // Kill ringing notes
+            const name = midiOut.name.toLowerCase();
+            document.body.className = name.includes("1320") ? "theme-1320" : name.includes("133") ? "theme-133" : "theme-40";
+            log("CONNECTED: " + midiOut.name);
+            document.getElementById('init-btn').innerText = "ONLINE";
         }
-        log("STOPPED: Notes and Clock halted.");
     }
 
-    function panic() {
-        isPlaying = false;
-        if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]);
-        log("RESET: All signals cleared.");
+    function startSequencer() {
+        if (!midiOut) return log("ERR: Connect Hardware");
+        stopSequencer();
+        
+        const bpm = parseInt(document.getElementById('tempo').value);
+        const globalBars = parseInt(document.getElementById('global-bars').value);
+        const stepTime = (60000 / bpm) / 4; // 16th notes
+        let currentStep = 0;
+        const totalSteps = globalBars * 16;
+        
+        log(`INJECTING ${globalBars} BARS...`);
+        midiOut.send([0xFA]);
+
+        timer = setInterval(() => {
+            if (currentStep >= totalSteps) { stopSequencer(); log("COMPLETE"); return; }
+
+            for (let p = 0; p < 12; p++) {
+                const padData = sequencerData[p];
+                // Loop the pad's specific step length within the global bars
+                const stepIdx = currentStep % padData.steps;
+                if (padData.data[stepIdx]) {
+                    midiOut.send([144, padNotes[p], 110]);
+                    setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100);
+                }
+            }
+            currentStep++;
+        }, stepTime);
     }
+
+    function stopSequencer() {
+        clearInterval(timer); timer = null;
+        if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); }
+        log("STOPPED.");
+    }
+
+    function panic() { stopSequencer(); log("PANIC: ALL KILLED"); }
+
+    // Auto-select first pad
+    selectPad(0);
 </script>
 </body>
 </html>
