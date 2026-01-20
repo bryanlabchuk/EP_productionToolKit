@@ -7,110 +7,72 @@
     <style>
         /* THEME DEFINITIONS */
         :root {
-            /* BOOT / GLITCH THEME */
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
-            --accent: #ff3e00; 
-            --text: #1a1a1a; 
-            --lcd-bg: #080a08; 
-            --lcd-text: #39ff14; 
-            --border: #8e8e8e; 
-            --panel-bg: rgba(255, 255, 255, 0.4);
+            --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
+            --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.4);
             --shadow: rgba(0,0,0,0.3);
         }
 
-        /* EP-40: Laboratory Ivory & Racing Green */
         body.theme-40 {
             --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; 
             --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff;
         }
 
-        /* EP-133: Industrial Cement & Safety Orange */
         body.theme-133 {
             --bg: #bcbcbc; --accent: #ff3e00; --text: #000000;
             --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0;
         }
 
-        /* EP-1320: Parchment & Royal Crimson */
         body.theme-1320 {
             --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f;
             --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad;
         }
 
         body {
-            background: var(--bg);
-            background-attachment: fixed;
-            color: var(--text);
-            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 40px 20px; margin: 0; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            background: var(--bg); background-attachment: fixed; color: var(--text);
+            font-family: 'Courier New', Courier, monospace; display: flex; 
+            flex-direction: column; align-items: center; padding: 40px 20px; margin: 0; 
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .chassis {
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-top: 1px solid rgba(255,255,255,0.8);
-            border-left: 1px solid rgba(255,255,255,0.8);
-            border-radius: 8px; padding: 30px;
-            width: 100%; max-width: 500px;
+            background: var(--bg); border: 2px solid var(--border); border-radius: 8px; 
+            padding: 30px; width: 100%; max-width: 500px;
             box-shadow: 20px 20px 60px var(--shadow), -5px -5px 20px rgba(255,255,255,0.2);
-            position: relative; overflow: hidden;
         }
 
         h1 {
-            background: var(--text); color: var(--bg);
-            padding: 12px; font-size: 0.9rem; text-align: center;
-            letter-spacing: 4px; margin: -30px -30px 25px -30px; 
+            background: var(--text); color: var(--bg); padding: 12px; font-size: 0.9rem; 
+            text-align: center; letter-spacing: 4px; margin: -30px -30px 25px -30px; 
             text-transform: uppercase; font-weight: 900;
         }
 
         .lcd-display {
-            background: var(--lcd-bg); color: var(--lcd-text);
-            padding: 15px; border-radius: 4px; font-size: 0.85rem;
-            font-weight: bold; margin-bottom: 25px;
-            border: 4px solid #222; height: 90px;
-            overflow-y: auto; box-shadow: inset 0 0 20px #000;
-            text-shadow: 0 0 5px var(--lcd-text);
-            scrollbar-width: none;
+            background: var(--lcd-bg); color: var(--lcd-text); padding: 15px; 
+            border-radius: 4px; font-size: 0.85rem; font-weight: bold; margin-bottom: 25px;
+            border: 4px solid #222; height: 90px; overflow-y: auto; 
+            box-shadow: inset 0 0 20px #000; text-shadow: 0 0 5px var(--lcd-text);
         }
 
         .instructions {
             background: var(--panel-bg); border-left: 4px solid var(--accent);
-            padding: 15px; font-size: 0.75rem; margin-bottom: 25px; 
-            line-height: 1.5; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+            padding: 15px; font-size: 0.75rem; margin-bottom: 25px; line-height: 1.5;
         }
 
-        .section-label {
-            font-weight: 800; font-size: 0.65rem; color: var(--text);
-            margin-bottom: 12px; display: block; text-transform: uppercase;
-            letter-spacing: 1px; opacity: 0.8;
-        }
+        .section-label { font-weight: 800; font-size: 0.65rem; color: var(--text); margin-bottom: 12px; display: block; text-transform: uppercase; border-bottom: 1px solid var(--accent); }
 
-        .panel { 
-            margin-bottom: 20px; border-top: 1px solid rgba(0,0,0,0.1); 
-            padding: 15px 0;
-        }
-
-        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .panel { margin-bottom: 20px; border-top: 1px solid rgba(0,0,0,0.1); padding: 15px 0; }
 
         button {
-            background: var(--text); color: var(--bg);
-            border: none; padding: 14px; font-family: inherit; font-weight: bold;
-            text-transform: uppercase; cursor: pointer; width: 100%;
-            border-radius: 4px; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
-            transition: all 0.1s;
+            background: var(--text); color: var(--bg); border: none; padding: 14px; 
+            font-family: inherit; font-weight: bold; text-transform: uppercase; 
+            cursor: pointer; width: 100%; border-radius: 4px; box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: all 0.1s;
         }
 
         button:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
         button.primary { background: var(--accent); color: white; }
-        
-        .connected-state { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-        select, input {
-            width: 100%; padding: 10px; background: rgba(0,0,0,0.05);
-            border: 1px solid var(--text); font-family: inherit;
-            box-sizing: border-box; font-size: 0.85rem; color: var(--text);
-            border-radius: 4px;
-        }
+        select, input { width: 100%; padding: 10px; background: rgba(0,0,0,0.05); border: 1px solid var(--text); font-family: inherit; border-radius: 4px; margin-bottom: 10px; }
 
         .pad-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
         .pad-box { background: rgba(0,0,0,0.08); font-size: 0.55rem; text-align: center; padding: 6px; border-radius: 2px; }
@@ -120,12 +82,10 @@
 
 <div class="chassis">
     <h1 id="main-header">EP // UNIVERSAL TOOLKIT</h1>
-    
-    <div class="lcd-display" id="log">AWAITING DEVICE...<br>BOOTING EP_LAB INTERFACE V3.1</div>
+    <div class="lcd-display" id="log">AWAITING DEVICE...<br>BOOTING EP_LAB INTERFACE V3.2</div>
 
     <div class="instructions">
-        <strong>OPERATION:</strong> Set hardware to 120 BPM / 1 BAR (REC+PLAY). 
-        Match settings below and click INJECT on the first downbeat.
+        <strong>OPERATION:</strong> Set hardware to BPM / BARS (REC+PLAY). Match settings and click INJECT on the first downbeat.
         <div class="pad-map">
             <div class="pad-box">9:B2</div><div class="pad-box">10:S2</div><div class="pad-box">11:OH</div><div class="pad-box">12:PR</div>
             <div class="pad-box">5:MT</div><div class="pad-box">6:ST</div><div class="pad-box">7:RD</div><div class="pad-box">8:CR</div>
@@ -133,19 +93,14 @@
         </div>
     </div>
 
-    <div class="panel">
-        <button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button>
-    </div>
+    <div class="panel"><button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button></div>
 
     <div class="panel">
         <span class="section-label">Config // BPM & Length</span>
-        <div class="control-grid">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div><label style="font-size:0.6rem;">TEMPO</label><input type="number" id="tempo" value="120"></div>
             <div><label style="font-size:0.6rem;">BARS</label>
-                <select id="bars">
-                    <option value="1">1 Bar</option><option value="2">2 Bars</option>
-                    <option value="4">4 Bars</option><option value="8">8 Bars</option>
-                </select>
+                <select id="bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option></select>
             </div>
         </div>
     </div>
@@ -203,7 +158,7 @@
 
 <script>
     let midiOut = null;
-    let stopSignal = false;
+    let isPlaying = false; // The Circuit Breaker Flag
     const logEl = document.getElementById('log');
 
     const PAD = { KICK: 36, SNARE: 37, HAT: 38, LTOM: 39, MTOM: 40, STOM: 41, RIDE: 42, CRASH: 43, KICK2: 44, SNARE2: 45, OHAT: 46, PERC: 47 };
@@ -213,41 +168,33 @@
     async function initMIDI() {
         try {
             const midi = await navigator.requestMIDIAccess();
-            const outputs = Array.from(midi.outputs.values());
-            midiOut = outputs.find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
-            
+            midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
             if (midiOut) {
                 const name = midiOut.name.toLowerCase();
                 const body = document.getElementById('main-body');
                 const header = document.getElementById('main-header');
-
-                if (name.includes("1320")) {
-                    body.className = "theme-1320"; header.innerText = "EP-1320 // MEDIEVAL TOOLKIT";
-                    log("CONNECTED: EP-1320 (MEDIEVAL)");
-                } else if (name.includes("133")) {
-                    body.className = "theme-133"; header.innerText = "EP-133 // K.O. II TOOLKIT";
-                    log("CONNECTED: EP-133 (INDUSTRIAL)");
-                } else {
-                    body.className = "theme-40"; header.innerText = "EP-40 // RIDDIM TOOLKIT";
-                    log("CONNECTED: EP-40 (LABORATORY)");
-                }
-                document.getElementById('init-btn').classList.add('connected-state');
+                if (name.includes("1320")) body.className = "theme-1320";
+                else if (name.includes("133")) body.className = "theme-133";
+                else body.className = "theme-40";
                 document.getElementById('init-btn').innerText = "DEVICE SYNCED";
-            } else { log("SCANNING: No hardware detected."); }
+                log("CONNECTED: " + midiOut.name);
+            }
         } catch(e) { log("ERR: MIDI Access Denied."); }
     }
 
-    function sendNote(note, vel, time) {
-        if (!midiOut || stopSignal) return;
-        midiOut.send([144, note, vel], time);
-        midiOut.send([128, note, 0], time + 100);
+    // THE CORE FIX: Note sending now checks the isPlaying flag
+    function sendNote(note, vel, timeOffset) {
+        if (!midiOut || !isPlaying) return;
+        
+        const now = window.performance.now();
+        const scheduledTime = now + timeOffset;
+
+        midiOut.send([144, note, vel], scheduledTime);
+        midiOut.send([128, note, 0], scheduledTime + 100);
     }
 
     const FOUNDATIONS = {
-        dembow: (off, ms) => {
-            [0, ms*0.75, ms*1.5, ms*2.25, ms*3, ms*3.75].forEach(t => sendNote(PAD.KICK, 110, off + t));
-            [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
-        },
+        dembow: (off, ms) => { [0, ms*0.75, ms*1.5, ms*2.25, ms*3, ms*3.75].forEach(t => sendNote(PAD.KICK, 110, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
         one_drop: (off, ms) => { [ms, ms*3].forEach(t => { sendNote(PAD.KICK, 110, off + t); sendNote(PAD.SNARE, 105, off + t); }); },
         steely: (off, ms) => { [0, ms*1.5, ms*2].forEach(t => sendNote(PAD.KICK, 110, off + t)); [ms, ms*2.5, ms*3.5].forEach(t => sendNote(PAD.SNARE, 100, off + t)); },
         boom_bap: (off, ms) => { [0, ms*1.2, ms*2, ms*2.1].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
@@ -270,28 +217,39 @@
     };
 
     function runSession() {
-        if (!midiOut) return log("ERR: Connect Hardware First");
-        stopSignal = false;
+        if (!midiOut) return log("ERR: Connect Hardware");
+        
+        isPlaying = true;
         const bpm = parseInt(document.getElementById('tempo').value);
         const msPerBeat = 60000 / bpm;
         const bars = parseInt(document.getElementById('bars').value);
         const core = document.getElementById('core-pattern').value;
         const top = document.getElementById('top-pattern').value;
-        const now = window.performance.now();
 
         log(`INJECTING ${bars} BARS...`);
-        midiOut.send([0xFA]); // MIDI Start signal
+        midiOut.send([0xFA]); // Hardware Start
 
         for (let bar = 0; bar < bars; bar++) {
-            const barOffset = now + (bar * msPerBeat * 4);
+            const barOffset = (bar * msPerBeat * 4);
             if (FOUNDATIONS[core]) FOUNDATIONS[core](barOffset, msPerBeat);
             if (EMBELLISHMENTS[top]) EMBELLISHMENTS[top](barOffset, msPerBeat);
         }
-        setTimeout(() => { if(!stopSignal) log("INJECTION COMPLETE"); }, msPerBeat * 4 * bars);
     }
 
-    function stopSession() { stopSignal = true; if (midiOut) midiOut.send([0xFC]); log("STOPPED."); panic(); }
-    function panic() { if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); log("MIDI BUFFER RESET."); }
+    function stopSession() {
+        isPlaying = false; // Trigger the circuit breaker
+        if (midiOut) {
+            midiOut.send([0xFC]); // Hardware Stop
+            for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); // Kill ringing notes
+        }
+        log("STOPPED: Notes and Clock halted.");
+    }
+
+    function panic() {
+        isPlaying = false;
+        if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]);
+        log("RESET: All signals cleared.");
+    }
 </script>
 </body>
 </html>
