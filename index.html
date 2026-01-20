@@ -5,163 +5,200 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EP // UNIVERSAL TOOLKIT</title>
     <style>
+        /* THEME DEFINITIONS */
         :root {
-            --bg: linear-gradient(135deg, #e8e4d9 0%, #d1d1d1 33%, #dfcf9d 66%, #bcbaaf 100%);
-            --accent: #ff3e00; --text: #121212; --lcd-bg: #0a0c0a; 
-            --lcd-text: #24ff00; --border: #bcbaaf; --panel-bg: rgba(255, 255, 255, 0.7);
+            /* BOOT / GLITCH THEME */
+            --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
+            --accent: #ff3e00; 
+            --text: #1a1a1a; 
+            --lcd-bg: #080a08; 
+            --lcd-text: #39ff14; 
+            --border: #8e8e8e; 
+            --panel-bg: rgba(255, 255, 255, 0.4);
+            --shadow: rgba(0,0,0,0.3);
         }
 
+        /* EP-40: Laboratory Ivory & Racing Green */
         body.theme-40 {
-            --bg: #e8e4d9; --accent: #ff3e00; --text: #121212; 
-            --lcd-bg: #0a0c0a; --lcd-text: #004f0b; --border: #bcbaaf; --panel-bg: #ffffff;
+            --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; 
+            --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff;
         }
 
+        /* EP-133: Industrial Cement & Safety Orange */
         body.theme-133 {
-            --bg: #d1d1d1; --accent: #ff3e00; --text: #000000;
-            --lcd-bg: #1a1a1a; --lcd-text: #ff3e00; --border: #999; --panel-bg: #f0f0f0;
+            --bg: #bcbcbc; --accent: #ff3e00; --text: #000000;
+            --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0;
         }
 
+        /* EP-1320: Parchment & Royal Crimson */
         body.theme-1320 {
-            --bg: #dfcf9d; --accent: #8b0000; --text: #2a1b0a;
-            --lcd-bg: #2a1b0a; --lcd-text: #dfcf9d; --border: #b38b4d; --panel-bg: #eee4c5;
+            --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f;
+            --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad;
         }
 
         body {
-            background: var(--bg); background-attachment: fixed; color: var(--text);
-            font-family: 'Courier New', Courier, monospace; display: flex; 
-            flex-direction: column; align-items: center; padding: 20px; margin: 0; 
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px; margin: 0; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .chassis {
-            background: var(--bg); border: 4px solid var(--border); border-radius: 12px; 
-            padding: 25px; width: 100%; max-width: 550px; box-shadow: 15px 15px 0px rgba(0,0,0,0.2);
-            transition: all 0.8s ease;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-top: 1px solid rgba(255,255,255,0.8);
+            border-left: 1px solid rgba(255,255,255,0.8);
+            border-radius: 8px; padding: 30px;
+            width: 100%; max-width: 500px;
+            box-shadow: 20px 20px 60px var(--shadow), -5px -5px 20px rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
         }
 
         h1 {
-            background: var(--text); color: var(--bg); padding: 10px; font-size: 1rem; 
-            text-align: center; letter-spacing: 3px; margin-top: 0; text-transform: uppercase;
+            background: var(--text); color: var(--bg);
+            padding: 12px; font-size: 0.9rem; text-align: center;
+            letter-spacing: 4px; margin: -30px -30px 25px -30px; 
+            text-transform: uppercase; font-weight: 900;
         }
 
         .lcd-display {
-            background: var(--lcd-bg); color: var(--lcd-text); padding: 12px; 
-            border-radius: 2px; font-size: 0.8rem; font-weight: bold; margin-bottom: 20px;
-            border: 3px inset var(--border); height: 100px; overflow-y: auto; 
-            box-shadow: inset 0 0 15px #000;
+            background: var(--lcd-bg); color: var(--lcd-text);
+            padding: 15px; border-radius: 4px; font-size: 0.85rem;
+            font-weight: bold; margin-bottom: 25px;
+            border: 4px solid #222; height: 90px;
+            overflow-y: auto; box-shadow: inset 0 0 20px #000;
+            text-shadow: 0 0 5px var(--lcd-text);
+            scrollbar-width: none;
         }
 
         .instructions {
-            background: var(--panel-bg); border: 1px solid var(--border); padding: 15px; 
-            font-size: 0.7rem; margin-bottom: 20px; line-height: 1.4; backdrop-filter: blur(5px);
+            background: var(--panel-bg); border-left: 4px solid var(--accent);
+            padding: 15px; font-size: 0.75rem; margin-bottom: 25px; 
+            line-height: 1.5; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
         }
 
         .section-label {
-            font-weight: bold; font-size: 0.65rem; color: var(--text); margin-bottom: 8px; 
-            display: block; text-transform: uppercase; border-bottom: 2px solid var(--accent);
+            font-weight: 800; font-size: 0.65rem; color: var(--text);
+            margin-bottom: 12px; display: block; text-transform: uppercase;
+            letter-spacing: 1px; opacity: 0.8;
         }
 
         .panel { 
-            margin-bottom: 15px; border: 1px solid var(--border); padding: 10px; 
-            border-radius: 4px; background: var(--panel-bg); backdrop-filter: blur(2px);
+            margin-bottom: 20px; border-top: 1px solid rgba(0,0,0,0.1); 
+            padding: 15px 0;
         }
 
-        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
         button {
-            background: var(--text); color: var(--bg); border: none; padding: 12px; 
-            font-family: inherit; font-weight: bold; text-transform: uppercase; 
-            cursor: pointer; width: 100%; border-bottom: 4px solid rgba(0,0,0,0.5); border-radius: 2px;
+            background: var(--text); color: var(--bg);
+            border: none; padding: 14px; font-family: inherit; font-weight: bold;
+            text-transform: uppercase; cursor: pointer; width: 100%;
+            border-radius: 4px; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            transition: all 0.1s;
         }
 
-        button:active { transform: translateY(2px); border-bottom: 2px solid rgba(0,0,0,0.5); }
-        button.primary { background: var(--accent); color: white; border-bottom-color: rgba(0,0,0,0.3); }
-        .connected-state { box-shadow: 0 0 15px var(--accent); filter: brightness(1.1); }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        button.primary { background: var(--accent); color: white; }
+        
+        .connected-state { outline: 3px solid var(--accent); outline-offset: 2px; }
 
         select, input {
-            width: 100%; padding: 8px; background: rgba(255,255,255,0.2);
-            border: 2px solid var(--text); font-family: inherit; margin-bottom: 10px; 
-            box-sizing: border-box; font-size: 0.8rem; color: var(--text);
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.05);
+            border: 1px solid var(--text); font-family: inherit;
+            box-sizing: border-box; font-size: 0.85rem; color: var(--text);
+            border-radius: 4px;
         }
 
-        .pad-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 10px; }
-        .pad-box { background: rgba(0,0,0,0.05); font-size: 0.5rem; text-align: center; padding: 4px; border: 1px solid var(--border); }
+        .pad-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
+        .pad-box { background: rgba(0,0,0,0.08); font-size: 0.55rem; text-align: center; padding: 6px; border-radius: 2px; }
     </style>
 </head>
 <body id="main-body">
 
 <div class="chassis">
     <h1 id="main-header">EP // UNIVERSAL TOOLKIT</h1>
-    <div class="lcd-display" id="log">SYSTEM INITIALIZING...<br>AWAITING HARDWARE HANDSHAKE</div>
+    
+    <div class="lcd-display" id="log">AWAITING DEVICE...<br>BOOTING EP_LAB INTERFACE V3.1</div>
 
     <div class="instructions">
-        <strong>SETUP INSTRUCTIONS:</strong><br>
-        1. Map drum sounds to Pads 1-12 (1:Kick, 2:Snare, 3:Hat, etc).<br>
-        2. Set EP to <strong>REC + PLAY</strong>.<br>
-        3. Match the <strong>BPM/BARS</strong>. Click <strong>INJECT</strong>; wait for count-in.
+        <strong>OPERATION:</strong> Set hardware to 120 BPM / 1 BAR (REC+PLAY). 
+        Match settings below and click INJECT on the first downbeat.
         <div class="pad-map">
-            <div class="pad-box">9: B2</div><div class="pad-box">10: S2</div><div class="pad-box">11: OH</div><div class="pad-box">12: PR</div>
-            <div class="pad-box">5: MT</div><div class="pad-box">6: ST</div><div class="pad-box">7: RD</div><div class="pad-box">8: CR</div>
-            <div class="pad-box">1: B1</div><div class="pad-box">2: S1</div><div class="pad-box">3: HH</div><div class="pad-box">4: LT</div>
+            <div class="pad-box">9:B2</div><div class="pad-box">10:S2</div><div class="pad-box">11:OH</div><div class="pad-box">12:PR</div>
+            <div class="pad-box">5:MT</div><div class="pad-box">6:ST</div><div class="pad-box">7:RD</div><div class="pad-box">8:CR</div>
+            <div class="pad-box">1:B1</div><div class="pad-box">2:S1</div><div class="pad-box">3:HH</div><div class="pad-box">4:LT</div>
         </div>
     </div>
 
-    <div class="panel"><button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button></div>
+    <div class="panel">
+        <button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button>
+    </div>
 
     <div class="panel">
-        <span class="section-label">01 // PROJECT CONFIG</span>
+        <span class="section-label">Config // BPM & Length</span>
         <div class="control-grid">
-            <div><label style="font-size:0.6rem;">BPM</label><input type="number" id="tempo" value="120"></div>
+            <div><label style="font-size:0.6rem;">TEMPO</label><input type="number" id="tempo" value="120"></div>
             <div><label style="font-size:0.6rem;">BARS</label>
-                <select id="bars"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="8">8</option></select>
+                <select id="bars">
+                    <option value="1">1 Bar</option><option value="2">2 Bars</option>
+                    <option value="4">4 Bars</option><option value="8">8 Bars</option>
+                </select>
             </div>
         </div>
     </div>
 
     <div class="panel">
-        <span class="section-label">02 // CORE (KICK/SNARE)</span>
+        <span class="section-label">Foundation // Core Rhythms</span>
         <select id="core-pattern">
             <optgroup label="REGGAE/DANCEHALL">
                 <option value="dembow">Dembow (3+3+2)</option>
-                <option value="one_drop">One Drop</option>
-                <option value="steely">Steely/Clevie</option>
+                <option value="one_drop">One Drop Reggae</option>
+                <option value="steely">Steely & Clevie</option>
             </optgroup>
             <optgroup label="HIP-HOP/FUNK">
                 <option value="boom_bap">Boom Bap Classic</option>
-                <option value="dilla">The Dilla Swing</option>
-                <option value="stepper">Straight Stepper</option>
+                <option value="dilla">Dilla Wonky Swing</option>
+                <option value="stepper">Classic Stepper</option>
             </optgroup>
             <optgroup label="ELECTRONIC">
                 <option value="four_floor">House (4x4)</option>
-                <option value="uk_garage">UK Garage (2-Step)</option>
+                <option value="uk_garage">2-Step Garage</option>
                 <option value="jungle_kick">Jungle Foundation</option>
             </optgroup>
-            <option value="none">-- NONE --</option>
+            <option value="none">-- NO CORE --</option>
         </select>
     </div>
 
     <div class="panel">
-        <span class="section-label">03 // TOP (HATS/PERC)</span>
+        <span class="section-label">Embellish // Top Layers</span>
         <select id="top-pattern">
-            <optgroup label="HI-HATS">
-                <option value="straight_8">Straight 8ths</option>
-                <option value="straight_16">Straight 16ths</option>
-                <option value="triplet">Trap Triplets</option>
-            </optgroup>
-            <optgroup label="PERCUSSION">
-                <option value="shuffler">Shuffled Perc</option>
-                <option value="perc_chaos">Tom Scatter</option>
-                <option value="rim_shot">Rimshot Accents</option>
+            <optgroup label="REGGAE/DANCEHALL">
+                <option value="shuffler">Dancehall Shuffler</option>
                 <option value="afrobeat">Afro-Percussion</option>
             </optgroup>
-            <option value="none">-- NONE --</option>
+            <optgroup label="HIP-HOP/FUNK">
+                <option value="straight_8">8th Note Hats</option>
+                <option value="straight_16">16th Note Hats</option>
+                <option value="triplet">Hi-Hat Triplets</option>
+            </optgroup>
+            <optgroup label="ELECTRONIC">
+                <option value="offbeat_hat">Offbeat House Hats</option>
+                <option value="perc_chaos">Breakbeat Toms</option>
+                <option value="rim_shot">UKG Rimshots</option>
+            </optgroup>
+            <option value="none">-- NO TOP --</option>
         </select>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="runSession()" class="primary" style="flex: 2;">INJECT</button>
-            <button onclick="stopSession()" style="flex: 1; background: #444;">STOP</button>
+        
+        <div style="display: flex; gap: 12px; margin-top: 15px;">
+            <button onclick="runSession()" class="primary" style="flex: 2;">Inject Riddim</button>
+            <button onclick="stopSession()" style="flex: 1; background: #333;">Stop</button>
         </div>
     </div>
-    <button onclick="panic()" style="background:#777; font-size: 0.6rem; border-bottom-color:#444;">MIDI Panic</button>
+
+    <button onclick="panic()" style="background:#555; font-size: 0.6rem; border-bottom: none; margin-top: 10px;">Global Reset</button>
 </div>
 
 <script>
@@ -176,18 +213,28 @@
     async function initMIDI() {
         try {
             const midi = await navigator.requestMIDIAccess();
-            midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+            const outputs = Array.from(midi.outputs.values());
+            midiOut = outputs.find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+            
             if (midiOut) {
                 const name = midiOut.name.toLowerCase();
                 const body = document.getElementById('main-body');
                 const header = document.getElementById('main-header');
-                if (name.includes("1320")) { body.className = "theme-1320"; header.innerText = "EP-1320 // TOOLKIT"; }
-                else if (name.includes("133")) { body.className = "theme-133"; header.innerText = "EP-133 // TOOLKIT"; }
-                else { body.className = "theme-40"; header.innerText = "EP-40 // TOOLKIT"; }
+
+                if (name.includes("1320")) {
+                    body.className = "theme-1320"; header.innerText = "EP-1320 // MEDIEVAL TOOLKIT";
+                    log("CONNECTED: EP-1320 (MEDIEVAL)");
+                } else if (name.includes("133")) {
+                    body.className = "theme-133"; header.innerText = "EP-133 // K.O. II TOOLKIT";
+                    log("CONNECTED: EP-133 (INDUSTRIAL)");
+                } else {
+                    body.className = "theme-40"; header.innerText = "EP-40 // RIDDIM TOOLKIT";
+                    log("CONNECTED: EP-40 (LABORATORY)");
+                }
                 document.getElementById('init-btn').classList.add('connected-state');
-                document.getElementById('init-btn').innerText = "ONLINE";
-            }
-        } catch(e) { log("ERR: MIDI Denied"); }
+                document.getElementById('init-btn').innerText = "DEVICE SYNCED";
+            } else { log("SCANNING: No hardware detected."); }
+        } catch(e) { log("ERR: MIDI Access Denied."); }
     }
 
     function sendNote(note, vel, time) {
@@ -218,32 +265,33 @@
         shuffler: (off, ms) => { [ms*0.33, ms*1.33, ms*2.33, ms*3.33].forEach(t => sendNote(PAD.PERC, 90, off + t)); },
         perc_chaos: (off, ms) => { [ms*0.2, ms*1.4, ms*2.6, ms*3.8].forEach((t, i) => sendNote(PAD.LTOM + (i%3), 85, off + t)); },
         rim_shot: (off, ms) => { [ms*0.75, ms*2.25, ms*3.75].forEach(t => sendNote(PAD.SNARE2, 80, off + t)); },
+        offbeat_hat: (off, ms) => { [ms*0.5, ms*1.5, ms*2.5, ms*3.5].forEach(t => sendNote(PAD.HAT, 100, off + t)); },
         afrobeat: (off, ms) => { [ms*0.5, ms*1.25, ms*2.5, ms*3.75].forEach(t => sendNote(PAD.PERC, 95, off + t)); }
     };
 
-    async function runSession() {
-        if (!midiOut) return log("ERR: No Device");
+    function runSession() {
+        if (!midiOut) return log("ERR: Connect Hardware First");
         stopSignal = false;
         const bpm = parseInt(document.getElementById('tempo').value);
         const msPerBeat = 60000 / bpm;
-        log("COUNT-IN:");
-        for (let i = 3; i > 0; i--) { log(i + "..."); await new Promise(r => setTimeout(r, msPerBeat)); if (stopSignal) return; }
         const bars = parseInt(document.getElementById('bars').value);
         const core = document.getElementById('core-pattern').value;
         const top = document.getElementById('top-pattern').value;
         const now = window.performance.now();
+
         log(`INJECTING ${bars} BARS...`);
-        midiOut.send([0xFA]);
+        midiOut.send([0xFA]); // MIDI Start signal
+
         for (let bar = 0; bar < bars; bar++) {
             const barOffset = now + (bar * msPerBeat * 4);
             if (FOUNDATIONS[core]) FOUNDATIONS[core](barOffset, msPerBeat);
             if (EMBELLISHMENTS[top]) EMBELLISHMENTS[top](barOffset, msPerBeat);
         }
-        setTimeout(() => { if(!stopSignal) log("COMPLETE"); }, msPerBeat * 4 * bars);
+        setTimeout(() => { if(!stopSignal) log("INJECTION COMPLETE"); }, msPerBeat * 4 * bars);
     }
 
     function stopSession() { stopSignal = true; if (midiOut) midiOut.send([0xFC]); log("STOPPED."); panic(); }
-    function panic() { if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); log("RESET."); }
+    function panic() { if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); log("MIDI BUFFER RESET."); }
 </script>
 </body>
 </html>
