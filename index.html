@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-40 // RIDDIM LAB</title>
+    <title>EP-40 // DRUM TOOLKIT</title>
     <style>
         :root {
             --ep-orange: #ff3e00;
@@ -31,7 +31,7 @@
             border-radius: 12px;
             padding: 25px;
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
         }
 
@@ -55,9 +55,18 @@
             font-weight: bold;
             margin-bottom: 20px;
             border: 3px inset var(--ep-border);
-            height: 90px;
+            height: 100px;
             overflow-y: auto;
             box-shadow: inset 0 0 15px #000;
+        }
+
+        .instructions {
+            background: var(--ep-white);
+            border: 1px solid var(--ep-border);
+            padding: 15px;
+            font-size: 0.7rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
         }
 
         .section-label {
@@ -70,7 +79,7 @@
             border-bottom: 2px solid var(--ep-orange);
         }
 
-        .panel { margin-bottom: 20px; border: 1px dashed var(--ep-border); padding: 10px; border-radius: 4px; }
+        .panel { margin-bottom: 15px; border: 1px solid var(--ep-border); padding: 10px; border-radius: 4px; }
 
         .control-grid {
             display: grid;
@@ -108,14 +117,42 @@
             box-sizing: border-box;
             font-size: 0.8rem;
         }
+
+        .pad-map {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-top: 10px;
+        }
+        .pad-box {
+            background: #ddd;
+            font-size: 0.5rem;
+            text-align: center;
+            padding: 4px;
+            border: 1px solid #bbb;
+        }
     </style>
 </head>
 <body>
 
 <div class="chassis">
-    <h1>EP-40 // MODULAR RIDDIM LAB</h1>
+    <h1>EP-40 // DRUM PRODUCTION TOOLKIT</h1>
     
-    <div class="lcd-display" id="log">AWAITING DEVICE INITIALIZATION...</div>
+    <div class="lcd-display" id="log">AWAITING DEVICE...</div>
+
+    <div class="instructions">
+        <strong>SETUP INSTRUCTIONS:</strong><br>
+        1. Map your drum sounds to Pads 1-12 exactly as shown below.<br>
+        2. Set EP-40 to <strong>REC + PLAY</strong> (Record Armed).<br>
+        3. Match the <strong>BPM</strong> and <strong>BARS</strong> below to your device.<br>
+        4. Click <strong>INJECT</strong> as the first beat drops.
+
+        <div class="pad-map">
+            <div class="pad-box">9: BASS 2</div><div class="pad-box">10: SNARE 2</div><div class="pad-box">11: OHAT</div><div class="pad-box">12: PERC</div>
+            <div class="pad-box">5: M-TOM</div><div class="pad-box">6: S-TOM</div><div class="pad-box">7: RIDE</div><div class="pad-box">8: CRASH</div>
+            <div class="pad-box">1: BASS 1</div><div class="pad-box">2: SNARE 1</div><div class="pad-box">3: HI-HAT</div><div class="pad-box">4: L-TOM</div>
+        </div>
+    </div>
 
     <div class="panel">
         <button onclick="initMIDI()" class="primary" id="init-btn">Initialize Hardware</button>
@@ -126,45 +163,61 @@
         <div class="control-grid">
             <div>
                 <label>TEMPO (BPM)</label>
-                <input type="number" id="tempo" value="110" min="40" max="240">
+                <input type="number" id="tempo" value="110">
             </div>
             <div>
                 <label>LENGTH (BARS)</label>
                 <select id="bars">
-                    <option value="1">1 Bar</option>
-                    <option value="2">2 Bars</option>
-                    <option value="4">4 Bars</option>
+                    <option value="1">1 Bar</option><option value="2">2 Bars</option>
+                    <option value="4">4 Bars</option><option value="8">8 Bars</option>
                 </select>
             </div>
         </div>
     </div>
 
     <div class="panel">
-        <span class="section-label">02 // CORE FOUNDATION (PADS 1-2)</span>
-        <label>KICK & SNARE PATTERN</label>
+        <span class="section-label">02 // CORE FOUNDATION (KICK/SNARE)</span>
         <select id="core-pattern">
-            <option value="dembow">DEMBOW (3+3+2)</option>
-            <option value="stepper">STEPPER (4-on-floor)</option>
-            <option value="one_drop">ONE DROP (Reggae)</option>
-            <option value="none">-- NO KICK/SNARE --</option>
+            <optgroup label="REGGAE/DANCEHALL">
+                <option value="dembow">Dembow (Standard)</option>
+                <option value="one_drop">One Drop</option>
+                <option value="steely">Steely/Clevie Style</option>
+            </optgroup>
+            <optgroup label="HIP-HOP/FUNK">
+                <option value="stepper">Straight Stepper</option>
+                <option value="boom_bap">Boom Bap Classic</option>
+                <option value="dilla">The Dilla Swing</option>
+                <option value="trap_half">Trap Half-Time</option>
+            </optgroup>
+            <optgroup label="ELECTRONIC">
+                <option value="four_floor">House (4x4)</option>
+                <option value="uk_garage">UK Garage (2-Step)</option>
+                <option value="jungle_kick">Jungle Foundation</option>
+                <option value="breakbeat">Standard Break</option>
+            </optgroup>
+            <option value="none">-- NO CORE --</option>
         </select>
     </div>
 
     <div class="panel">
-        <span class="section-label">03 // TOP EMBELLISHMENT (PADS 3-12)</span>
-        <label>HI-HATS & PERCUSSION</label>
+        <span class="section-label">03 // TOP EMBELLISHMENT (HATS/PERC)</span>
         <select id="top-pattern">
-            <option value="straight_8">STRAIGHT 8ths (Hats)</option>
-            <option value="shuffler">SHUFFLED (Groove)</option>
-            <option value="perc_chaos">PERC SCATTER (Randomish)</option>
-            <option value="none">-- NO EMBELLISHMENT --</option>
+            <optgroup label="HI-HATS">
+                <option value="straight_8">Straight 8ths</option>
+                <option value="straight_16">Straight 16ths</option>
+                <option value="triplet">Trap Triplets</option>
+                <option value="offbeat_hat">Off-Beat Only</option>
+            </optgroup>
+            <optgroup label="PERCUSSION/TOM">
+                <option value="shuffler">Shuffled Perc</option>
+                <option value="perc_chaos">Tom Scatter</option>
+                <option value="rim_shot">Rimshot Accents</option>
+                <option value="ride_bell">Ride Bell Groove</option>
+                <option value="afrobeat">Afro-Percussion</option>
+            </optgroup>
+            <option value="none">-- NO TOP --</option>
         </select>
         <button onclick="runSession()" class="primary">INJECT HYBRID RIDDIM</button>
-    </div>
-
-    <div class="panel">
-        <span class="section-label">04 // ANALOG PERFORMANCE</span>
-        <input type="range" id="filter" min="0" max="127" value="64">
     </div>
 
     <button onclick="panic()" style="background:#777; font-size: 0.6rem; border-bottom-color:#444;">MIDI Panic</button>
@@ -200,37 +253,55 @@
         midiOut.send([128, note, 0], time + 100);
     }
 
-    // PATTERN DEFINITIONS (Relative to beat starts)
     const FOUNDATIONS = {
         dembow: (off, ms) => {
             [0, ms*0.75, ms*1.5, ms*2.25, ms*3, ms*3.75].forEach(t => sendNote(PAD.KICK, 110, off + t));
             [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
         },
-        stepper: (off, ms) => {
-            [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.KICK, 115, off + t));
+        one_drop: (off, ms) => { [ms, ms*3].forEach(t => { sendNote(PAD.KICK, 110, off + t); sendNote(PAD.SNARE, 105, off + t); }); },
+        steely: (off, ms) => {
+            [0, ms*1.5, ms*2].forEach(t => sendNote(PAD.KICK, 110, off + t));
+            [ms, ms*2.5, ms*3.5].forEach(t => sendNote(PAD.SNARE, 100, off + t));
+        },
+        boom_bap: (off, ms) => {
+            [0, ms*1.2, ms*2, ms*2.1].forEach(t => sendNote(PAD.KICK, 115, off + t));
             [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
         },
-        one_drop: (off, ms) => {
-            [ms, ms*3].forEach(t => sendNote(PAD.KICK, 110, off + t));
+        dilla: (off, ms) => {
+            [0, ms*0.9, ms*1.8, ms*2].forEach(t => sendNote(PAD.KICK, 110, off + t));
+            [ms*1.1, ms*3.1].forEach(t => sendNote(PAD.SNARE, 95, off + t));
+        },
+        trap_half: (off, ms) => {
+            [0, ms*0.5, ms*2.2, ms*3.7].forEach(t => sendNote(PAD.KICK, 120, off + t));
+            [ms*2].forEach(t => sendNote(PAD.SNARE, 110, off + t));
+        },
+        four_floor: (off, ms) => { [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 100, off + t)); },
+        uk_garage: (off, ms) => {
+            [0, ms*1.5].forEach(t => sendNote(PAD.KICK, 115, off + t));
             [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
-        }
+        },
+        jungle_kick: (off, ms) => { [0, ms*1.25, ms*2.5].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); },
+        breakbeat: (off, ms) => {
+            [0, ms*0.75, ms*2, ms*2.5].forEach(t => sendNote(PAD.KICK, 110, off + t));
+            [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t));
+        },
+        stepper: (off, ms) => { [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.KICK, 115, off + t)); [ms, ms*3].forEach(t => sendNote(PAD.SNARE, 105, off + t)); }
     };
 
     const EMBELLISHMENTS = {
-        straight_8: (off, ms) => {
-            [0, ms*0.5, ms, ms*1.5, ms*2, ms*2.5, ms*3, ms*3.5].forEach(t => sendNote(PAD.HAT, 85, off + t));
-        },
-        shuffler: (off, ms) => {
-            [ms*0.33, ms*0.66, ms*1.33, ms*1.66, ms*2.33, ms*2.66, ms*3.33, ms*3.66].forEach(t => sendNote(PAD.PERC, 90, off + t));
-        },
-        perc_chaos: (off, ms) => {
-            [ms*0.25, ms*1.75, ms*2.5, ms*3.25].forEach((t, i) => sendNote(PAD.LTOM + i, 80, off + t));
-        }
+        straight_8: (off, ms) => { [0, ms*0.5, ms, ms*1.5, ms*2, ms*2.5, ms*3, ms*3.5].forEach(t => sendNote(PAD.HAT, 85, off + t)); },
+        straight_16: (off, ms) => { for(let i=0; i<16; i++) sendNote(PAD.HAT, 70, off + (i * ms * 0.25)); },
+        triplet: (off, ms) => { for(let i=0; i<12; i++) sendNote(PAD.HAT, 90, off + (i * ms * 0.33)); },
+        offbeat_hat: (off, ms) => { [ms*0.5, ms*1.5, ms*2.5, ms*3.5].forEach(t => sendNote(PAD.HAT, 100, off + t)); },
+        shuffler: (off, ms) => { [ms*0.33, ms*1.33, ms*2.33, ms*3.33].forEach(t => sendNote(PAD.PERC, 90, off + t)); },
+        perc_chaos: (off, ms) => { [ms*0.2, ms*1.4, ms*2.6, ms*3.8].forEach((t, i) => sendNote(PAD.LTOM + (i%3), 85, off + t)); },
+        rim_shot: (off, ms) => { [ms*0.75, ms*2.25, ms*3.75].forEach(t => sendNote(PAD.SNARE2, 80, off + t)); },
+        ride_bell: (off, ms) => { [0, ms, ms*2, ms*3].forEach(t => sendNote(PAD.RIDE, 90, off + t)); },
+        afrobeat: (off, ms) => { [ms*0.5, ms*1.25, ms*2.5, ms*3.75].forEach(t => sendNote(PAD.PERC, 95, off + t)); }
     };
 
     function runSession() {
         if (!midiOut) return log("ERR: No Device");
-        
         const bpm = parseInt(document.getElementById('tempo').value);
         const bars = parseInt(document.getElementById('bars').value);
         const core = document.getElementById('core-pattern').value;
@@ -239,20 +310,13 @@
         const now = window.performance.now();
 
         log(`INJECTING ${bars} BARS...`);
-
         for (let bar = 0; bar < bars; bar++) {
             const barOffset = now + (bar * msPerBeat * 4);
-            
             if (FOUNDATIONS[core]) FOUNDATIONS[core](barOffset, msPerBeat);
             if (EMBELLISHMENTS[top]) EMBELLISHMENTS[top](barOffset, msPerBeat);
         }
-        
-        setTimeout(() => log("INJECTION COMPLETE"), msPerBeat * 4 * bars);
+        setTimeout(() => log("COMPLETE"), msPerBeat * 4 * bars);
     }
-
-    document.getElementById('filter').oninput = (e) => {
-        if (midiOut) midiOut.send([176, 74, e.target.value]);
-    };
 
     function panic() {
         if (midiOut) for(let i=0; i<16; i++) midiOut.send([176, 123, 0]);
