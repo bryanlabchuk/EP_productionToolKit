@@ -26,7 +26,7 @@
 
         .chassis {
             background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
-            padding: 30px; width: 100%; max-width: 500px;
+            padding: 30px; width: 100%; max-width: 480px;
             box-shadow: 20px 20px 60px var(--shadow); position: relative;
         }
 
@@ -45,7 +45,7 @@
             text-shadow: 0 0 5px var(--lcd-text); line-height: 1.4;
         }
 
-        /* 3x4 Hardware Grid */
+        /* 3x4 Grid Layout */
         .ep-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -65,10 +65,9 @@
         .pad-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
         .pad-btn.active-pad { border-color: var(--accent); background: var(--accent); color: white; box-shadow: 0 6px 0 rgba(0,0,0,0.25); }
 
-        .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.8rem; }
-        .orange-sq { width: 10px; height: 10px; background: var(--accent); border-radius: 1px; }
+        .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
+        .orange-sq { width: 12px; height: 12px; background: var(--accent); border-radius: 1px; }
 
-        /* Sequencer Panel */
         .editor-panel { background: var(--panel-bg); border: 2px solid var(--accent); padding: 20px; border-radius: 10px; margin-bottom: 25px; }
         .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 15px; }
         .step-box { aspect-ratio: 1/1; background: rgba(0,0,0,0.05); border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; font-weight: 900; border-radius: 4px; }
@@ -77,7 +76,7 @@
         .step-box.on-z { background: transparent; color: var(--accent); border-color: var(--accent); border-style: dashed; }
         .step-box.off { color: var(--text); opacity: 0.2; }
 
-        .config-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; margin-bottom: 20px; align-items: end; }
+        .config-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 15px; margin-bottom: 20px; align-items: end; }
         label { font-size: 0.6rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
         select, input { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); font-family: inherit; border-radius: 4px; font-weight: bold; }
 
@@ -90,7 +89,7 @@
 
 <div class="chassis">
     <h1>EP-DC-OXO // DRUM COMPUTER</h1>
-    <div class="lcd-display" id="log">SYSTEM READY // OXO_OS v5.0</div>
+    <div class="lcd-display" id="log">SYSTEM READY // OXO_OS v5.1</div>
 
     <div class="panel" style="margin-bottom: 25px;">
         <button onclick="initMIDI()" class="primary" id="init-btn" style="width:100%;">INITIALIZE CONNECTION</button>
@@ -98,11 +97,11 @@
 
     <div class="config-row">
         <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
-        <div><label>LENGTH</label>
+        <div><label>LEN</label>
             <select id="global-bars">
-                <option value="1">1 Bar</option><option value="2">2 Bars</option>
-                <option value="4">4 Bars</option><option value="8">8 Bars</option>
-                <option value="16">16 Bars</option>
+                <option value="1">1</option><option value="2">2</option>
+                <option value="4">4</option><option value="8">8</option>
+                <option value="16">16</option>
             </select>
         </div>
         <div><label>SWING</label><input type="range" id="swing-slider" min="0" max="75" value="0"></div>
@@ -117,7 +116,7 @@
             <button onclick="clearCurrentPad()" style="width:auto; padding:5px 15px; font-size:0.6rem; background:#444; color:white;">CLEAR</button>
         </div>
         <div class="config-row" style="grid-template-columns: 1fr 2fr;">
-            <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="4">4</option><option value="8">8</option><option value="16" selected>16</option><option value="32">32</option></select></div>
+            <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8</option><option value="16" selected>16</option><option value="32">32</option></select></div>
             <div><label>PRESET LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
         </div>
         <div class="step-container" id="step-ui"></div>
@@ -135,13 +134,17 @@
     let selectedPad = 0;
     let humanize = false;
     
-    // Physical Legends Map (3 Columns x 4 Rows, reading Top to Bottom)
-    // Row 1: 7, 8, 9
-    // Row 2: 4, 5, 6
-    // Row 3: 1, 2, 3
-    // Row 4: Square, 0, Enter
+    // Hardware Legend Definitions
+    const legends = {
+        6: '7', 7: '8', 8: '9',
+        3: '4', 4: '5', 5: '6',
+        0: '1', 1: '2', 2: '3',
+        9: '<div class="orange-sq"></div>', 10: '0', 11: 'ENTER'
+    };
+
+    // The order they appear in the 3-column grid (Top to Bottom)
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
-    const legends = ['<div class="orange-sq"></div>', '0', 'ENTER', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
     const oxoPresets = ["XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "YOOZ YOOZ YOOZ YOOZ", "XOZY XOZY XOZY XOZY"];
 
@@ -179,7 +182,7 @@
         document.getElementById(`btn-${idx}`).classList.add('active-pad');
         document.getElementById('editor').style.display = 'block';
         let leg = legends[idx].includes('sq') ? '■' : legends[idx];
-        document.getElementById('editor-title').innerText = `PAD: ${leg}`;
+        document.getElementById('editor-title').innerText = `EDITING PAD: ${leg}`;
         renderSteps();
     }
 
@@ -235,7 +238,8 @@
 
     function stopSequencer() { clearInterval(timer); timer = null; if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); } log("HALTED."); }
     function panic() { stopSequencer(); log("RESET."); }
-    selectPad(0);
+    
+    selectPad(9); // Default select the Square pad
 </script>
 </body>
 </html>
