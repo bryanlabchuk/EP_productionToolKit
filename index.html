@@ -3,33 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP // UNIVERSAL DRUM TOOLKIT</title>
+    <title>EP // MULTI-TOOLKIT</title>
     <style>
         /* CSS THEME VARIABLES */
         :root {
-            /* DEFAULT EP-40 LAB THEME */
+            /* GLITCH / INITIAL MISH-MASH THEME */
+            --bg: linear-gradient(135deg, #e8e4d9 0%, #d1d1d1 33%, #dfcf9d 66%, #bcbaaf 100%);
+            --accent: #ff3e00; 
+            --text: #121212; 
+            --lcd-bg: #0a0c0a; 
+            --lcd-text: #24ff00; 
+            --border: #bcbaaf; 
+            --panel-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        /* EP-40 LAB THEME */
+        body.theme-40 {
             --bg: #e8e4d9; --accent: #ff3e00; --text: #121212; 
             --lcd-bg: #0a0c0a; --lcd-text: #004f0b; --border: #bcbaaf; --panel-bg: #ffffff;
         }
 
+        /* EP-133 K.O. II THEME */
         body.theme-133 {
-            /* EP-133 K.O. II THEME */
             --bg: #d1d1d1; --accent: #ff3e00; --text: #000000;
             --lcd-bg: #1a1a1a; --lcd-text: #ff3e00; --border: #999; --panel-bg: #f0f0f0;
         }
 
+        /* EP-1320 MEDIEVAL THEME */
         body.theme-1320 {
-            /* EP-1320 MEDIEVAL THEME */
             --bg: #dfcf9d; --accent: #8b0000; --text: #2a1b0a;
             --lcd-bg: #2a1b0a; --lcd-text: #dfcf9d; --border: #b38b4d; --panel-bg: #eee4c5;
         }
 
         body {
-            background-color: var(--bg);
+            background: var(--bg);
+            background-attachment: fixed;
             color: var(--text);
             font-family: 'Courier New', Courier, monospace;
             display: flex; flex-direction: column; align-items: center;
-            padding: 20px; margin: 0; transition: all 0.5s ease;
+            padding: 20px; margin: 0; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .chassis {
@@ -37,7 +49,8 @@
             border: 4px solid var(--border);
             border-radius: 12px; padding: 25px;
             width: 100%; max-width: 550px;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.2);
+            transition: all 0.8s ease;
         }
 
         h1 {
@@ -57,6 +70,7 @@
         .instructions {
             background: var(--panel-bg); border: 1px solid var(--border);
             padding: 15px; font-size: 0.7rem; margin-bottom: 20px; line-height: 1.4;
+            backdrop-filter: blur(5px);
         }
 
         .section-label {
@@ -65,7 +79,11 @@
             border-bottom: 2px solid var(--accent);
         }
 
-        .panel { margin-bottom: 15px; border: 1px solid var(--border); padding: 10px; border-radius: 4px; background: var(--panel-bg); }
+        .panel { 
+            margin-bottom: 15px; border: 1px solid var(--border); 
+            padding: 10px; border-radius: 4px; background: var(--panel-bg); 
+            backdrop-filter: blur(2px);
+        }
 
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 
@@ -78,29 +96,32 @@
 
         button:active { transform: translateY(2px); border-bottom: 2px solid rgba(0,0,0,0.5); }
         button.primary { background: var(--accent); color: white; border-bottom-color: rgba(0,0,0,0.3); }
-        .connected-state { filter: brightness(1.2); }
+        
+        /* Connected glow effect */
+        .connected-state { box-shadow: 0 0 15px var(--accent); filter: brightness(1.1); }
 
-        label { font-size: 0.6rem; font-weight: bold; display: block; margin-bottom: 5px; color: var(--text); opacity: 0.7; }
+        label { font-size: 0.6rem; font-weight: bold; display: block; margin-bottom: 5px; color: var(--text); opacity: 0.8; }
+        
         select, input {
-            width: 100%; padding: 8px; background: var(--bg);
+            width: 100%; padding: 8px; background: rgba(255,255,255,0.2);
             border: 2px solid var(--text); font-family: inherit;
             margin-bottom: 10px; box-sizing: border-box; font-size: 0.8rem; color: var(--text);
         }
 
         .pad-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 10px; }
-        .pad-box { background: var(--bg); font-size: 0.5rem; text-align: center; padding: 4px; border: 1px solid var(--border); }
+        .pad-box { background: rgba(0,0,0,0.05); font-size: 0.5rem; text-align: center; padding: 4px; border: 1px solid var(--border); }
     </style>
 </head>
-<body>
+<body id="main-body">
 
 <div class="chassis">
-    <h1 id="main-header">EP-SERIES TOOLKIT</h1>
+    <h1 id="main-header">EP // UNIVERSAL TOOLKIT</h1>
     
-    <div class="lcd-display" id="log">SYSTEM IDLE...<br>AWAITING USB-C CONNECTION</div>
+    <div class="lcd-display" id="log">SYSTEM INITIALIZING...<br>AWAITING HARDWARE HANDSHAKE</div>
 
     <div class="instructions">
         <strong>SETUP INSTRUCTIONS:</strong><br>
-        1. Map drum sounds to Pads 1-12 as shown.<br>
+        1. Connect EP device via USB-C.<br>
         2. Set EP to <strong>REC + PLAY</strong>.<br>
         3. Match <strong>BPM/BARS</strong> on device and tool.<br>
         4. Click <strong>INJECT</strong> as the first beat drops.
@@ -199,27 +220,28 @@
             
             if (midiOut) {
                 const name = midiOut.name.toLowerCase();
-                const body = document.body;
+                const body = document.getElementById('main-body');
                 const header = document.getElementById('main-header');
 
+                // TRANSITION LOGIC
                 if (name.includes("1320")) {
                     body.className = "theme-1320";
                     header.innerText = "EP-1320 // MEDIEVAL TOOLKIT";
-                    log("DETECTED: EP-1320 Medieval");
+                    log("HARDWARE SYNC: EP-1320 (CRIMSON/GOLD)");
                 } else if (name.includes("133")) {
                     body.className = "theme-133";
                     header.innerText = "EP-133 // K.O. II TOOLKIT";
-                    log("DETECTED: EP-133 K.O. II");
+                    log("HARDWARE SYNC: EP-133 (INDUSTRIAL)");
                 } else {
-                    body.className = ""; // Default (EP-40 colors)
+                    body.className = "theme-40";
                     header.innerText = "EP-40 // RIDDIM TOOLKIT";
-                    log("DETECTED: EP-40 Laboratory");
+                    log("HARDWARE SYNC: EP-40 (LABORATORY)");
                 }
 
                 document.getElementById('init-btn').classList.add('connected-state');
-                document.getElementById('init-btn').innerText = "HARDWARE SYNCED";
+                document.getElementById('init-btn').innerText = "DEVICE ONLINE";
             } else {
-                log("SCANNING: No hardware found.");
+                log("SCANNING... Ensure USB-C is connected.");
             }
         } catch(e) { log("ERR: MIDI Access Denied"); }
     }
