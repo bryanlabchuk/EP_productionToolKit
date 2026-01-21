@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // MASTER CLOCK</title>
+    <title>EP-DC-OXO // PRECISION</title>
     <style>
         /* --- THEME VARIABLES --- */
         :root {
@@ -108,26 +108,25 @@
         <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // CLOCK v12.0</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // AUDIO_ENGINE v13</div></div>
 
     <div class="main-deck">
         
         <div class="deck-left">
-            <button onclick="initMIDI()" class="btn-main primary" id="init-btn" style="margin-bottom:20px;">INITIALIZE MIDI</button>
+            <button onclick="initAudioAndMIDI()" class="btn-main primary" id="init-btn" style="margin-bottom:20px;">START ENGINE</button>
             
             <div class="control-group" style="margin-bottom: 20px;">
                 <div class="config-grid" style="margin-bottom: 15px;">
-                    <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
-                    <div><label>GLOBAL LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
+                    <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
+                    <div><label>SYNC MODE</label><select id="sync-mode"><option value="master">CLOCK OUT (MASTER)</option><option value="trigger">TRIGGER ONLY (SLAVE)</option></select></div>
                 </div>
-                
                 <div class="split-row">
+                    <div><label>LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
                     <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
-                    <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
                 </div>
                 <div class="split-row" style="margin-top: 10px;">
+                    <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
                     <div><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
-                    <div><button id="dark-btn" onclick="toggleDark()" class="btn-small">NIGHT: OFF</button></div>
                 </div>
             </div>
 
@@ -175,27 +174,33 @@
 
             <div class="action-row">
                 <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
-                <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">PANIC</button>
+                <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">STOP / PANIC</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    /* --- STATE --- */
-    let midiOut = null; 
-    let midiIn = null; 
-    let sequencerInterval = null;
-    let pendingTimeouts = []; 
-    let selectedPad = 0; 
-    let humanize = false; 
-    let countIn = false; 
+    /* --- AUDIO & MIDI CONTEXT --- */
+    let audioCtx = null;
+    let midiOut = null;
+    let nextNoteTime = 0.0;
+    let timerID = null;
+    let current16thNote = 0;
+    let isPlaying = false;
+    
+    // Config
+    let lookahead = 25.0; // ms
+    let scheduleAheadTime = 0.1; // sec
+    
+    // State
+    let selectedPad = 0;
+    let humanize = false;
+    let countIn = false;
     let editMode = 'note';
-    
-    // MIDI Clock State
-    let clockTick = 0;
-    
-    // Hardware Constants
+    let totalBarsToPlay = 0;
+    let barsPlayed = 0;
+
     const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
@@ -217,8 +222,6 @@
         gridEl.appendChild(btn);
     });
 
-    if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
-
     function log(m) { 
         const l = document.getElementById('log');
         if (m.startsWith("COUNT")) { l.innerHTML = `<div class="lcd-overlay">${m.split(":")[1]}</div>`; }
@@ -230,29 +233,182 @@
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
 
-    /* --- MIDI ENGINE --- */
-    async function initMIDI() {
+    /* --- AUDIO/MIDI ENGINE --- */
+    async function initAudioAndMIDI() {
         try {
+            // 1. Audio Context for Timing
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+            
+            // 2. MIDI Access
             const midi = await navigator.requestMIDIAccess();
             midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
-            midiIn = Array.from(midi.inputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
             
             if (midiOut) {
                 const n = midiOut.name.toLowerCase();
                 document.body.className = n.includes("1320") ? 'theme-1320' : n.includes("133") ? 'theme-133' : 'theme-40';
-                document.getElementById('init-btn').innerText = "LINKED: " + midiOut.name.toUpperCase();
-                log("OUTPUT READY");
+                document.getElementById('init-btn').innerText = "ENGINE ONLINE";
+                log("AUDIO ENGINE & MIDI LINKED");
+            } else { log("ERR: NO DEVICE FOUND"); }
+
+        } catch(e) { log("ERR: ACCESS DENIED"); }
+    }
+
+    /* --- SCHEDULER --- */
+    function nextNote() {
+        const bpm = parseInt(document.getElementById('tempo').value);
+        const secondsPerBeat = 60.0 / bpm;
+        nextNoteTime += 0.25 * secondsPerBeat; // Add 16th note length
+        current16thNote++;
+    }
+
+    function scheduleNote(beatNumber, time) {
+        if (!midiOut) return;
+
+        // CLOCK PULSES: If in Master Mode, we must send 6 clock pulses per 16th note
+        // Note: Web MIDI API doesn't support scheduling SysEx/Realtime in future easily. 
+        // We rely on high-frequency triggering for Clock, or accept some jitter.
+        // BETTER: Send Clock NOW if close enough. 
+        // Ideally, for precise clock, we need a dedicated worker. 
+        // For this build, we will focus on sending the NOTE precisely.
+        
+        // Sync Mode Check
+        const isMaster = document.getElementById('sync-mode').value === 'master';
+        if (isMaster) {
+            // Simplified Clock Injection: Send a burst of 6 pulses? No, that rushes.
+            // We just send one pulse per call? Too slow. 
+            // Correct approach: We send 0xF8 immediately in the main loop, 
+            // but we use the audio timer to Trigger the Notes.
+        }
+
+        const swing = parseInt(document.getElementById('swing-slider').value);
+        const isEven = beatNumber % 2 !== 0;
+        const swingDelay = isEven ? ((60/parseInt(document.getElementById('tempo').value))/4) * (swing/100) : 0;
+        const humanJitter = humanize ? (Math.random() * 0.015) : 0; // 15ms jitter
+
+        const actualTime = time + swingDelay + humanJitter;
+
+        // Iterate Pads
+        for (let p = 0; p < 12; p++) {
+            const pad = sequencerData[p];
+            const stepIdx = beatNumber % pad.steps;
+            const note = pad.notes[stepIdx];
+            const auto = pad.auto[stepIdx];
+            
+            // We use perform(msg, timestamp) if browser supports it, otherwise setTimeout
+            // Most browsers support timestamp in send()
+            // However, 'time' is AudioContext time. MIDI needs DOMHighResTimeStamp (performance.now())
+            // Conversion: performance.now() + (time - audioCtx.currentTime) * 1000
+            
+            const midiTime = performance.now() + (actualTime - audioCtx.currentTime) * 1000;
+
+            if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto], midiTime);
+            if (note !== 'O') {
+                const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
+                midiOut.send([144, padNotes[p], vel], midiTime);
+                midiOut.send([128, padNotes[p], 0], midiTime + 100);
+                
+                // Visual Flash (approximate)
+                setTimeout(() => flashPad(padNotes[p]), (actualTime - audioCtx.currentTime) * 1000);
             }
-            if (midiIn) { midiIn.onmidimessage = handleIncomingMIDI; log("INPUT READY"); }
-            if(!midiOut && !midiIn) log("ERR: DEVICE NOT DETECTED");
-        } catch(e) { log("ERR: MIDI ACCESS DENIED"); }
+        }
     }
 
-    function handleIncomingMIDI(event) {
-        const [status, data1, data2] = event.data;
-        if ((status & 0xF0) === 144 && data2 > 0) flashPad(data1);
+    function scheduler() {
+        // While there are notes that will need to play before the next interval, schedule them
+        while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+            scheduleNote(current16thNote, nextNoteTime);
+            
+            // Check for end of loop
+            const totalBars = parseInt(document.getElementById('global-bars').value);
+            const total16ths = totalBars * 16;
+            
+            if (current16thNote >= total16ths) {
+                // STOP!
+                stopSequencer();
+                log("INJECTION COMPLETE");
+                return;
+            }
+            
+            // MIDI CLOCK PULSES (Approximation for Master Mode)
+            // If Master Mode, we should be sending 0xF8 continuously. 
+            // Using a separate interval for Clock is safer than scheduling it here.
+            
+            nextNote();
+        }
+        if (isPlaying) timerID = requestAnimationFrame(scheduler);
     }
 
+    /* --- TRANSPORT --- */
+    let clockInterval = null;
+
+    function handleInject() {
+        if (!midiOut || !audioCtx) return log("ERR: START ENGINE FIRST");
+        if (countIn) runCountIn();
+        else startSequencer();
+    }
+
+    function runCountIn() {
+        let beat = 4;
+        const bpm = parseInt(document.getElementById('tempo').value);
+        const beatTime = 60000 / bpm;
+        log(`COUNT: ${beat}...`);
+        const ci = setInterval(() => {
+            beat--;
+            if (beat > 0) log(`COUNT: ${beat}...`);
+            else { clearInterval(ci); log("COUNT: GO!"); startSequencer(); }
+        }, beatTime);
+    }
+
+    function startSequencer() {
+        stopSequencer(); // Reset
+        
+        const bpm = parseInt(document.getElementById('tempo').value);
+        const isMaster = document.getElementById('sync-mode').value === 'master';
+        
+        isPlaying = true;
+        current16thNote = 0;
+        nextNoteTime = audioCtx.currentTime + 0.1; // Start 100ms in future
+        
+        // 1. Send Clock PRE-ROLL if Master Mode
+        if (isMaster) {
+            // Send 100ms of clock pulses before Start to wake up device
+            // 24 PPQN @ 120BPM = ~20ms interval
+            const pulseLen = 60000 / (bpm * 24);
+            let pr = 0;
+            const preRoll = setInterval(() => {
+                midiOut.send([0xF8]);
+                pr++;
+                if (pr > 5) {
+                    clearInterval(preRoll);
+                    // NOW SEND START
+                    midiOut.send([0xFA]);
+                    // Start Main Clock Loop
+                    clockInterval = setInterval(() => midiOut.send([0xF8]), pulseLen);
+                }
+            }, pulseLen);
+        } else {
+            // Trigger Mode: Just send Start
+            midiOut.send([0xFA]);
+        }
+
+        log(`INJECTING...`);
+        scheduler();
+    }
+
+    function stopSequencer() {
+        isPlaying = false;
+        if (timerID) cancelAnimationFrame(timerID);
+        if (clockInterval) clearInterval(clockInterval);
+        
+        if (midiOut) {
+            midiOut.send([0xFC]); // Stop
+            for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); // All Notes Off
+        }
+        log("HALTED");
+    }
+
+    /* --- HELPERS --- */
     function flashPad(note) {
         const padIdx = padNotes.indexOf(note);
         if (padIdx !== -1) {
@@ -260,19 +416,12 @@
             if (btn) { btn.classList.add('hit'); setTimeout(() => btn.classList.remove('hit'), 100); }
         }
     }
-
-    /* --- UI HELPERS --- */
-    function toggleDark() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode'));
-        document.getElementById('dark-btn').classList.toggle('btn-toggle-on', document.body.classList.contains('dark-mode'));
-        document.getElementById('dark-btn').innerText = document.body.classList.contains('dark-mode') ? "NIGHT: ON" : "NIGHT: OFF";
-    }
-
-    function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; }
     
-    function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; }
-
+    // UI Toggles
+    function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
+    function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
+    function toggleDark() { document.body.classList.toggle('dark-mode'); document.getElementById('dark-btn').innerText = document.body.classList.contains('dark-mode') ? "NIGHT: ON" : "NIGHT: OFF"; }
+    
     function setEditMode(m) {
         editMode = m;
         document.getElementById('grid-notes').style.display = m === 'note' ? 'grid' : 'none';
@@ -330,111 +479,6 @@
     function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
     function loadProject(input) { const r = new FileReader(); r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); }; r.readAsText(input.files[0]); }
-
-    /* --- MASTER CLOCK ENGINE --- */
-    function handleInject() {
-        if (!midiOut) return log("ERR: INIT MIDI FIRST");
-        if (countIn) runCountIn();
-        else startSequencer();
-    }
-
-    function runCountIn() {
-        const bpm = parseInt(document.getElementById('tempo').value);
-        const beatTime = 60000 / bpm;
-        let beat = 4;
-        log(`COUNT: ${beat}...`);
-        const countInt = setInterval(() => {
-            beat--;
-            if (beat > 0) log(`COUNT: ${beat}...`);
-            else { clearInterval(countInt); log("COUNT: GO!"); startSequencer(); }
-        }, beatTime);
-    }
-
-    function startSequencer() {
-        stopSequencer(); // Safety First
-        
-        const bpm = parseInt(document.getElementById('tempo').value);
-        const bars = parseInt(document.getElementById('global-bars').value);
-        const swing = parseInt(document.getElementById('swing-slider').value);
-        
-        // 24 pulses per quarter note (PPQN)
-        // Interval = 60,000 / (BPM * 24)
-        const pulseInterval = 60000 / (bpm * 24);
-        
-        // Total pulses to run = Bars * 4 beats * 24 pulses
-        const totalPulses = bars * 4 * 24;
-        
-        // Reset Counters
-        clockTick = 0;
-        
-        // Send Start
-        midiOut.send([0xFA]);
-        log(`MASTER CLOCK STARTED @ ${bpm} BPM`);
-
-        // High-resolution Clock Loop
-        sequencerInterval = setInterval(() => {
-            if (clockTick >= totalPulses) { 
-                stopSequencer(); 
-                log("INJECTION COMPLETE"); 
-                return; 
-            }
-            
-            // Send MIDI Clock Byte
-            midiOut.send([0xF8]);
-            
-            // Check if we need to fire a 16th note?
-            // 24 pulses per beat / 4 = 6 pulses per 16th note
-            if (clockTick % 6 === 0) {
-                const current16th = clockTick / 6;
-                const isEven = current16th % 2 !== 0;
-                
-                // Calculate delay for swing/humanize (in ms)
-                // Note: We can't delay the CLOCK (0xF8), only the NOTE message
-                const noteDelay = (isEven ? (pulseInterval * 6 * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
-                
-                triggerStep(current16th, noteDelay);
-            }
-            
-            clockTick++;
-        }, pulseInterval);
-    }
-    
-    function triggerStep(stepIndex, delay) {
-         // Loop through all 12 pads
-         for (let p = 0; p < 12; p++) {
-            const pad = sequencerData[p];
-            const loopStep = stepIndex % pad.steps; // Wrap around pattern length
-            const note = pad.notes[loopStep];
-            const auto = pad.auto[loopStep];
-            
-            const tId = setTimeout(() => {
-                if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto]);
-                if (note !== 'O') {
-                    const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
-                    midiOut.send([144, padNotes[p], vel]);
-                    setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100); // Note Off 100ms later
-                    flashPad(padNotes[p]);
-                }
-            }, delay);
-            pendingTimeouts.push(tId);
-        }
-    }
-
-    function stopSequencer() { 
-        clearInterval(sequencerInterval); 
-        sequencerInterval = null; 
-        
-        // Clear pending notes
-        pendingTimeouts.forEach(id => clearTimeout(id));
-        pendingTimeouts = [];
-
-        if (midiOut) { 
-            midiOut.send([0xFC]); // MIDI Stop
-            // Panic: All Notes Off
-            for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); 
-        } 
-        log("HALTED"); 
-    }
     
     selectPad(9);
 </script>
