@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // PRECISION RECORDER</title>
+    <title>EP-DC-OXO // LOGIC CORRECTED</title>
     <style>
+        /* --- THEME VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
@@ -65,6 +66,7 @@
         label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         
+        /* --- PAD GRID --- */
         .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 80px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
@@ -73,6 +75,7 @@
         .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
+        /* --- EDITOR & SLIDERS --- */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
@@ -109,7 +112,7 @@
         </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // RECORDER v14</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // MAPPING v1.0</div></div>
 
     <div class="main-deck">
         
@@ -191,39 +194,53 @@
 </div>
 
 <script>
-    /* --- AUDIO & MIDI STATE --- */
     let audioCtx = null;
     let midiOut = null;
     let nextNoteTime = 0.0;
     let timerID = null;
     let current16thNote = 0;
     let isPlaying = false;
-    let clockInterval = null; // High-res clock ID
-    
-    // Config
-    let scheduleAheadTime = 0.1; // sec
-    
-    // App State
+    let clockInterval = null; 
+    let scheduleAheadTime = 0.1;
     let selectedPad = 0;
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
 
-    const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
-    const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
+    // *** FIX: Remapping to match Standard Layout ***
+    // Indices 0-11 in sequencerData = Pads 1-12
+    // Pad 1 = Note 36 ... Pad 12 = Note 47
+    
+    const legends = {
+        9: '7', 10: '8', 11: '9',  // Top Row (Pads 10,11,12)
+        6: '4', 7: '5', 8: '6',    // Mid Row (Pads 7,8,9)
+        3: '1', 4: '2', 5: '3',    // Low Row (Pads 4,5,6)
+        0: '', 1: '0', 2: 'ENTER'  // Btm Row (Pads 1,2,3)
+    };
+    
+    // VISUAL ORDER TO DRAW (Left-to-Right, Top-to-Bottom)
+    // We want to draw the buttons in this order:
+    // Pad 10, Pad 11, Pad 12 (Indices 9, 10, 11)
+    // Pad 7, Pad 8, Pad 9 (Indices 6, 7, 8)
+    // Pad 4, Pad 5, Pad 6 (Indices 3, 4, 5)
+    // Pad 1, Pad 2, Pad 3 (Indices 0, 1, 2)
+    const visualOrder = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
+    
+    // MIDI Notes 36-47 map 1:1 with Indices 0-11
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
     const oxoPresets = ["CUSTOM", "XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "XOZY XOZY XOZY XOZY"];
 
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
-    /* --- INITIALIZATION --- */
+    /* --- INIT --- */
     const ps = document.getElementById('preset-select');
     oxoPresets.forEach((p, i) => { let o = document.createElement('option'); o.value = i; o.innerText = p; ps.appendChild(o); });
 
     const gridEl = document.getElementById('pad-grid');
     visualOrder.forEach(idx => {
         const btn = document.createElement('div');
-        btn.className = 'pad-btn' + (idx === 9 ? ' pad-btn-sq' : '');
+        // Check for Pad 1 (Index 0) to add Square class
+        btn.className = 'pad-btn' + (idx === 0 ? ' pad-btn-sq' : '');
         btn.id = `btn-${idx}`;
         btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`;
         btn.onclick = () => selectPad(idx);
@@ -279,11 +296,8 @@
         const humanJitter = humanize ? (Math.random() * 0.015) : 0;
 
         const actualTime = time + swingDelay + humanJitter;
-        // Convert AudioTime to DOMHighResTimeStamp for MIDI
         const midiTime = performance.now() + (actualTime - audioCtx.currentTime) * 1000;
         
-        // Get Channel (0x90 = Ch1, 0x91 = Ch2, etc)
-        // Note On status byte = 0x90 + channelIndex
         const chIdx = parseInt(document.getElementById('midi-channel').value);
         const noteOn = 0x90 + chIdx;
         const noteOff = 0x80 + chIdx;
@@ -301,8 +315,6 @@
                 const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
                 midiOut.send([noteOn, padNotes[p], vel], midiTime);
                 midiOut.send([noteOff, padNotes[p], 0], midiTime + 100);
-                
-                // Visuals
                 setTimeout(() => flashPad(padNotes[p]), (actualTime - audioCtx.currentTime) * 1000);
             }
         }
@@ -311,7 +323,6 @@
     function scheduler() {
         while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
             scheduleNote(current16thNote, nextNoteTime);
-            
             const totalBars = parseInt(document.getElementById('global-bars').value);
             const total16ths = totalBars * 16;
             
@@ -345,28 +356,21 @@
     }
 
     function startSequencer() {
-        stopSequencer(); // Hard Reset
-        
+        stopSequencer();
         const bpm = parseInt(document.getElementById('tempo').value);
-        
         isPlaying = true;
         current16thNote = 0;
-        nextNoteTime = audioCtx.currentTime + 0.1; // 100ms Buffer
+        nextNoteTime = audioCtx.currentTime + 0.1;
         
-        // 1. REWIND Protocol: Stop -> SPP Zero -> Start
         midiOut.send([0xFC]); // Stop
-        midiOut.send([0xF2, 0x00, 0x00]); // Song Position Pointer = 0
+        midiOut.send([0xF2, 0x00, 0x00]); // Reset Song Position
         midiOut.send([0xFA]); // Start
         
         log(`RECORDING...`);
 
-        // 2. MASTER CLOCK PULSE GENERATOR (24 PPQN)
         const pulseLen = 60000 / (bpm * 24);
-        clockInterval = setInterval(() => {
-            if(midiOut) midiOut.send([0xF8]);
-        }, pulseLen);
+        clockInterval = setInterval(() => { if(midiOut) midiOut.send([0xF8]); }, pulseLen);
 
-        // 3. START NOTE SCHEDULER
         scheduler();
     }
 
@@ -374,12 +378,10 @@
         isPlaying = false;
         if (timerID) cancelAnimationFrame(timerID);
         if (clockInterval) clearInterval(clockInterval);
-        
         if (midiOut) {
-            midiOut.send([0xFC]); // Stop
+            midiOut.send([0xFC]);
             const chIdx = parseInt(document.getElementById('midi-channel').value);
-            const ccStatus = 0xB0 + chIdx;
-            midiOut.send([ccStatus, 123, 0]); // All Notes Off on selected Channel
+            midiOut.send([0xB0 + chIdx, 123, 0]);
         }
         log("HALTED");
     }
@@ -393,7 +395,6 @@
         }
     }
     
-    // UI Logic
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
     function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
     function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode')); }
@@ -411,7 +412,8 @@
         document.getElementById(`btn-${idx}`).classList.add('active-pad');
         document.getElementById('editor').style.display = 'block';
         document.getElementById('preset-select').selectedIndex = 0;
-        let leg = idx === 9 ? '■' : legends[idx];
+        let leg = legends[idx];
+        if(idx === 0) leg = '■';
         document.getElementById('editor-title').innerText = `EDIT PAD ${leg}`;
         renderSteps();
     }
@@ -461,7 +463,7 @@
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
     function loadProject(input) { const r = new FileReader(); r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); }; r.readAsText(input.files[0]); }
     
-    selectPad(9);
+    selectPad(0);
 </script>
 </body>
 </html>
