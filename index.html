@@ -26,7 +26,7 @@
 
         .chassis {
             background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
-            padding: 30px; width: 100%; max-width: 480px;
+            padding: 30px; width: 100%; max-width: 460px;
             box-shadow: 20px 20px 60px var(--shadow); position: relative;
         }
 
@@ -45,35 +45,36 @@
             text-shadow: 0 0 5px var(--lcd-text); line-height: 1.4;
         }
 
+        /* 3x4 Grid Layout */
         .ep-grid { 
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; 
-            margin-bottom: 25px; max-width: 320px; margin-left: auto; margin-right: auto;
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            margin-bottom: 25px;
         }
         
         .pad-btn { 
             background: var(--panel-bg); border: 2px solid var(--border); 
             height: 70px; border-radius: 8px; cursor: pointer; 
-            position: relative; display: flex; align-items: center; justify-content: center;
-            transition: 0.1s; box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+            position: relative; transition: 0.1s; box-shadow: 0 5px 0 rgba(0,0,0,0.15);
         }
         .pad-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
-        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent); color: white; box-shadow: 0 6px 0 rgba(0,0,0,0.25); }
+        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 6px 0 rgba(0,0,0,0.25); }
 
-        /* The Legend labels (Numbers/Text) */
         .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
         
-        /* THE PRECISION MARKER (TOP LEFT SQUARE) */
+        /* THE REFINED CORNER MARKER FIX */
         .corner-marker { 
             position: absolute; 
-            top: 10%; 
-            left: 10%; 
-            width: 14.4%; /* Calculated: 1.3 divided by 9 total units approx */
+            top: 12%; 
+            left: 12%; 
+            width: 14.4%; 
             height: 14.4%; 
             background: var(--accent); 
             border-radius: 1px;
+            transition: background 0.2s;
         }
-        /* Hide marker text if active so it doesn't overlap */
-        .active-pad .corner-marker { background: white; }
+        .active-pad .corner-marker { background: #ffffff !important; }
 
         .editor-panel { background: var(--panel-bg); border: 2px solid var(--accent); padding: 20px; border-radius: 10px; margin-bottom: 25px; }
         .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 15px; }
@@ -140,7 +141,7 @@
     let selectedPad = 0;
     let humanize = false;
     
-    // Hardware Legend Definitions
+    // Mapping: index to label
     const legends = {
         6: '7', 7: '8', 8: '9',
         3: '4', 4: '5', 5: '6',
@@ -174,17 +175,11 @@
             const name = midiOut.name.toLowerCase();
             document.body.className = name.includes("1320") ? "theme-1320" : name.includes("133") ? "theme-133" : "theme-40";
             document.getElementById('init-btn').innerText = "DEVICE SYNCED";
-            log("ONLINE // " + midiOut.name.toUpperCase());
+            log("CONNECTED // " + midiOut.name.toUpperCase());
         }
     }
 
-    function toggleHuman() { 
-        humanize = !humanize; 
-        const b = document.getElementById('human-btn');
-        b.innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`;
-        b.style.background = humanize ? 'var(--lcd-text)' : 'var(--text)';
-        b.style.color = humanize ? '#000' : 'var(--bg)';
-    }
+    function toggleHuman() { humanize = !humanize; const b = document.getElementById('human-btn'); b.innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; b.style.background = humanize ? 'var(--lcd-text)' : 'var(--text)'; b.style.color = humanize ? '#000' : 'var(--bg)'; }
 
     function selectPad(idx) {
         selectedPad = idx;
@@ -248,7 +243,6 @@
 
     function stopSequencer() { clearInterval(timer); timer = null; if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); } log("HALTED."); }
     function panic() { stopSequencer(); log("RESET."); }
-    
     selectPad(9); 
 </script>
 </body>
