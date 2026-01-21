@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // DRUM COMPUTER</title>
+    <title>EP-DC-OXO // TERMINAL</title>
     <style>
         /* --- THEME VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
             --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.45);
-            --shadow: rgba(0,0,0,0.4); --fader-track: #ccc; --knob-bg: #444;
+            --shadow: rgba(0,0,0,0.4); --fader-track: #ccc;
         }
 
-        /* --- HARDWARE SKINS --- */
         body.theme-40 { --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
         body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
         body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
         
-        /* --- DARK MODE --- */
         body.dark-mode {
             --bg: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
             --text: #e0e0e0; --border: #444; --panel-bg: rgba(30,30,30,0.9); 
-            --fader-track: #444; --knob-bg: #eee;
+            --fader-track: #444;
         }
 
         body {
@@ -33,7 +31,7 @@
 
         .chassis {
             background: var(--panel-bg); border: 2px solid var(--border); border-radius: 12px;
-            padding: 30px; width: 100%; max-width: 540px; box-shadow: 20px 20px 60px var(--shadow);
+            padding: 30px; width: 100%; max-width: 560px; box-shadow: 20px 20px 60px var(--shadow);
             backdrop-filter: blur(10px);
         }
 
@@ -43,95 +41,64 @@
             text-transform: uppercase; font-weight: 900; border-radius: 10px 10px 0 0;
         }
 
+        /* --- TERMINAL LCD --- */
         .lcd-display {
             background: var(--lcd-bg); color: var(--lcd-text); padding: 15px; border-radius: 4px; 
-            font-size: 0.8rem; font-weight: bold; margin-bottom: 20px; border: 4px solid #222;
-            height: 45px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 5px var(--lcd-text);
-            white-space: pre-line; overflow: hidden;
+            font-size: 0.7rem; font-weight: normal; margin-bottom: 20px; border: 4px solid #222;
+            height: 80px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 3px var(--lcd-text);
+            overflow-y: auto; font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column-reverse; /* Auto-scroll to bottom */
         }
+        .log-entry { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 2px 0; }
+        .log-time { opacity: 0.5; margin-right: 8px; }
 
-        /* --- NEW CONTROL LAYOUT (2 ROWS) --- */
+        /* --- CONTROL DECK --- */
         .control-deck {
             display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;
             background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border);
         }
-
-        .deck-row {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: end;
-        }
-
+        .deck-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: end; }
         .module { display: flex; flex-direction: column; }
-        label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         
-        select, input[type="number"] { 
-            width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); 
-            color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; 
-            box-sizing: border-box;
-        }
-
-        /* COMPACT SLIDER */
-        input[type="range"].compact-slider {
-            -webkit-appearance: none; width: 100%; height: 6px; background: var(--text); 
-            border-radius: 3px; outline: none; margin-bottom: 5px;
-        }
-        input[type="range"].compact-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent); 
-            border-radius: 50%; cursor: pointer; border: 2px solid white;
-        }
-
-        /* TOGGLE BUTTONS */
-        button.btn-toggle {
-            background: transparent; border: 1px solid var(--text); color: var(--text);
-            padding: 8px; font-size: 0.6rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%;
-        }
+        label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
+        select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
+        input[type="range"].compact-slider { -webkit-appearance: none; width: 100%; height: 6px; background: var(--text); border-radius: 3px; outline: none; margin-bottom: 5px; }
+        input[type="range"].compact-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; }
+        button.btn-toggle { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 8px; font-size: 0.6rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; }
         button.btn-toggle.active { background: var(--lcd-text); color: #000; border-color: var(--lcd-text); }
 
-        /* --- PAD GRID (3x4) --- */
+        /* --- PAD GRID --- */
         .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; max-width: 320px; margin-left: auto; margin-right: auto; }
-        .pad-btn { 
-            background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 75px; 
-            border-radius: 6px; cursor: pointer; position: relative; transition: 0.1s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-        }
+        .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 75px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
+        .pad-btn.hit { filter: brightness(1.5); transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); } /* Visual flash for incoming midi */
         .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
         .pad-btn-sq::before { content: ''; position: absolute; top: 12%; left: 12%; width: 12%; height: 12%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
-        /* --- EDITOR PANEL --- */
+        /* --- EDITOR & SOUND LAB --- */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        
         .mode-toggles button { background: transparent; border: 1px solid var(--text); font-size: 0.6rem; padding: 4px 8px; cursor: pointer; color: var(--text); margin-left: 5px; }
         .mode-toggles button.active { background: var(--text); color: var(--bg); }
 
-        /* --- SEQUENCER GRIDS --- */
-        .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; }
-        .step-box { 
-            aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; 
-            justify-content: center; font-size: 1rem; cursor: pointer; font-weight: 900; border-radius: 3px; 
-            opacity: 0.6; transition: 0.1s;
-        }
-        .step-box:hover { opacity: 1; border-color: var(--accent); }
-        .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
-        .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
-        .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
-        
-        /* Automation Faders */
-        .fader-step { height: 60px; background: var(--fader-track); position: relative; border-radius: 2px; cursor: crosshair; }
-        .fader-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); pointer-events: none; }
-        .fader-val { position: absolute; bottom: 2px; width: 100%; text-align: center; font-size: 0.5rem; color: white; pointer-events: none; text-shadow: 0 1px 2px black; }
-
-        /* --- SOUND LAB --- */
-        .sound-lab { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 4px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .sound-lab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px; margin-bottom: 15px; border: 1px solid var(--border); }
         .knob-group { text-align: center; }
         .knob { -webkit-appearance: none; width: 100%; height: 4px; background: var(--text); outline: none; border-radius: 2px; margin-top: 5px; }
         .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
-        /* --- TRANSPORT --- */
+        .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; }
+        .step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
+        .step-box:hover { opacity: 1; border-color: var(--accent); }
+        .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
+        .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
+        .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
+        .fader-step { height: 60px; background: var(--fader-track); position: relative; border-radius: 2px; cursor: crosshair; }
+        .fader-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); pointer-events: none; }
+
+        /* --- FOOTER --- */
         .transport-row { display: flex; gap: 10px; margin-top: 10px; }
         .file-row { display: flex; gap: 10px; margin-bottom: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
-        
         .btn-main { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; flex: 1; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.3); letter-spacing: 1px; font-size: 0.8rem; }
         .btn-main.primary { background: var(--accent); color: white; }
         .btn-small { background: #555; color: white; border: none; padding: 8px; font-size: 0.6rem; cursor: pointer; border-radius: 3px; flex: 1; font-weight: bold; }
@@ -141,10 +108,10 @@
 
 <div class="chassis">
     <h1>EP-DC-OXO</h1>
-    <div class="lcd-display" id="log">SYSTEM READY // OXO_MASTER v7.0<br>INITIALIZE MIDI TO BEGIN</div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM INITIALIZED...</div></div>
 
     <div class="transport-row" style="margin-bottom: 25px;">
-        <button onclick="initMIDI()" class="btn-main primary" id="init-btn">INITIALIZE CONNECTION</button>
+        <button onclick="initMIDI()" class="btn-main primary" id="init-btn">CONNECT DEVICE</button>
     </div>
 
     <div class="control-deck">
@@ -155,13 +122,9 @@
         </div>
         <div class="deck-row">
             <div class="module" style="grid-column: span 2;">
-                <label>SWING %</label>
-                <input type="range" class="compact-slider" id="swing-slider" min="0" max="75" value="0">
+                <label>SWING %</label><input type="range" class="compact-slider" id="swing-slider" min="0" max="75" value="0">
             </div>
-            <div class="module">
-                <label>FEEL</label>
-                <button id="human-btn" onclick="toggleHuman()" class="btn-toggle">HUMAN</button>
-            </div>
+            <div class="module"><label>FEEL</label><button id="human-btn" onclick="toggleHuman()" class="btn-toggle">HUMAN</button></div>
         </div>
     </div>
 
@@ -169,7 +132,7 @@
 
     <div class="editor-panel" id="editor" style="display: none;">
         <div class="editor-header">
-            <strong id="editor-title">PAD EDITOR</strong>
+            <strong id="editor-title">PAD SELECT</strong>
             <div class="mode-toggles">
                 <button id="mode-note" class="active" onclick="setEditMode('note')">OXO</button>
                 <button id="mode-auto" onclick="setEditMode('auto')">AUTO</button>
@@ -177,10 +140,12 @@
         </div>
 
         <div class="sound-lab">
-            <div class="knob-group"><label>PITCH (CC16)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(16, this.value)"></div>
-            <div class="knob-group"><label>FILTER (CC74)</label><input type="range" class="knob" min="0" max="127" value="127" oninput="sendLiveCC(74, this.value)"></div>
-            <div class="knob-group"><label>DECAY (CC72)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(72, this.value)"></div>
-            <div class="knob-group"><label>LEVEL (CC7)</label><input type="range" class="knob" min="0" max="127" value="100" oninput="sendLiveCC(7, this.value)"></div>
+            <div class="knob-group"><label>PITCH (16)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(16, this.value)"></div>
+            <div class="knob-group"><label>FILTER (74)</label><input type="range" class="knob" min="0" max="127" value="127" oninput="sendLiveCC(74, this.value)"></div>
+            <div class="knob-group"><label>DECAY (72)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(72, this.value)"></div>
+            <div class="knob-group"><label>PAN (10)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(10, this.value)"></div>
+            <div class="knob-group"><label>REVERB (93)</label><input type="range" class="knob" min="0" max="127" value="0" oninput="sendLiveCC(93, this.value)"></div>
+            <div class="knob-group"><label>LEVEL (7)</label><input type="range" class="knob" min="0" max="127" value="100" oninput="sendLiveCC(7, this.value)"></div>
         </div>
 
         <div class="deck-row" style="margin-bottom: 10px; gap: 10px;">
@@ -191,9 +156,7 @@
         <div id="grid-notes" class="step-container"></div>
         <div id="grid-auto" class="step-container" style="display:none;"></div>
         
-        <div style="margin-top:15px; text-align:right;">
-            <button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PAD</button>
-        </div>
+        <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PAD</button></div>
     </div>
 
     <div class="file-row">
@@ -203,30 +166,23 @@
     </div>
 
     <div class="transport-row">
-        <button onclick="startSequencer()" class="btn-main primary" style="flex: 2;">INJECT SEQUENCE</button>
-        <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">STOP / PANIC</button>
+        <button onclick="startSequencer()" class="btn-main primary" style="flex: 2;">INJECT</button>
+        <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">PANIC</button>
     </div>
 </div>
 
 <script>
-    /* --- SYSTEM STATE --- */
-    let midiOut = null; let timer = null; let selectedPad = 0; let humanize = false; let editMode = 'note';
+    let midiOut = null; let midiIn = null; let timer = null; let selectedPad = 0; let humanize = false; let editMode = 'note';
     
-    // Hardware Constants (EP-133 KO II Mappings)
+    // Hardware Constants
     const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
-    const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
+    const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]; // Map array index 0-11 to MIDI Notes
     const oxoPresets = ["CUSTOM", "XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "XOZY XOZY XOZY XOZY"];
 
-    // Default CCs: Pitch(16), Filter(74), Decay(72), Level(7)
-    let sequencerData = Array.from({length: 12}, () => ({ 
-        steps: 16, 
-        notes: Array(32).fill('O'), 
-        auto: Array(32).fill(0), 
-        autoTargetCC: 74 // Default Automation Target
-    }));
+    let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
-    /* --- INIT --- */
+    // Init UI
     const ps = document.getElementById('preset-select');
     oxoPresets.forEach((p, i) => { let o = document.createElement('option'); o.value = i; o.innerText = p; ps.appendChild(o); });
 
@@ -242,27 +198,69 @@
 
     if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
 
-    function log(m) { const l = document.getElementById('log'); l.innerText = `> ${m}`; }
+    // --- TERMINAL LOGIC ---
+    function log(m) { 
+        const l = document.getElementById('log');
+        const time = new Date().toLocaleTimeString().split(' ')[0];
+        l.innerHTML = `<div class="log-entry"><span class="log-time">${time}</span>${m}</div>` + l.innerHTML;
+    }
 
     async function initMIDI() {
         try {
             const midi = await navigator.requestMIDIAccess();
+            // SETUP OUTPUT
             midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+            
+            // SETUP INPUT (Bi-Directional)
+            midiIn = Array.from(midi.inputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
+            
             if (midiOut) {
                 const n = midiOut.name.toLowerCase();
                 document.body.className = n.includes("1320") ? 'theme-1320' : n.includes("133") ? 'theme-133' : 'theme-40';
-                document.getElementById('init-btn').innerText = "CONNECTED: " + midiOut.name.toUpperCase();
-                log("HARDWARE SYNCED\nREADY TO INJECT");
-            } else { log("NO DEVICE DETECTED\nCHECK USB CONNECTION"); }
-        } catch(e) { log("MIDI PERMISSION DENIED"); }
+                document.getElementById('init-btn').innerText = "LINKED: " + midiOut.name.toUpperCase();
+                log("OUTPUT CHANNEL ESTABLISHED");
+            }
+            
+            if (midiIn) {
+                midiIn.onmidimessage = handleIncomingMIDI;
+                log("INPUT CHANNEL ESTABLISHED");
+            }
+
+            if(!midiOut && !midiIn) log("ERR: DEVICE NOT DETECTED");
+
+        } catch(e) { log("ERR: MIDI PERMISSION DENIED"); }
+    }
+
+    function handleIncomingMIDI(event) {
+        const [status, data1, data2] = event.data;
+        // Note On (144)
+        if ((status & 0xF0) === 144 && data2 > 0) {
+            log(`RECV: NOTE ${data1} VEL ${data2}`);
+            flashPad(data1);
+        }
+        // CC (176)
+        else if ((status & 0xF0) === 176) {
+            log(`RECV: CC ${data1} VAL ${data2}`);
+        }
+    }
+
+    function flashPad(note) {
+        // Find which internal pad index matches this note
+        const padIdx = padNotes.indexOf(note);
+        if (padIdx !== -1) {
+            const btn = document.getElementById(`btn-${padIdx}`); // Note: visual buttons use internal index 0-11 logic
+            if (btn) {
+                btn.classList.add('hit');
+                setTimeout(() => btn.classList.remove('hit'), 100);
+            }
+        }
     }
 
     /* --- UI HANDLERS --- */
     function toggleDark() {
         document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('oxo_dark', isDark);
-        document.getElementById('dark-btn').classList.toggle('active', isDark);
+        localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode'));
+        document.getElementById('dark-btn').classList.toggle('active');
     }
 
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').classList.toggle('active', humanize); }
@@ -294,7 +292,7 @@
         const padData = sequencerData[selectedPad];
 
         for (let i = 0; i < padData.steps; i++) {
-            // Note Grid
+            // NOTES
             const nDiv = document.createElement('div');
             const val = padData.notes[i];
             nDiv.className = `step-box ${val !== 'O' ? 'on-' + val.toLowerCase() : 'off'}`;
@@ -306,11 +304,11 @@
             };
             noteContainer.appendChild(nDiv);
 
-            // Auto Grid (Click to set level)
+            // AUTOMATION
             const aDiv = document.createElement('div');
             aDiv.className = 'fader-step';
             const ccVal = padData.auto[i];
-            aDiv.innerHTML = `<div class="fader-fill" style="height:${(ccVal/127)*100}%"></div><div class="fader-val">${ccVal}</div>`;
+            aDiv.innerHTML = `<div class="fader-fill" style="height:${(ccVal/127)*100}%"></div>`;
             aDiv.onclick = (e) => {
                 const rect = aDiv.getBoundingClientRect();
                 const h = rect.bottom - e.clientY;
@@ -325,6 +323,7 @@
     function sendLiveCC(cc, val) {
         if (!midiOut) return;
         midiOut.send([0xB0, cc, parseInt(val)]);
+        log(`SENT: CC ${cc} -> ${val}`);
     }
 
     function applyPreset(idx) {
@@ -341,16 +340,17 @@
         const a = document.createElement('a');
         a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData));
         a.download = "ep_oxo_session.json"; a.click();
+        log("SESSION SAVED TO DISK");
     }
 
     function loadProject(input) {
         const r = new FileReader();
-        r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("PROJECT LOADED"); };
+        r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); };
         r.readAsText(input.files[0]);
     }
 
     function startSequencer() {
-        if (!midiOut) return log("ERR: INIT MIDI FIRST");
+        if (!midiOut) return log("ERR: NO CONNECTION");
         stopSequencer();
         const bpm = parseInt(document.getElementById('tempo').value);
         const bars = parseInt(document.getElementById('global-bars').value);
@@ -358,11 +358,11 @@
         const stepTime = (60000 / bpm) / 4; 
         let currentStep = 0; const totalSteps = bars * 16;
         
-        midiOut.send([0xFA]); log(`INJECTING ${bars} BARS...`);
+        midiOut.send([0xFA]); 
+        log(`INJECTING ${bars} BARS @ ${bpm} BPM`);
 
         timer = setInterval(() => {
-            if (currentStep >= totalSteps) { stopSequencer(); log("INJECTION COMPLETE"); return; }
-            
+            if (currentStep >= totalSteps) { stopSequencer(); log("SEQUENCE COMPLETE"); return; }
             const isEven = currentStep % 2 !== 0;
             const delay = (isEven ? (stepTime * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
 
@@ -373,13 +373,12 @@
                 const auto = pad.auto[stepIdx];
 
                 setTimeout(() => {
-                    // Send Automation (Filter CC 74) if value > 0
-                    if (auto > 0) midiOut.send([0xB0, 74, auto]);
-                    
+                    if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto]);
                     if (note !== 'O') {
                         const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
                         midiOut.send([144, padNotes[p], vel]);
                         setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100);
+                        flashPad(padNotes[p]); // Flash UI on playback too
                     }
                 }, delay);
             }
@@ -387,7 +386,11 @@
         }, stepTime);
     }
 
-    function stopSequencer() { clearInterval(timer); timer = null; if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); } log("HALTED"); }
+    function stopSequencer() { 
+        clearInterval(timer); timer = null; 
+        if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); } 
+        log("SEQUENCER STOPPED"); 
+    }
     
     selectPad(9);
 </script>
