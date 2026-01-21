@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // GOLD MASTER</title>
+    <title>EP-DC-OXO // LIBRARIAN</title>
     <style>
         /* --- CORE VARIABLES --- */
         :root {
@@ -139,26 +139,12 @@
 <body id="main-body">
 
 <button id="feedback-btn" onclick="openFeedback()">REPORT ISSUE</button>
-
 <div class="modal-overlay" id="feedback-modal">
     <div class="modal-box">
         <div class="modal-title">SYSTEM REPORT</div>
-        <div>
-            <label>ISSUE TYPE</label>
-            <select id="fb-type">
-                <option>BUG REPORT</option>
-                <option>FEATURE REQUEST</option>
-                <option>PATTERN IDEA</option>
-            </select>
-        </div>
-        <div>
-            <label>DETAILS</label>
-            <textarea id="fb-text" class="modal-input" placeholder="Describe the behavior..."></textarea>
-        </div>
-        <div class="modal-actions">
-            <button class="btn-small" onclick="closeFeedback()">CANCEL</button>
-            <button class="btn-small primary" onclick="submitFeedback()" style="background:var(--accent); color:white;">SEND REPORT</button>
-        </div>
+        <div><label>ISSUE TYPE</label><select id="fb-type"><option>BUG REPORT</option><option>FEATURE REQUEST</option><option>PATTERN IDEA</option></select></div>
+        <div><label>DETAILS</label><textarea id="fb-text" class="modal-input" placeholder="Describe behavior..."></textarea></div>
+        <div class="modal-actions"><button class="btn-small" onclick="closeFeedback()">CANCEL</button><button class="btn-small primary" onclick="submitFeedback()" style="background:var(--accent); color:white;">SEND</button></div>
     </div>
 </div>
 
@@ -171,7 +157,7 @@
         </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // GOLD MASTER v22</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // LIBRARIAN v24</div></div>
 
     <div class="main-deck">
         
@@ -182,14 +168,11 @@
                 <div class="config-grid" style="margin-bottom: 15px;">
                     <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
                     <div><label>MIDI CHANNEL</label>
-                        <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">
-                            AUTO-MAPPED
-                        </div>
+                        <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">AUTO-MAPPED</div>
                     </div>
                 </div>
-                
                 <div class="split-row">
-                    <div><label>LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
+                    <div><label>LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option><option value="32">32 Bars</option><option value="64">64 Bars</option><option value="128">128 Bars</option></select></div>
                     <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
                 </div>
                 <div class="split-row" style="margin-top: 10px;">
@@ -231,12 +214,11 @@
 
                 <div class="config-grid" style="margin-bottom: 10px;">
                     <div><label>PATTERN LEN</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8 Steps</option><option value="16" selected>16 Steps</option><option value="32">32 Steps</option></select></div>
-                    <div><label>PATTERN LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
+                    <div><label>LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
                 </div>
 
                 <div id="grid-notes" class="step-container"></div>
                 <div id="grid-auto" class="step-container" style="display:none;"></div>
-                
                 <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PATTERN</button></div>
             </div>
 
@@ -257,7 +239,6 @@
 </div>
 
 <script>
-    /* --- SYSTEM CORE --- */
     let audioCtx = null;
     let midiOut = null;
     let nextNoteTime = 0.0;
@@ -265,9 +246,8 @@
     let current16thNote = 0;
     let isPlaying = false;
     let scheduleAheadTime = 0.1; 
-    
     let selectedPad = 0;
-    let activeGroup = 0; // 0=A, 1=B, 2=C, 3=D
+    let activeGroup = 0;
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
@@ -276,40 +256,31 @@
     const visualOrder = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
 
-    const oxoPresets = {
-        "FOUNDATION (16)": [
-            { name: "Four on Floor", pat: "XOOO XOOO XOOO XOOO" },
-            { name: "Motorik (Kraut)", pat: "XOXO XOXO XOXO XOXO" },
-            { name: "Boom Bap Kick", pat: "XOOZ OOXZ OOOO XOOO" },
-            { name: "Classic House Hat", pat: "OOXO OOXO OOXO OOXO" },
-            { name: "Reggaeton Dembow", pat: "XOOX OOXZ XOOX OOXZ" }
+    // --- LIBRARY DATA ---
+    const patterns = {
+        "KICK PATTERNS": [
+            { name: "4-Floor Basic", pat: "XOOO XOOO XOOO XOOO" },
+            { name: "Boom Bap 1", pat: "XOOZ OOXZ OOOO XOOO" },
+            { name: "Rock Kick", pat: "XOOO OOXZ XOOO OOXZ" },
+            { name: "Reggaeton Kick", pat: "XOOO OOXZ XOOO OOXZ" }
         ],
-        "BREAKBEATS (16)": [
-            { name: "Amen Kick", pat: "XOOX OOXO OOXO OOXO" },
-            { name: "Funky Drummer", pat: "XOOX OOXO XOOO OOXO" },
-            { name: "Ghost Snare Fill", pat: "OOOO YOOO ZZZZ YOOZ" },
-            { name: "Jungle 2-Step", pat: "XOOZ OOXZ OOOZ OOXZ" }
+        "SNARE PATTERNS": [
+            { name: "Backbeat 2/4", pat: "OOOO XOOO OOOO XOOO" },
+            { name: "Half Time 3", pat: "OOOO OOOO XOOO OOOO" },
+            { name: "Trap Snare", pat: "OOOO OOOO XOOO OOOO" },
+            { name: "Ghost Notes", pat: "OOOO YOOO ZZZZ YOOZ" }
         ],
-        "LATIN / WORLD (16)": [
-            { name: "Bossa Clave", pat: "XOOX OOXO OOXO XOOO" },
-            { name: "Son Clave 3-2", pat: "XOOX OOXO OOXZ XOOO" },
-            { name: "Soca Drive", pat: "XOOX XOOX XOOX XOOX" },
-            { name: "Afro 6/8 Feel", pat: "XOOX OOXZ OOXO OOXO" }
+        "HI-HAT PATTERNS": [
+            { name: "8th Notes", pat: "XOXO XOXO XOXO XOXO" },
+            { name: "16th Notes", pat: "XXXX XXXX XXXX XXXX" },
+            { name: "Offbeat Open", pat: "OOXO OOXO OOXO OOXO" },
+            { name: "Trap Rolls", pat: "XZXZ XZXZ XXXX XZXZ" }
         ],
-        "TRAP / DRILL (32)": [
-            { name: "Drill Hat Rolls", pat: "XZXZ XZXZ XXXX XZXZ XZXZ XZXZ ZZZZ XZXZ" },
-            { name: "Trap Snare", pat: "OOOO OOOO XOOO OOOO OOOO OOOO XOOO OOZZ" },
-            { name: "808 Glides", pat: "XOOO OOOO OOOO OOOO XOOO OOOO OOOO ZOZO" }
-        ],
-        "ODD / EUCLIDEAN (8)": [
-            { name: "Euclidean 3/8", pat: "XOOX OOXO" },
-            { name: "Euclidean 5/8", pat: "XOXO XOXO" },
-            { name: "Tresillo", pat: "XOOXOOXO" }
-        ],
-        "UTILITY": [
-            { name: "All Accent (16)", pat: "XXXX XXXX XXXX XXXX" },
-            { name: "All Ghost (16)", pat: "ZZZZ ZZZZ ZZZZ ZZZZ" },
-            { name: "Clear Pattern", pat: "OOOO OOOO OOOO OOOO" }
+        "--- FULL KITS (OVERRIDES ALL) ---": [
+            { name: "Basic House Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } },
+            { name: "Boom Bap Kit", type: "multi", tracks: { 0:"XOOZOOXZOOOOXOOO", 1:"OOOOYOOOZZZZYOOZ", 2:"XOXOXOXOXOXOXOXO" } },
+            { name: "Rock Beat 1", type: "multi", tracks: { 0:"XOOOXXOOXOOOXXOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXOXOXXXXXOXO" } },
+            { name: "Dem Bow Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOXZOOXZOOXZOOXZ", 2:"XXXXXXXXXXXXXXXX" } }
         ]
     };
 
@@ -325,17 +296,19 @@
         const body = encodeURIComponent(`Type: ${type}\n\nMessage:\n${text}`);
         window.open(`mailto:bryan.labchuk@gmail.com?subject=${subject}&body=${body}`);
         closeFeedback();
-        log("REPORT GENERATED");
     }
 
     /* --- INIT --- */
     const ps = document.getElementById('preset-select');
-    for (const [category, patterns] of Object.entries(oxoPresets)) {
+    // Add default blank option
+    let def = document.createElement('option'); def.innerText = "-- SELECT PATTERN --"; ps.appendChild(def);
+    
+    for (const [category, list] of Object.entries(patterns)) {
         const group = document.createElement('optgroup');
         group.label = category;
-        patterns.forEach(p => {
+        list.forEach((p, idx) => {
             const opt = document.createElement('option');
-            opt.value = p.pat;
+            opt.value = JSON.stringify(p); // Store full object in value
             opt.innerText = p.name;
             group.appendChild(opt);
         });
@@ -364,12 +337,31 @@
     }
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
-    function selectGroup(idx) { 
-        activeGroup = idx; 
-        document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); 
-        log(`GROUP ${['A','B','C','D'][idx]} SELECTED (CH ${idx+1})`); 
+    function selectGroup(idx) { activeGroup = idx; document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); }
+
+    /* --- CORE LOGIC --- */
+    function applyPreset(valString) {
+        if (!valString || valString.startsWith("--")) return;
+        const preset = JSON.parse(valString);
+        
+        if (preset.type === "multi") {
+            // Apply to Pads 1, 2, 3 (Indices 0, 1, 2)
+            for (const [padIdx, patString] of Object.entries(preset.tracks)) {
+                for(let i=0; i<32; i++) sequencerData[padIdx].notes[i] = patString[i % patString.length] || 'O';
+            }
+            log(`LOADED KIT: ${preset.name}`);
+        } else {
+            // Apply to currently selected pad only
+            const pat = preset.pat.replace(/\s/g, '');
+            for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O';
+            log(`LOADED PATTERN: ${preset.name}`);
+        }
+        renderSteps();
+        // Reset dropdown
+        document.getElementById('preset-select').selectedIndex = 0;
     }
 
+    /* --- AUDIO ENGINE --- */
     async function initAudioAndMIDI() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -494,7 +486,6 @@
         document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
         document.getElementById(`btn-${idx}`).classList.add('active-pad');
         document.getElementById('editor').style.display = 'block';
-        document.getElementById('preset-select').selectedIndex = 0;
         let leg = legends[idx]; if(idx === 0) leg = '■';
         document.getElementById('editor-title').innerText = `EDIT PAD ${leg}`;
         renderSteps();
@@ -532,7 +523,6 @@
     }
 
     function sendLiveCC(cc, val) { if (!midiOut) return; midiOut.send([0xB0 + activeGroup, cc, parseInt(val)]); }
-    function applyPreset(val) { if (!val) return; const pat = val.replace(/\s/g, ''); for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O'; renderSteps(); }
     function updateStepCount(v) { sequencerData[selectedPad].steps = parseInt(v); renderSteps(); }
     function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
