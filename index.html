@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // REFERENCE</title>
+    <title>EP-DC-OXO // GOLD MASTER</title>
     <style>
         /* --- CORE VARIABLES --- */
         :root {
@@ -38,6 +38,33 @@
         }
         .chassis.skinny-mode { max-width: 480px; }
 
+        /* --- FEEDBACK MODULE --- */
+        #feedback-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--text); color: var(--bg); border: 2px solid var(--border);
+            padding: 10px 20px; font-family: inherit; font-weight: 900;
+            border-radius: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 100; transition: 0.2s; letter-spacing: 1px; font-size: 0.75rem;
+        }
+        #feedback-btn:hover { transform: scale(1.05); background: var(--accent); color: white; border-color: var(--accent); }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 200;
+            align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: var(--bg); border: 2px solid var(--accent); width: 90%; max-width: 400px;
+            padding: 25px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 15px; color: var(--text);
+        }
+        .modal-title { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid var(--text); padding-bottom: 10px; }
+        .modal-input {
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.05); border: 1px solid var(--text);
+            color: var(--text); font-family: inherit; resize: vertical; min-height: 100px; box-sizing: border-box;
+        }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
         /* --- HEADER --- */
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
@@ -55,7 +82,7 @@
         .lcd-overlay { font-size: 2rem; text-align: center; color: var(--accent); font-weight: 900; animation: pulse 0.5s infinite alternate; }
         @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
 
-        /* --- MAIN DECK LAYOUT --- */
+        /* --- LAYOUT --- */
         .main-deck { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; }
         .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
 
@@ -66,10 +93,7 @@
         label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         
-        /* --- PERFORMANCE AREA (Sidebar + Grid) --- */
         .performance-container { display: grid; grid-template-columns: 50px 1fr; gap: 12px; }
-        
-        /* GROUP STRIP */
         .group-strip { display: flex; flex-direction: column; gap: 10px; height: 100%; }
         .group-btn {
             flex: 1; background: rgba(0,0,0,0.1); border: 2px solid var(--text);
@@ -79,7 +103,6 @@
         }
         .group-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-        /* PAD GRID */
         .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 80px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
@@ -88,7 +111,6 @@
         .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
-        /* --- EDITOR & SLIDERS --- */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
@@ -105,7 +127,6 @@
         .fader-step { height: 50px; background: var(--fader-track); position: relative; border-radius: 2px; cursor: crosshair; }
         .fader-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); pointer-events: none; }
 
-        /* --- BUTTONS --- */
         .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
         .btn-main { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.3); letter-spacing: 1px; font-size: 0.8rem; width: 100%; }
         .btn-main.primary { background: var(--accent); color: white; }
@@ -117,6 +138,30 @@
 </head>
 <body id="main-body">
 
+<button id="feedback-btn" onclick="openFeedback()">REPORT ISSUE</button>
+
+<div class="modal-overlay" id="feedback-modal">
+    <div class="modal-box">
+        <div class="modal-title">SYSTEM REPORT</div>
+        <div>
+            <label>ISSUE TYPE</label>
+            <select id="fb-type">
+                <option>BUG REPORT</option>
+                <option>FEATURE REQUEST</option>
+                <option>PATTERN IDEA</option>
+            </select>
+        </div>
+        <div>
+            <label>DETAILS</label>
+            <textarea id="fb-text" class="modal-input" placeholder="Describe the behavior..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-small" onclick="closeFeedback()">CANCEL</button>
+            <button class="btn-small primary" onclick="submitFeedback()" style="background:var(--accent); color:white;">SEND REPORT</button>
+        </div>
+    </div>
+</div>
+
 <div class="chassis" id="app-chassis">
     <div class="header-row">
         <h1>EP-DC-OXO</h1>
@@ -126,7 +171,7 @@
         </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // REFERENCE v20</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // GOLD MASTER v22</div></div>
 
     <div class="main-deck">
         
@@ -136,15 +181,20 @@
             <div class="control-group" style="margin-bottom: 20px;">
                 <div class="config-grid" style="margin-bottom: 15px;">
                     <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
-                    <div><label>GLOBAL LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
+                    <div><label>MIDI CHANNEL</label>
+                        <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">
+                            AUTO-MAPPED
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="split-row">
+                    <div><label>LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
                     <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
-                    <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
                 </div>
-                <div style="margin-top: 10px;">
-                    <button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button>
+                <div class="split-row" style="margin-top: 10px;">
+                    <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
+                    <div><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
                 </div>
             </div>
 
@@ -207,7 +257,7 @@
 </div>
 
 <script>
-    /* --- CORE VARIABLES --- */
+    /* --- SYSTEM CORE --- */
     let audioCtx = null;
     let midiOut = null;
     let nextNoteTime = 0.0;
@@ -216,24 +266,16 @@
     let isPlaying = false;
     let scheduleAheadTime = 0.1; 
     
-    // State
     let selectedPad = 0;
     let activeGroup = 0; // 0=A, 1=B, 2=C, 3=D
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
 
-    // HARDWARE MAPPING: Square Pad = Index 0 (Note 36)
-    // Visual Order maps the buttons to the index in sequencerData
-    // Row 1 (Top): Pads 10,11,12 -> Indices 9,10,11
-    // Row 2: Pads 7,8,9 -> Indices 6,7,8
-    // Row 3: Pads 4,5,6 -> Indices 3,4,5
-    // Row 4 (Bot): Pads 1,2,3 -> Indices 0,1,2
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const visualOrder = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
 
-    /* --- EXPANDED PATTERN LIBRARY --- */
     const oxoPresets = {
         "FOUNDATION (16)": [
             { name: "Four on Floor", pat: "XOOO XOOO XOOO XOOO" },
@@ -273,7 +315,20 @@
 
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
-    /* --- INITIALIZATION --- */
+    /* --- FEEDBACK --- */
+    function openFeedback() { document.getElementById('feedback-modal').style.display = 'flex'; }
+    function closeFeedback() { document.getElementById('feedback-modal').style.display = 'none'; }
+    function submitFeedback() {
+        const type = document.getElementById('fb-type').value;
+        const text = document.getElementById('fb-text').value;
+        const subject = encodeURIComponent(`EP-DC-OXO Feedback: ${type}`);
+        const body = encodeURIComponent(`Type: ${type}\n\nMessage:\n${text}`);
+        window.open(`mailto:bryan.labchuk@gmail.com?subject=${subject}&body=${body}`);
+        closeFeedback();
+        log("REPORT GENERATED");
+    }
+
+    /* --- INIT --- */
     const ps = document.getElementById('preset-select');
     for (const [category, patterns] of Object.entries(oxoPresets)) {
         const group = document.createElement('optgroup');
@@ -309,17 +364,12 @@
     }
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
-
-    /* --- GROUP LOGIC --- */
-    function selectGroup(idx) {
-        activeGroup = idx;
-        document.querySelectorAll('.group-btn').forEach((btn, i) => {
-            btn.classList.toggle('active', i === idx);
-        });
-        log(`GROUP ${['A','B','C','D'][idx]} SELECTED (CH ${idx+1})`);
+    function selectGroup(idx) { 
+        activeGroup = idx; 
+        document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); 
+        log(`GROUP ${['A','B','C','D'][idx]} SELECTED (CH ${idx+1})`); 
     }
 
-    /* --- AUDIO ENGINE --- */
     async function initAudioAndMIDI() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -334,7 +384,6 @@
                 document.getElementById('init-btn').innerText = "LINKED: " + midiOut.name.toUpperCase();
                 log("ATOMIC CLOCK READY");
             } else { log("ERR: DEVICE NOT FOUND"); }
-
         } catch(e) { log("ERR: ACCESS DENIED"); }
     }
 
@@ -347,25 +396,19 @@
 
     function scheduleNote(beatNumber, time) {
         if (!midiOut) return;
-
-        // 1. CLOCK (Master)
         const bpm = parseInt(document.getElementById('tempo').value);
         const secondsPer16th = (60.0 / bpm) * 0.25;
-        const pulseInterval = secondsPer16th / 6; // 6 pulses per 16th = 24 PPQN
+        const pulseInterval = secondsPer16th / 6;
         for (let i = 0; i < 6; i++) {
-            const clockTime = time + (i * pulseInterval);
-            const midiClockTime = performance.now() + (clockTime - audioCtx.currentTime) * 1000;
+            const midiClockTime = performance.now() + ((time + (i * pulseInterval)) - audioCtx.currentTime) * 1000;
             midiOut.send([0xF8], midiClockTime);
         }
 
-        // 2. NOTES
         const swing = parseInt(document.getElementById('swing-slider').value);
         const isEven = beatNumber % 2 !== 0;
         const swingDelay = isEven ? ((60/bpm)/4) * (swing/100) : 0;
         const humanJitter = humanize ? (Math.random() * 0.015) : 0;
-
-        const actualTime = time + swingDelay + humanJitter;
-        const midiTime = performance.now() + (actualTime - audioCtx.currentTime) * 1000;
+        const midiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
         
         const noteOn = 0x90 + activeGroup;
         const noteOff = 0x80 + activeGroup;
@@ -376,31 +419,21 @@
             const stepIdx = beatNumber % pad.steps;
             const note = pad.notes[stepIdx];
             const auto = pad.auto[stepIdx];
-            
             if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], midiTime);
-            
             if (note !== 'O') {
                 const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
                 midiOut.send([noteOn, padNotes[p], vel], midiTime);
                 midiOut.send([noteOff, padNotes[p], 0], midiTime + 100);
-                setTimeout(() => flashPad(padNotes[p]), (actualTime - audioCtx.currentTime) * 1000);
+                setTimeout(() => flashPad(padNotes[p]), (time + swingDelay + humanJitter - audioCtx.currentTime) * 1000);
             }
         }
     }
 
     function scheduler() {
         while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
-            
-            // --- STRICT END CHECK ---
             const totalBars = parseInt(document.getElementById('global-bars').value);
             const total16ths = totalBars * 16;
-            
-            if (current16thNote >= total16ths) {
-                stopSequencer();
-                log("INJECTION COMPLETE");
-                return;
-            }
-
+            if (current16thNote >= total16ths) { stopSequencer(); log("INJECTION COMPLETE"); return; }
             scheduleNote(current16thNote, nextNoteTime);
             nextNote();
         }
@@ -409,8 +442,7 @@
 
     function handleInject() {
         if (!midiOut || !audioCtx) return log("ERR: INIT MIDI FIRST");
-        if (countIn) runCountIn();
-        else startSequencer();
+        if (countIn) runCountIn(); else startSequencer();
     }
 
     function runCountIn() {
@@ -431,12 +463,9 @@
         isPlaying = true;
         current16thNote = 0;
         nextNoteTime = audioCtx.currentTime + 0.1;
-        
-        // REC PROTOCOL
-        midiOut.send([0xFC]); // Stop
-        midiOut.send([0xF2, 0x00, 0x00]); // SPP Zero
-        midiOut.send([0xFA]); // Start
-        
+        midiOut.send([0xFC]); 
+        midiOut.send([0xF2, 0x00, 0x00]); 
+        midiOut.send([0xFA]); 
         log(`RECORDING (CH ${activeGroup + 1})...`);
         scheduler();
     }
@@ -444,22 +473,11 @@
     function stopSequencer() {
         isPlaying = false;
         if (timerID) cancelAnimationFrame(timerID);
-        if (midiOut) {
-            midiOut.send([0xFC]); // Stop
-            midiOut.send([0xB0 + activeGroup, 123, 0]); // Notes Off
-        }
+        if (midiOut) { midiOut.send([0xFC]); midiOut.send([0xB0 + activeGroup, 123, 0]); }
         log("HALTED");
     }
 
-    /* --- HELPERS --- */
-    function flashPad(note) {
-        const padIdx = padNotes.indexOf(note);
-        if (padIdx !== -1) {
-            const btn = document.getElementById(`btn-${padIdx}`);
-            if (btn) { btn.classList.add('hit'); setTimeout(() => btn.classList.remove('hit'), 100); }
-        }
-    }
-    
+    function flashPad(note) { const padIdx = padNotes.indexOf(note); if (padIdx !== -1) { const btn = document.getElementById(`btn-${padIdx}`); if (btn) { btn.classList.add('hit'); setTimeout(() => btn.classList.remove('hit'), 100); } } }
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
     function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
     function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode')); }
@@ -477,8 +495,7 @@
         document.getElementById(`btn-${idx}`).classList.add('active-pad');
         document.getElementById('editor').style.display = 'block';
         document.getElementById('preset-select').selectedIndex = 0;
-        let leg = legends[idx];
-        if(idx === 0) leg = '■';
+        let leg = legends[idx]; if(idx === 0) leg = '■';
         document.getElementById('editor-title').innerText = `EDIT PAD ${leg}`;
         renderSteps();
     }
@@ -488,7 +505,6 @@
         const autoContainer = document.getElementById('grid-auto');
         noteContainer.innerHTML = ''; autoContainer.innerHTML = '';
         const padData = sequencerData[selectedPad];
-
         for (let i = 0; i < padData.steps; i++) {
             const nDiv = document.createElement('div');
             const val = padData.notes[i];
@@ -500,7 +516,6 @@
                 renderSteps();
             };
             noteContainer.appendChild(nDiv);
-
             const aDiv = document.createElement('div');
             aDiv.className = 'fader-step';
             const ccVal = padData.auto[i];
@@ -516,18 +531,8 @@
         }
     }
 
-    function sendLiveCC(cc, val) { 
-        if (!midiOut) return;
-        midiOut.send([0xB0 + activeGroup, cc, parseInt(val)]); 
-    }
-
-    function applyPreset(val) { 
-        if (!val) return;
-        const pat = val.replace(/\s/g, ''); 
-        for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O'; 
-        renderSteps(); 
-    }
-    
+    function sendLiveCC(cc, val) { if (!midiOut) return; midiOut.send([0xB0 + activeGroup, cc, parseInt(val)]); }
+    function applyPreset(val) { if (!val) return; const pat = val.replace(/\s/g, ''); for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O'; renderSteps(); }
     function updateStepCount(v) { sequencerData[selectedPad].steps = parseInt(v); renderSteps(); }
     function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
