@@ -5,78 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EP-DC-OXO // DRUM COMPUTER</title>
     <style>
-        /* THEME ENGINE */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
             --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.4);
-            --shadow: rgba(0,0,0,0.3);
         }
 
+        /* HARDWARE THEMES */
         body.theme-40 { --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
         body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
         body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
 
         body {
             background: var(--bg); background-attachment: fixed; color: var(--text);
-            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 40px 20px; margin: 0; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            font-family: 'IBM Plex Mono', monospace; display: flex; flex-direction: column; 
+            align-items: center; padding: 40px 20px; margin: 0; transition: all 0.6s ease;
         }
 
         .chassis {
             background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
-            padding: 30px; width: 100%; max-width: 460px;
-            box-shadow: 20px 20px 60px var(--shadow); position: relative;
+            padding: 30px; width: 100%; max-width: 480px; box-shadow: 20px 20px 60px rgba(0,0,0,0.3);
         }
 
         h1 {
-            background: var(--text); color: var(--bg);
-            padding: 15px; font-size: 1.1rem; text-align: center;
-            letter-spacing: 6px; margin: -30px -30px 25px -30px; 
+            background: var(--text); color: var(--bg); padding: 15px; font-size: 1.1rem; 
+            text-align: center; letter-spacing: 6px; margin: -30px -30px 25px -30px; 
             text-transform: uppercase; font-weight: 900; border-radius: 10px 10px 0 0;
         }
 
         .lcd-display {
-            background: var(--lcd-bg); color: var(--lcd-text);
-            padding: 18px; border-radius: 4px; font-size: 0.85rem;
-            font-weight: bold; margin-bottom: 25px; border: 4px solid #222;
-            height: 40px; overflow-y: auto; box-shadow: inset 0 0 20px #000;
-            text-shadow: 0 0 5px var(--lcd-text); line-height: 1.4;
+            background: var(--lcd-bg); color: var(--lcd-text); padding: 18px; border-radius: 4px; 
+            font-size: 0.85rem; font-weight: bold; margin-bottom: 25px; border: 4px solid #222;
+            height: 40px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 5px var(--lcd-text);
         }
 
-        /* 3x4 Grid Layout */
-        .ep-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 12px; 
-            margin-bottom: 25px;
-        }
+        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
         
         .pad-btn { 
-            background: var(--panel-bg); border: 2px solid var(--border); 
-            height: 70px; border-radius: 8px; cursor: pointer; 
-            position: relative; transition: 0.1s; box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+            background: var(--panel-bg); border: 2px solid var(--border); height: 75px; 
+            border-radius: 8px; cursor: pointer; position: relative; transition: 0.1s;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
         }
-        .pad-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
-        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 6px 0 rgba(0,0,0,0.25); }
+        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; }
 
-        .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
+        .legend-tag { position: absolute; top: 10px; right: 12px; font-weight: 900; font-size: 0.9rem; }
         
-        /* THE REFINED CORNER MARKER FIX */
-        .corner-marker { 
-            position: absolute; 
-            top: 12%; 
-            left: 12%; 
-            width: 14.4%; 
-            height: 14.4%; 
-            background: var(--accent); 
-            border-radius: 1px;
-            transition: background 0.2s;
+        /* PAD 1 / SQUARE MARKER UI */
+        .pad-btn-sq::before {
+            content: ''; position: absolute;
+            top: 11%; left: 11%; width: 14.4%; height: 14.4%;
+            background: var(--accent); border-radius: 1px;
         }
-        .active-pad .corner-marker { background: #ffffff !important; }
+        .active-pad.pad-btn-sq::before { background: white; }
 
         .editor-panel { background: var(--panel-bg); border: 2px solid var(--accent); padding: 20px; border-radius: 10px; margin-bottom: 25px; }
+        
+        /* 8 PER ROW GRID */
         .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 15px; }
         .step-box { aspect-ratio: 1/1; background: rgba(0,0,0,0.05); border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; font-weight: 900; border-radius: 4px; }
         .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); }
@@ -95,7 +79,7 @@
 <body id="main-body">
 
 <div class="chassis">
-    <h1>EP-DC-OXO // DRUM COMPUTER</h1>
+    <h1>EP-DC-OXO</h1>
     <div class="lcd-display" id="log">READY // SELECT PAD TO EDIT</div>
 
     <div class="panel" style="margin-bottom: 25px;">
@@ -112,7 +96,6 @@
             </select>
         </div>
         <div><label>SWING</label><input type="range" id="swing-slider" min="0" max="75" value="0"></div>
-        <div><label>FEEL</label><button id="human-btn" onclick="toggleHuman()" style="padding:10px; font-size:0.5rem; width:100%;">HUMAN: OFF</button></div>
     </div>
 
     <div class="ep-grid" id="pad-grid"></div>
@@ -120,11 +103,11 @@
     <div class="editor-panel" id="editor" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <strong id="editor-title">PAD</strong>
-            <button onclick="clearCurrentPad()" style="width:auto; padding:5px 15px; font-size:0.6rem; background:#444; color:white; border-radius: 4px;">CLEAR</button>
+            <button onclick="clearCurrentPad()" style="width:auto; padding:5px 15px; font-size:0.6rem; background:#444; color:white;">CLEAR</button>
         </div>
         <div class="config-row" style="grid-template-columns: 1fr 2fr;">
             <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8</option><option value="16" selected>16</option><option value="32">32</option></select></div>
-            <div><label>OXO PRESET</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
+            <div><label>OXO PRESETS</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
         </div>
         <div class="step-container" id="step-ui"></div>
     </div>
@@ -139,20 +122,14 @@
     let midiOut = null;
     let timer = null;
     let selectedPad = 0;
-    let humanize = false;
     
-    // Mapping: index to label
-    const legends = {
-        6: '7', 7: '8', 8: '9',
-        3: '4', 4: '5', 5: '6',
-        0: '1', 1: '2', 2: '3',
-        9: '<div class="corner-marker"></div>', 10: '0', 11: 'ENTER'
-    };
-
+    // Physical layout labels (7-8-9 top row, Square-0-Enter bottom row)
+    const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
-    const oxoPresets = ["XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "YOOZ YOOZ YOOZ YOOZ", "XOZY XOZY XOZY XOZY"];
+    const oxoPresets = ["CUSTOM OXO", "XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "XOZY XOZY XOZY XOZY"];
 
+    // The Persistent Memory
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, data: Array(32).fill('O') }));
 
     const ps = document.getElementById('preset-select');
@@ -161,33 +138,34 @@
     const gridEl = document.getElementById('pad-grid');
     visualOrder.forEach(idx => {
         const btn = document.createElement('div');
-        btn.className = 'pad-btn'; btn.id = `btn-${idx}`;
+        btn.className = 'pad-btn' + (idx === 9 ? ' pad-btn-sq' : '');
+        btn.id = `btn-${idx}`;
         btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`;
-        btn.onclick = () => selectPad(idx); gridEl.appendChild(btn);
+        btn.onclick = () => selectPad(idx);
+        gridEl.appendChild(btn);
     });
-
-    function log(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}`; }
 
     async function initMIDI() {
         const midi = await navigator.requestMIDIAccess();
         midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
         if (midiOut) {
-            const name = midiOut.name.toLowerCase();
-            document.body.className = name.includes("1320") ? "theme-1320" : name.includes("133") ? "theme-133" : "theme-40";
+            document.body.className = midiOut.name.toLowerCase().includes("1320") ? "theme-1320" : midiOut.name.toLowerCase().includes("133") ? "theme-133" : "theme-40";
             document.getElementById('init-btn').innerText = "DEVICE SYNCED";
-            log("CONNECTED // " + midiOut.name.toUpperCase());
+            log("ONLINE // " + midiOut.name.toUpperCase());
         }
     }
-
-    function toggleHuman() { humanize = !humanize; const b = document.getElementById('human-btn'); b.innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; b.style.background = humanize ? 'var(--lcd-text)' : 'var(--text)'; b.style.color = humanize ? '#000' : 'var(--bg)'; }
 
     function selectPad(idx) {
         selectedPad = idx;
         document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
         document.getElementById(`btn-${idx}`).classList.add('active-pad');
         document.getElementById('editor').style.display = 'block';
-        let leg = legends[idx].includes('marker') ? '■' : legends[idx];
-        document.getElementById('editor-title').innerText = `EDITING PAD: ${leg}`;
+        
+        // This resets the label, but sequencerData[idx] preserves your pattern!
+        document.getElementById('preset-select').selectedIndex = 0;
+        
+        let leg = idx === 9 ? '■' : legends[idx];
+        document.getElementById('editor-title').innerText = `EDIT PAD: ${leg}`;
         renderSteps();
     }
 
@@ -209,6 +187,7 @@
     }
 
     function applyPreset(idx) {
+        if (idx == 0) return;
         const pat = oxoPresets[idx].replace(/\s/g, '');
         for(let i=0; i<32; i++) sequencerData[selectedPad].data[i] = pat[i % pat.length] || 'O';
         renderSteps();
@@ -216,6 +195,7 @@
 
     function updateStepCount(v) { sequencerData[selectedPad].steps = v; renderSteps(); }
     function clearCurrentPad() { sequencerData[selectedPad].data.fill('O'); renderSteps(); }
+    function log(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}`; }
 
     function startSequencer() {
         if (!midiOut) return log("ERR: INITIALIZE FIRST");
@@ -229,7 +209,7 @@
         midiOut.send([0xFA]);
         timer = setInterval(() => {
             if (currentStep >= totalSteps) { stopSequencer(); log("COMPLETE"); return; }
-            const delay = (currentStep % 2 !== 0 ? (stepTime * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
+            const delay = (currentStep % 2 !== 0 ? (stepTime * (swing / 100)) : 0);
             for (let p = 0; p < 12; p++) {
                 const char = sequencerData[p].data[currentStep % sequencerData[p].steps];
                 if (char !== 'O') {
@@ -242,7 +222,6 @@
     }
 
     function stopSequencer() { clearInterval(timer); timer = null; if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); } log("HALTED."); }
-    function panic() { stopSequencer(); log("RESET."); }
     selectPad(9); 
 </script>
 </body>
