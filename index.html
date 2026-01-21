@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // LIBRARIAN</title>
+    <title>EP-DC-OXO // STUDIO</title>
     <style>
-        /* --- CORE VARIABLES --- */
+        /* --- VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
@@ -38,7 +38,7 @@
         }
         .chassis.skinny-mode { max-width: 480px; }
 
-        /* --- FEEDBACK MODULE --- */
+        /* --- FEEDBACK --- */
         #feedback-btn {
             position: fixed; bottom: 20px; right: 20px;
             background: var(--text); color: var(--bg); border: 2px solid var(--border);
@@ -93,6 +93,7 @@
         label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         
+        /* PERFORMANCE */
         .performance-container { display: grid; grid-template-columns: 50px 1fr; gap: 12px; }
         .group-strip { display: flex; flex-direction: column; gap: 10px; height: 100%; }
         .group-btn {
@@ -111,6 +112,7 @@
         .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
+        /* EDITOR */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
@@ -157,7 +159,7 @@
         </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // LIBRARIAN v24</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // STUDIO v25</div></div>
 
     <div class="main-deck">
         
@@ -171,14 +173,16 @@
                         <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">AUTO-MAPPED</div>
                     </div>
                 </div>
+                
                 <div class="split-row">
                     <div><label>LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option><option value="32">32 Bars</option><option value="64">64 Bars</option><option value="128">128 Bars</option></select></div>
                     <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
                 </div>
                 <div class="split-row" style="margin-top: 10px;">
                     <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
-                    <div><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
+                    <div><button id="transport-btn" onclick="toggleTransport()" class="btn-small btn-toggle-on">TX: START/STOP</button></div>
                 </div>
+                <div style="margin-top:10px;"><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
             </div>
 
             <div class="performance-container">
@@ -246,18 +250,19 @@
     let current16thNote = 0;
     let isPlaying = false;
     let scheduleAheadTime = 0.1; 
+    
     let selectedPad = 0;
     let activeGroup = 0;
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
+    let sendTransport = true; // NEW TOGGLE STATE
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const visualOrder = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
 
-    // --- LIBRARY DATA ---
-    const patterns = {
+    const oxoPresets = {
         "KICK PATTERNS": [
             { name: "4-Floor Basic", pat: "XOOO XOOO XOOO XOOO" },
             { name: "Boom Bap 1", pat: "XOOZ OOXZ OOOO XOOO" },
@@ -276,7 +281,7 @@
             { name: "Offbeat Open", pat: "OOXO OOXO OOXO OOXO" },
             { name: "Trap Rolls", pat: "XZXZ XZXZ XXXX XZXZ" }
         ],
-        "--- FULL KITS (OVERRIDES ALL) ---": [
+        "FULL KITS (Pads 1-3)": [
             { name: "Basic House Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } },
             { name: "Boom Bap Kit", type: "multi", tracks: { 0:"XOOZOOXZOOOOXOOO", 1:"OOOOYOOOZZZZYOOZ", 2:"XOXOXOXOXOXOXOXO" } },
             { name: "Rock Beat 1", type: "multi", tracks: { 0:"XOOOXXOOXOOOXXOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXOXOXXXXXOXO" } },
@@ -286,32 +291,12 @@
 
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
-    /* --- FEEDBACK --- */
-    function openFeedback() { document.getElementById('feedback-modal').style.display = 'flex'; }
-    function closeFeedback() { document.getElementById('feedback-modal').style.display = 'none'; }
-    function submitFeedback() {
-        const type = document.getElementById('fb-type').value;
-        const text = document.getElementById('fb-text').value;
-        const subject = encodeURIComponent(`EP-DC-OXO Feedback: ${type}`);
-        const body = encodeURIComponent(`Type: ${type}\n\nMessage:\n${text}`);
-        window.open(`mailto:bryan.labchuk@gmail.com?subject=${subject}&body=${body}`);
-        closeFeedback();
-    }
-
     /* --- INIT --- */
     const ps = document.getElementById('preset-select');
-    // Add default blank option
     let def = document.createElement('option'); def.innerText = "-- SELECT PATTERN --"; ps.appendChild(def);
-    
-    for (const [category, list] of Object.entries(patterns)) {
-        const group = document.createElement('optgroup');
-        group.label = category;
-        list.forEach((p, idx) => {
-            const opt = document.createElement('option');
-            opt.value = JSON.stringify(p); // Store full object in value
-            opt.innerText = p.name;
-            group.appendChild(opt);
-        });
+    for (const [category, list] of Object.entries(oxoPresets)) {
+        const group = document.createElement('optgroup'); group.label = category;
+        list.forEach(p => { const opt = document.createElement('option'); opt.value = JSON.stringify(p); opt.innerText = p.name; group.appendChild(opt); });
         ps.appendChild(group);
     }
 
@@ -339,26 +324,16 @@
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
     function selectGroup(idx) { activeGroup = idx; document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); }
 
-    /* --- CORE LOGIC --- */
-    function applyPreset(valString) {
-        if (!valString || valString.startsWith("--")) return;
-        const preset = JSON.parse(valString);
-        
-        if (preset.type === "multi") {
-            // Apply to Pads 1, 2, 3 (Indices 0, 1, 2)
-            for (const [padIdx, patString] of Object.entries(preset.tracks)) {
-                for(let i=0; i<32; i++) sequencerData[padIdx].notes[i] = patString[i % patString.length] || 'O';
-            }
-            log(`LOADED KIT: ${preset.name}`);
-        } else {
-            // Apply to currently selected pad only
-            const pat = preset.pat.replace(/\s/g, '');
-            for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O';
-            log(`LOADED PATTERN: ${preset.name}`);
-        }
-        renderSteps();
-        // Reset dropdown
-        document.getElementById('preset-select').selectedIndex = 0;
+    /* --- FEEDBACK --- */
+    function openFeedback() { document.getElementById('feedback-modal').style.display = 'flex'; }
+    function closeFeedback() { document.getElementById('feedback-modal').style.display = 'none'; }
+    function submitFeedback() {
+        const type = document.getElementById('fb-type').value;
+        const text = document.getElementById('fb-text').value;
+        const subject = encodeURIComponent(`EP-DC-OXO Feedback: ${type}`);
+        const body = encodeURIComponent(`Type: ${type}\n\nMessage:\n${text}`);
+        window.open(`mailto:bryan.labchuk@gmail.com?subject=${subject}&body=${body}`);
+        closeFeedback();
     }
 
     /* --- AUDIO ENGINE --- */
@@ -455,23 +430,34 @@
         isPlaying = true;
         current16thNote = 0;
         nextNoteTime = audioCtx.currentTime + 0.1;
-        midiOut.send([0xFC]); 
-        midiOut.send([0xF2, 0x00, 0x00]); 
-        midiOut.send([0xFA]); 
-        log(`RECORDING (CH ${activeGroup + 1})...`);
+        
+        // FIXED RECORDING LOGIC: Do NOT send Stop (0xFC) if sending transport
+        // Only send Start (0xFA) if Transport is enabled.
+        if (sendTransport) {
+            midiOut.send([0xFA]); 
+            log(`TX: START SENT...`);
+        } else {
+            log(`TX: CLOCK ONLY...`);
+        }
+        
         scheduler();
     }
 
     function stopSequencer() {
         isPlaying = false;
         if (timerID) cancelAnimationFrame(timerID);
-        if (midiOut) { midiOut.send([0xFC]); midiOut.send([0xB0 + activeGroup, 123, 0]); }
+        if (midiOut) { 
+            if (sendTransport) midiOut.send([0xFC]); // Stop
+            midiOut.send([0xB0 + activeGroup, 123, 0]); // Notes Off
+        }
         log("HALTED");
     }
 
+    /* --- UI HELPERS --- */
     function flashPad(note) { const padIdx = padNotes.indexOf(note); if (padIdx !== -1) { const btn = document.getElementById(`btn-${padIdx}`); if (btn) { btn.classList.add('hit'); setTimeout(() => btn.classList.remove('hit'), 100); } } }
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
     function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
+    function toggleTransport() { sendTransport = !sendTransport; document.getElementById('transport-btn').innerText = `TX: ${sendTransport ? 'START/STOP' : 'CLOCK ONLY'}`; document.getElementById('transport-btn').classList.toggle('btn-toggle-on', sendTransport); }
     function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode')); }
     
     function setEditMode(m) {
@@ -523,6 +509,24 @@
     }
 
     function sendLiveCC(cc, val) { if (!midiOut) return; midiOut.send([0xB0 + activeGroup, cc, parseInt(val)]); }
+    
+    function applyPreset(valString) {
+        if (!valString || valString.startsWith("--")) return;
+        const preset = JSON.parse(valString);
+        if (preset.type === "multi") {
+            for (const [padIdx, patString] of Object.entries(preset.tracks)) {
+                for(let i=0; i<32; i++) sequencerData[padIdx].notes[i] = patString[i % patString.length] || 'O';
+            }
+            log(`LOADED KIT: ${preset.name}`);
+        } else {
+            const pat = preset.pat.replace(/\s/g, '');
+            for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O';
+            log(`LOADED PAT: ${preset.name}`);
+        }
+        renderSteps();
+        document.getElementById('preset-select').selectedIndex = 0;
+    }
+
     function updateStepCount(v) { sequencerData[selectedPad].steps = parseInt(v); renderSteps(); }
     function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
