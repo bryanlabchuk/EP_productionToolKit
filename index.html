@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // PRECISION</title>
+    <title>EP-DC-OXO // PRECISION RECORDER</title>
     <style>
-        /* --- THEME VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
@@ -38,12 +37,11 @@
         }
         .chassis.skinny-mode { max-width: 480px; }
 
+        /* --- HEADER --- */
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
+        .header-controls { display: flex; gap: 10px; }
         
-        .main-deck { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; }
-        .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
-
         /* --- TERMINAL --- */
         .lcd-display {
             background: var(--lcd-bg); color: var(--lcd-text); padding: 12px; border-radius: 4px; 
@@ -57,6 +55,9 @@
         @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
 
         /* --- CONTROLS --- */
+        .main-deck { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; }
+        .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
+
         .control-group { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
         .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
@@ -64,7 +65,6 @@
         label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         
-        /* --- PAD GRID (3x4) --- */
         .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 80px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
@@ -73,7 +73,6 @@
         .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
-        /* --- EDITOR & SLIDERS --- */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
@@ -90,7 +89,6 @@
         .fader-step { height: 50px; background: var(--fader-track); position: relative; border-radius: 2px; cursor: crosshair; }
         .fader-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); pointer-events: none; }
 
-        /* --- BUTTONS --- */
         .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
         .btn-main { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.3); letter-spacing: 1px; font-size: 0.8rem; width: 100%; }
         .btn-main.primary { background: var(--accent); color: white; }
@@ -105,21 +103,33 @@
 <div class="chassis" id="app-chassis">
     <div class="header-row">
         <h1>EP-DC-OXO</h1>
-        <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
+        <div class="header-controls">
+            <button id="dark-btn" onclick="toggleDark()" class="btn-layout">NIGHT</button>
+            <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
+        </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // AUDIO_ENGINE v13</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // RECORDER v14</div></div>
 
     <div class="main-deck">
         
         <div class="deck-left">
-            <button onclick="initAudioAndMIDI()" class="btn-main primary" id="init-btn" style="margin-bottom:20px;">START ENGINE</button>
+            <button onclick="initAudioAndMIDI()" class="btn-main primary" id="init-btn" style="margin-bottom:20px;">INITIALIZE MIDI</button>
             
             <div class="control-group" style="margin-bottom: 20px;">
                 <div class="config-grid" style="margin-bottom: 15px;">
-                    <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
-                    <div><label>SYNC MODE</label><select id="sync-mode"><option value="master">CLOCK OUT (MASTER)</option><option value="trigger">TRIGGER ONLY (SLAVE)</option></select></div>
+                    <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
+                    <div><label>MIDI CHANNEL</label>
+                        <select id="midi-channel">
+                            <option value="0">CH 1 (Group A)</option>
+                            <option value="1">CH 2 (Group B)</option>
+                            <option value="2">CH 3 (Group C)</option>
+                            <option value="3">CH 4 (Group D)</option>
+                            <option value="9">CH 10 (Global)</option>
+                        </select>
+                    </div>
                 </div>
+                
                 <div class="split-row">
                     <div><label>LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
                     <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
@@ -181,25 +191,23 @@
 </div>
 
 <script>
-    /* --- AUDIO & MIDI CONTEXT --- */
+    /* --- AUDIO & MIDI STATE --- */
     let audioCtx = null;
     let midiOut = null;
     let nextNoteTime = 0.0;
     let timerID = null;
     let current16thNote = 0;
     let isPlaying = false;
+    let clockInterval = null; // High-res clock ID
     
     // Config
-    let lookahead = 25.0; // ms
     let scheduleAheadTime = 0.1; // sec
     
-    // State
+    // App State
     let selectedPad = 0;
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
-    let totalBarsToPlay = 0;
-    let barsPlayed = 0;
 
     const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
@@ -208,7 +216,7 @@
 
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
-    /* --- INIT --- */
+    /* --- INITIALIZATION --- */
     const ps = document.getElementById('preset-select');
     oxoPresets.forEach((p, i) => { let o = document.createElement('option'); o.value = i; o.innerText = p; ps.appendChild(o); });
 
@@ -222,6 +230,8 @@
         gridEl.appendChild(btn);
     });
 
+    if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
+
     function log(m) { 
         const l = document.getElementById('log');
         if (m.startsWith("COUNT")) { l.innerHTML = `<div class="lcd-overlay">${m.split(":")[1]}</div>`; }
@@ -233,117 +243,91 @@
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
 
-    /* --- AUDIO/MIDI ENGINE --- */
+    /* --- ENGINE STARTUP --- */
     async function initAudioAndMIDI() {
         try {
-            // 1. Audio Context for Timing
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') await audioCtx.resume();
             
-            // 2. MIDI Access
             const midi = await navigator.requestMIDIAccess();
             midiOut = Array.from(midi.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample"));
             
             if (midiOut) {
                 const n = midiOut.name.toLowerCase();
                 document.body.className = n.includes("1320") ? 'theme-1320' : n.includes("133") ? 'theme-133' : 'theme-40';
-                document.getElementById('init-btn').innerText = "ENGINE ONLINE";
-                log("AUDIO ENGINE & MIDI LINKED");
-            } else { log("ERR: NO DEVICE FOUND"); }
+                document.getElementById('init-btn').innerText = "LINKED: " + midiOut.name.toUpperCase();
+                log("AUDIO & MIDI LINKED");
+            } else { log("ERR: DEVICE NOT FOUND"); }
 
         } catch(e) { log("ERR: ACCESS DENIED"); }
     }
 
-    /* --- SCHEDULER --- */
+    /* --- SCHEDULER (AUDIO THREAD) --- */
     function nextNote() {
         const bpm = parseInt(document.getElementById('tempo').value);
         const secondsPerBeat = 60.0 / bpm;
-        nextNoteTime += 0.25 * secondsPerBeat; // Add 16th note length
+        nextNoteTime += 0.25 * secondsPerBeat;
         current16thNote++;
     }
 
     function scheduleNote(beatNumber, time) {
         if (!midiOut) return;
 
-        // CLOCK PULSES: If in Master Mode, we must send 6 clock pulses per 16th note
-        // Note: Web MIDI API doesn't support scheduling SysEx/Realtime in future easily. 
-        // We rely on high-frequency triggering for Clock, or accept some jitter.
-        // BETTER: Send Clock NOW if close enough. 
-        // Ideally, for precise clock, we need a dedicated worker. 
-        // For this build, we will focus on sending the NOTE precisely.
-        
-        // Sync Mode Check
-        const isMaster = document.getElementById('sync-mode').value === 'master';
-        if (isMaster) {
-            // Simplified Clock Injection: Send a burst of 6 pulses? No, that rushes.
-            // We just send one pulse per call? Too slow. 
-            // Correct approach: We send 0xF8 immediately in the main loop, 
-            // but we use the audio timer to Trigger the Notes.
-        }
-
         const swing = parseInt(document.getElementById('swing-slider').value);
         const isEven = beatNumber % 2 !== 0;
         const swingDelay = isEven ? ((60/parseInt(document.getElementById('tempo').value))/4) * (swing/100) : 0;
-        const humanJitter = humanize ? (Math.random() * 0.015) : 0; // 15ms jitter
+        const humanJitter = humanize ? (Math.random() * 0.015) : 0;
 
         const actualTime = time + swingDelay + humanJitter;
+        // Convert AudioTime to DOMHighResTimeStamp for MIDI
+        const midiTime = performance.now() + (actualTime - audioCtx.currentTime) * 1000;
+        
+        // Get Channel (0x90 = Ch1, 0x91 = Ch2, etc)
+        // Note On status byte = 0x90 + channelIndex
+        const chIdx = parseInt(document.getElementById('midi-channel').value);
+        const noteOn = 0x90 + chIdx;
+        const noteOff = 0x80 + chIdx;
+        const ccStatus = 0xB0 + chIdx;
 
-        // Iterate Pads
         for (let p = 0; p < 12; p++) {
             const pad = sequencerData[p];
             const stepIdx = beatNumber % pad.steps;
             const note = pad.notes[stepIdx];
             const auto = pad.auto[stepIdx];
             
-            // We use perform(msg, timestamp) if browser supports it, otherwise setTimeout
-            // Most browsers support timestamp in send()
-            // However, 'time' is AudioContext time. MIDI needs DOMHighResTimeStamp (performance.now())
-            // Conversion: performance.now() + (time - audioCtx.currentTime) * 1000
+            if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], midiTime);
             
-            const midiTime = performance.now() + (actualTime - audioCtx.currentTime) * 1000;
-
-            if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto], midiTime);
             if (note !== 'O') {
                 const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
-                midiOut.send([144, padNotes[p], vel], midiTime);
-                midiOut.send([128, padNotes[p], 0], midiTime + 100);
+                midiOut.send([noteOn, padNotes[p], vel], midiTime);
+                midiOut.send([noteOff, padNotes[p], 0], midiTime + 100);
                 
-                // Visual Flash (approximate)
+                // Visuals
                 setTimeout(() => flashPad(padNotes[p]), (actualTime - audioCtx.currentTime) * 1000);
             }
         }
     }
 
     function scheduler() {
-        // While there are notes that will need to play before the next interval, schedule them
         while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
             scheduleNote(current16thNote, nextNoteTime);
             
-            // Check for end of loop
             const totalBars = parseInt(document.getElementById('global-bars').value);
             const total16ths = totalBars * 16;
             
             if (current16thNote >= total16ths) {
-                // STOP!
                 stopSequencer();
                 log("INJECTION COMPLETE");
                 return;
             }
-            
-            // MIDI CLOCK PULSES (Approximation for Master Mode)
-            // If Master Mode, we should be sending 0xF8 continuously. 
-            // Using a separate interval for Clock is safer than scheduling it here.
-            
             nextNote();
         }
         if (isPlaying) timerID = requestAnimationFrame(scheduler);
     }
 
     /* --- TRANSPORT --- */
-    let clockInterval = null;
-
     function handleInject() {
-        if (!midiOut || !audioCtx) return log("ERR: START ENGINE FIRST");
+        if (!midiOut || !audioCtx) return log("ERR: INIT MIDI FIRST");
         if (countIn) runCountIn();
         else startSequencer();
     }
@@ -361,38 +345,28 @@
     }
 
     function startSequencer() {
-        stopSequencer(); // Reset
+        stopSequencer(); // Hard Reset
         
         const bpm = parseInt(document.getElementById('tempo').value);
-        const isMaster = document.getElementById('sync-mode').value === 'master';
         
         isPlaying = true;
         current16thNote = 0;
-        nextNoteTime = audioCtx.currentTime + 0.1; // Start 100ms in future
+        nextNoteTime = audioCtx.currentTime + 0.1; // 100ms Buffer
         
-        // 1. Send Clock PRE-ROLL if Master Mode
-        if (isMaster) {
-            // Send 100ms of clock pulses before Start to wake up device
-            // 24 PPQN @ 120BPM = ~20ms interval
-            const pulseLen = 60000 / (bpm * 24);
-            let pr = 0;
-            const preRoll = setInterval(() => {
-                midiOut.send([0xF8]);
-                pr++;
-                if (pr > 5) {
-                    clearInterval(preRoll);
-                    // NOW SEND START
-                    midiOut.send([0xFA]);
-                    // Start Main Clock Loop
-                    clockInterval = setInterval(() => midiOut.send([0xF8]), pulseLen);
-                }
-            }, pulseLen);
-        } else {
-            // Trigger Mode: Just send Start
-            midiOut.send([0xFA]);
-        }
+        // 1. REWIND Protocol: Stop -> SPP Zero -> Start
+        midiOut.send([0xFC]); // Stop
+        midiOut.send([0xF2, 0x00, 0x00]); // Song Position Pointer = 0
+        midiOut.send([0xFA]); // Start
+        
+        log(`RECORDING...`);
 
-        log(`INJECTING...`);
+        // 2. MASTER CLOCK PULSE GENERATOR (24 PPQN)
+        const pulseLen = 60000 / (bpm * 24);
+        clockInterval = setInterval(() => {
+            if(midiOut) midiOut.send([0xF8]);
+        }, pulseLen);
+
+        // 3. START NOTE SCHEDULER
         scheduler();
     }
 
@@ -403,7 +377,9 @@
         
         if (midiOut) {
             midiOut.send([0xFC]); // Stop
-            for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); // All Notes Off
+            const chIdx = parseInt(document.getElementById('midi-channel').value);
+            const ccStatus = 0xB0 + chIdx;
+            midiOut.send([ccStatus, 123, 0]); // All Notes Off on selected Channel
         }
         log("HALTED");
     }
@@ -417,10 +393,10 @@
         }
     }
     
-    // UI Toggles
+    // UI Logic
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
     function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
-    function toggleDark() { document.body.classList.toggle('dark-mode'); document.getElementById('dark-btn').innerText = document.body.classList.contains('dark-mode') ? "NIGHT: ON" : "NIGHT: OFF"; }
+    function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode')); }
     
     function setEditMode(m) {
         editMode = m;
@@ -473,7 +449,12 @@
         }
     }
 
-    function sendLiveCC(cc, val) { if (midiOut) midiOut.send([0xB0, cc, parseInt(val)]); }
+    function sendLiveCC(cc, val) { 
+        if (!midiOut) return;
+        const chIdx = parseInt(document.getElementById('midi-channel').value);
+        midiOut.send([0xB0 + chIdx, cc, parseInt(val)]); 
+    }
+
     function applyPreset(idx) { if (idx == 0) return; const pat = oxoPresets[idx].replace(/\s/g, ''); for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O'; renderSteps(); }
     function updateStepCount(v) { sequencerData[selectedPad].steps = parseInt(v); renderSteps(); }
     function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
