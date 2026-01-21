@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // PRODUCTION ENGINE</title>
+    <title>EP-DC-OXO // MASTER CLOCK</title>
     <style>
         /* --- THEME VARIABLES --- */
         :root {
@@ -29,7 +29,7 @@
             align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: all 0.4s ease;
         }
 
-        /* --- CHASSIS & LAYOUT --- */
+        /* --- CHASSIS --- */
         .chassis {
             background: var(--panel-bg); border: 2px solid var(--border); border-radius: 12px;
             padding: 25px; width: 95%; max-width: 980px;
@@ -108,7 +108,7 @@
         <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // ENGINE v11.0</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // CLOCK v12.0</div></div>
 
     <div class="main-deck">
         
@@ -117,7 +117,7 @@
             
             <div class="control-group" style="margin-bottom: 20px;">
                 <div class="config-grid" style="margin-bottom: 15px;">
-                    <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
+                    <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
                     <div><label>GLOBAL LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
                 </div>
                 
@@ -175,7 +175,7 @@
 
             <div class="action-row">
                 <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
-                <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">PANIC STOP</button>
+                <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">PANIC</button>
             </div>
         </div>
     </div>
@@ -185,15 +185,17 @@
     /* --- STATE --- */
     let midiOut = null; 
     let midiIn = null; 
-    let sequencerInterval = null; 
+    let sequencerInterval = null;
     let pendingTimeouts = []; 
     let selectedPad = 0; 
     let humanize = false; 
     let countIn = false; 
     let editMode = 'note';
     
-    // Hardware Constants (EP-133 MIDI)
-    // Channel 1 is default for Pads 1-12 mapped to Notes 36-47
+    // MIDI Clock State
+    let clockTick = 0;
+    
+    // Hardware Constants
     const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
@@ -268,6 +270,7 @@
     }
 
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; }
+    
     function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; }
 
     function setEditMode(m) {
@@ -321,19 +324,14 @@
         }
     }
 
-    // SLIDER LOGIC: Send CC on Channel 1 (0xB0)
-    function sendLiveCC(cc, val) { 
-        if (!midiOut) return; 
-        midiOut.send([0xB0, cc, parseInt(val)]); 
-    }
-
+    function sendLiveCC(cc, val) { if (midiOut) midiOut.send([0xB0, cc, parseInt(val)]); }
     function applyPreset(idx) { if (idx == 0) return; const pat = oxoPresets[idx].replace(/\s/g, ''); for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O'; renderSteps(); }
     function updateStepCount(v) { sequencerData[selectedPad].steps = parseInt(v); renderSteps(); }
     function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
     function loadProject(input) { const r = new FileReader(); r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); }; r.readAsText(input.files[0]); }
 
-    /* --- PRODUCTION INJECTION LOGIC --- */
+    /* --- MASTER CLOCK ENGINE --- */
     function handleInject() {
         if (!midiOut) return log("ERR: INIT MIDI FIRST");
         if (countIn) runCountIn();
@@ -353,64 +351,85 @@
     }
 
     function startSequencer() {
-        stopSequencer(); // Safety clear
+        stopSequencer(); // Safety First
         
         const bpm = parseInt(document.getElementById('tempo').value);
         const bars = parseInt(document.getElementById('global-bars').value);
         const swing = parseInt(document.getElementById('swing-slider').value);
-        const stepTime = (60000 / bpm) / 4; // 16th note duration
         
-        let currentStep = 0; 
-        const totalSteps = bars * 16;
+        // 24 pulses per quarter note (PPQN)
+        // Interval = 60,000 / (BPM * 24)
+        const pulseInterval = 60000 / (bpm * 24);
         
-        // 1. ARM: Send Transport START (0xFA)
-        midiOut.send([0xFA]); 
-        log(`INJECTING ${bars} BARS...`);
+        // Total pulses to run = Bars * 4 beats * 24 pulses
+        const totalPulses = bars * 4 * 24;
+        
+        // Reset Counters
+        clockTick = 0;
+        
+        // Send Start
+        midiOut.send([0xFA]);
+        log(`MASTER CLOCK STARTED @ ${bpm} BPM`);
 
-        // 2. RUN LOOP
+        // High-resolution Clock Loop
         sequencerInterval = setInterval(() => {
-            // 3. AUTO-STOP: If we hit limit, send STOP (0xFC)
-            if (currentStep >= totalSteps) { 
+            if (clockTick >= totalPulses) { 
                 stopSequencer(); 
                 log("INJECTION COMPLETE"); 
                 return; 
             }
             
-            const isEven = currentStep % 2 !== 0;
-            const delay = (isEven ? (stepTime * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
+            // Send MIDI Clock Byte
+            midiOut.send([0xF8]);
             
-            for (let p = 0; p < 12; p++) {
-                const pad = sequencerData[p];
-                const stepIdx = currentStep % pad.steps; 
+            // Check if we need to fire a 16th note?
+            // 24 pulses per beat / 4 = 6 pulses per 16th note
+            if (clockTick % 6 === 0) {
+                const current16th = clockTick / 6;
+                const isEven = current16th % 2 !== 0;
                 
-                const note = pad.notes[stepIdx];
-                const auto = pad.auto[stepIdx];
+                // Calculate delay for swing/humanize (in ms)
+                // Note: We can't delay the CLOCK (0xF8), only the NOTE message
+                const noteDelay = (isEven ? (pulseInterval * 6 * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
                 
-                const tId = setTimeout(() => {
-                    if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto]);
-                    if (note !== 'O') {
-                        const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
-                        midiOut.send([144, padNotes[p], vel]);
-                        setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100);
-                        flashPad(padNotes[p]);
-                    }
-                }, delay);
-                pendingTimeouts.push(tId);
+                triggerStep(current16th, noteDelay);
             }
-            currentStep++;
-        }, stepTime);
+            
+            clockTick++;
+        }, pulseInterval);
+    }
+    
+    function triggerStep(stepIndex, delay) {
+         // Loop through all 12 pads
+         for (let p = 0; p < 12; p++) {
+            const pad = sequencerData[p];
+            const loopStep = stepIndex % pad.steps; // Wrap around pattern length
+            const note = pad.notes[loopStep];
+            const auto = pad.auto[loopStep];
+            
+            const tId = setTimeout(() => {
+                if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto]);
+                if (note !== 'O') {
+                    const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
+                    midiOut.send([144, padNotes[p], vel]);
+                    setTimeout(() => midiOut.send([128, padNotes[p], 0]), 100); // Note Off 100ms later
+                    flashPad(padNotes[p]);
+                }
+            }, delay);
+            pendingTimeouts.push(tId);
+        }
     }
 
     function stopSequencer() { 
         clearInterval(sequencerInterval); 
         sequencerInterval = null; 
         
+        // Clear pending notes
         pendingTimeouts.forEach(id => clearTimeout(id));
         pendingTimeouts = [];
 
         if (midiOut) { 
-            // 4. HARDWARE STOP
-            midiOut.send([0xFC]); 
+            midiOut.send([0xFC]); // MIDI Stop
             // Panic: All Notes Off
             for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); 
         } 
