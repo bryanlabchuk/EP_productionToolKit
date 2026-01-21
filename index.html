@@ -9,12 +9,12 @@
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
             --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.4);
+            --shadow: rgba(0,0,0,0.3);
         }
 
-        /* HARDWARE THEMES */
         body.theme-40 { --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
         body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
-        body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
+        body.theme-1320 { --bg: #dccb96; --accent: #8b0000; --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
 
         body {
             background: var(--bg); background-attachment: fixed; color: var(--text);
@@ -24,7 +24,7 @@
 
         .chassis {
             background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
-            padding: 30px; width: 100%; max-width: 480px; box-shadow: 20px 20px 60px rgba(0,0,0,0.3);
+            padding: 30px; width: 100%; max-width: 520px; box-shadow: 20px 20px 60px rgba(0,0,0,0.3);
         }
 
         h1 {
@@ -39,18 +39,19 @@
             height: 40px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 5px var(--lcd-text);
         }
 
-        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+        /* 3x4 Hardware Grid */
+        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
         
         .pad-btn { 
             background: var(--panel-bg); border: 2px solid var(--border); height: 75px; 
             border-radius: 8px; cursor: pointer; position: relative; transition: 0.1s;
             box-shadow: 0 5px 0 rgba(0,0,0,0.15);
         }
-        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; }
+        .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 6px 0 rgba(0,0,0,0.25); }
 
         .legend-tag { position: absolute; top: 10px; right: 12px; font-weight: 900; font-size: 0.9rem; }
         
-        /* PAD 1 / SQUARE MARKER UI */
+        /* Square Pad Marker */
         .pad-btn-sq::before {
             content: ''; position: absolute;
             top: 11%; left: 11%; width: 14.4%; height: 14.4%;
@@ -60,7 +61,6 @@
 
         .editor-panel { background: var(--panel-bg); border: 2px solid var(--accent); padding: 20px; border-radius: 10px; margin-bottom: 25px; }
         
-        /* 8 PER ROW GRID */
         .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 15px; }
         .step-box { aspect-ratio: 1/1; background: rgba(0,0,0,0.05); border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; font-weight: 900; border-radius: 4px; }
         .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); }
@@ -68,34 +68,53 @@
         .step-box.on-z { background: transparent; color: var(--accent); border-color: var(--accent); border-style: dashed; }
         .step-box.off { color: var(--text); opacity: 0.2; }
 
-        .config-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 15px; margin-bottom: 20px; align-items: end; }
-        label { font-size: 0.6rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        select, input { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); font-family: inherit; border-radius: 4px; font-weight: bold; }
+        /* REFINED CONFIG SPACING */
+        .config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .config-sub-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; align-items: end; }
+        
+        label { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        select, input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--text); font-family: inherit; border-radius: 4px; font-weight: bold; box-sizing: border-box; }
 
         .transport button { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 6px; flex: 1; text-transform: uppercase; border-bottom: 5px solid rgba(0,0,0,0.4); }
         button.primary { background: var(--accent); color: white; }
+        button.toggle-btn { background: var(--panel-bg); color: var(--text); border: 1px solid var(--text); padding: 10px; font-size: 0.6rem; border-bottom: 3px solid rgba(0,0,0,0.2); }
+        button.toggle-on { background: var(--lcd-text); color: #000; border-color: var(--lcd-text); }
     </style>
 </head>
 <body id="main-body">
 
 <div class="chassis">
     <h1>EP-DC-OXO</h1>
-    <div class="lcd-display" id="log">READY // SELECT PAD TO EDIT</div>
+    <div class="lcd-display" id="log">READY // V5.3 STABLE</div>
 
     <div class="panel" style="margin-bottom: 25px;">
         <button onclick="initMIDI()" class="primary" id="init-btn" style="width:100%;">INITIALIZE CONNECTION</button>
     </div>
 
     <div class="config-row">
-        <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
-        <div><label>LEN</label>
+        <div>
+            <label>TEMPO (BPM)</label>
+            <input type="number" id="tempo" value="120">
+        </div>
+        <div>
+            <label>BAR LENGTH</label>
             <select id="global-bars">
-                <option value="1">1</option><option value="2">2</option>
-                <option value="4">4</option><option value="8">8</option>
-                <option value="16">16</option>
+                <option value="1">1 Bar</option><option value="2">2 Bars</option>
+                <option value="4">4 Bars</option><option value="8">8 Bars</option>
+                <option value="16">16 Bars</option>
             </select>
         </div>
-        <div><label>SWING</label><input type="range" id="swing-slider" min="0" max="75" value="0"></div>
+    </div>
+
+    <div class="config-sub-row">
+        <div>
+            <label>SWING GROOVE</label>
+            <input type="range" id="swing-slider" min="0" max="75" value="0">
+        </div>
+        <div>
+            <label>FEEL</label>
+            <button id="human-btn" onclick="toggleHuman()" class="toggle-btn">HUMAN: OFF</button>
+        </div>
     </div>
 
     <div class="ep-grid" id="pad-grid"></div>
@@ -103,9 +122,9 @@
     <div class="editor-panel" id="editor" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <strong id="editor-title">PAD</strong>
-            <button onclick="clearCurrentPad()" style="width:auto; padding:5px 15px; font-size:0.6rem; background:#444; color:white;">CLEAR</button>
+            <button onclick="clearCurrentPad()" style="width:auto; padding:5px 15px; font-size:0.6rem; background:#444; color:white; border-radius: 4px;">CLEAR GRID</button>
         </div>
-        <div class="config-row" style="grid-template-columns: 1fr 2fr;">
+        <div class="config-row" style="grid-template-columns: 1fr 2fr; margin-bottom: 10px;">
             <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8</option><option value="16" selected>16</option><option value="32">32</option></select></div>
             <div><label>OXO PRESETS</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
         </div>
@@ -122,14 +141,13 @@
     let midiOut = null;
     let timer = null;
     let selectedPad = 0;
+    let humanize = false;
     
-    // Physical layout labels (7-8-9 top row, Square-0-Enter bottom row)
     const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
     const visualOrder = [6, 7, 8, 3, 4, 5, 0, 1, 2, 9, 10, 11];
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
     const oxoPresets = ["CUSTOM OXO", "XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "XOZY XOZY XOZY XOZY"];
 
-    // The Persistent Memory
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, data: Array(32).fill('O') }));
 
     const ps = document.getElementById('preset-select');
@@ -155,17 +173,21 @@
         }
     }
 
+    function toggleHuman() {
+        humanize = !humanize;
+        const b = document.getElementById('human-btn');
+        b.innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`;
+        b.className = humanize ? 'toggle-btn toggle-on' : 'toggle-btn';
+    }
+
     function selectPad(idx) {
         selectedPad = idx;
         document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
         document.getElementById(`btn-${idx}`).classList.add('active-pad');
         document.getElementById('editor').style.display = 'block';
-        
-        // This resets the label, but sequencerData[idx] preserves your pattern!
         document.getElementById('preset-select').selectedIndex = 0;
-        
         let leg = idx === 9 ? '■' : legends[idx];
-        document.getElementById('editor-title').innerText = `EDIT PAD: ${leg}`;
+        document.getElementById('editor-title').innerText = `PAD: ${leg}`;
         renderSteps();
     }
 
@@ -209,7 +231,8 @@
         midiOut.send([0xFA]);
         timer = setInterval(() => {
             if (currentStep >= totalSteps) { stopSequencer(); log("COMPLETE"); return; }
-            const delay = (currentStep % 2 !== 0 ? (stepTime * (swing / 100)) : 0);
+            const isEven = currentStep % 2 !== 0;
+            const delay = (isEven ? (stepTime * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
             for (let p = 0; p < 12; p++) {
                 const char = sequencerData[p].data[currentStep % sequencerData[p].steps];
                 if (char !== 'O') {
