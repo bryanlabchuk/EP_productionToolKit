@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EP-DC-OXO // STUDIO</title>
     <style>
-        /* --- VARIABLES --- */
+        /* --- CORE VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
@@ -38,7 +38,7 @@
         }
         .chassis.skinny-mode { max-width: 480px; }
 
-        /* --- FEEDBACK --- */
+        /* --- FEEDBACK MODULE --- */
         #feedback-btn {
             position: fixed; bottom: 20px; right: 20px;
             background: var(--text); color: var(--bg); border: 2px solid var(--border);
@@ -93,7 +93,6 @@
         label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         
-        /* PERFORMANCE */
         .performance-container { display: grid; grid-template-columns: 50px 1fr; gap: 12px; }
         .group-strip { display: flex; flex-direction: column; gap: 10px; height: 100%; }
         .group-btn {
@@ -112,7 +111,6 @@
         .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
-        /* EDITOR */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
@@ -159,7 +157,7 @@
         </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // STUDIO v25</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // STUDIO v26</div></div>
 
     <div class="main-deck">
         
@@ -180,7 +178,7 @@
                 </div>
                 <div class="split-row" style="margin-top: 10px;">
                     <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
-                    <div><button id="transport-btn" onclick="toggleTransport()" class="btn-small btn-toggle-on">TX: START/STOP</button></div>
+                    <div><button id="transport-btn" onclick="toggleTransport()" class="btn-small">TX: CLOCK ONLY</button></div>
                 </div>
                 <div style="margin-top:10px;"><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
             </div>
@@ -256,7 +254,8 @@
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
-    let sendTransport = true; // NEW TOGGLE STATE
+    // --- DEFAULT: OFF (Safe Recording) ---
+    let sendTransport = false;
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const visualOrder = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
@@ -291,6 +290,18 @@
 
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
+    /* --- FEEDBACK --- */
+    function openFeedback() { document.getElementById('feedback-modal').style.display = 'flex'; }
+    function closeFeedback() { document.getElementById('feedback-modal').style.display = 'none'; }
+    function submitFeedback() {
+        const type = document.getElementById('fb-type').value;
+        const text = document.getElementById('fb-text').value;
+        const subject = encodeURIComponent(`EP-DC-OXO Feedback: ${type}`);
+        const body = encodeURIComponent(`Type: ${type}\n\nMessage:\n${text}`);
+        window.open(`mailto:bryan.labchuk@gmail.com?subject=${subject}&body=${body}`);
+        closeFeedback();
+    }
+
     /* --- INIT --- */
     const ps = document.getElementById('preset-select');
     let def = document.createElement('option'); def.innerText = "-- SELECT PATTERN --"; ps.appendChild(def);
@@ -323,18 +334,6 @@
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
     function selectGroup(idx) { activeGroup = idx; document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); }
-
-    /* --- FEEDBACK --- */
-    function openFeedback() { document.getElementById('feedback-modal').style.display = 'flex'; }
-    function closeFeedback() { document.getElementById('feedback-modal').style.display = 'none'; }
-    function submitFeedback() {
-        const type = document.getElementById('fb-type').value;
-        const text = document.getElementById('fb-text').value;
-        const subject = encodeURIComponent(`EP-DC-OXO Feedback: ${type}`);
-        const body = encodeURIComponent(`Type: ${type}\n\nMessage:\n${text}`);
-        window.open(`mailto:bryan.labchuk@gmail.com?subject=${subject}&body=${body}`);
-        closeFeedback();
-    }
 
     /* --- AUDIO ENGINE --- */
     async function initAudioAndMIDI() {
@@ -431,10 +430,9 @@
         current16thNote = 0;
         nextNoteTime = audioCtx.currentTime + 0.1;
         
-        // FIXED RECORDING LOGIC: Do NOT send Stop (0xFC) if sending transport
-        // Only send Start (0xFA) if Transport is enabled.
+        // FIXED LOGIC: Only send Start (0xFA) if Transport is Enabled
         if (sendTransport) {
-            midiOut.send([0xFA]); 
+            midiOut.send([0xFA]);
             log(`TX: START SENT...`);
         } else {
             log(`TX: CLOCK ONLY...`);
@@ -447,13 +445,12 @@
         isPlaying = false;
         if (timerID) cancelAnimationFrame(timerID);
         if (midiOut) { 
-            if (sendTransport) midiOut.send([0xFC]); // Stop
-            midiOut.send([0xB0 + activeGroup, 123, 0]); // Notes Off
+            if (sendTransport) midiOut.send([0xFC]); 
+            midiOut.send([0xB0 + activeGroup, 123, 0]); 
         }
         log("HALTED");
     }
 
-    /* --- UI HELPERS --- */
     function flashPad(note) { const padIdx = padNotes.indexOf(note); if (padIdx !== -1) { const btn = document.getElementById(`btn-${padIdx}`); if (btn) { btn.classList.add('hit'); setTimeout(() => btn.classList.remove('hit'), 100); } } }
     function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
     function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
