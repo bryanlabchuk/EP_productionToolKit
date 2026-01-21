@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // SYNC COMMANDER</title>
+    <title>EP-DC-OXO // ARCHITECT</title>
     <style>
-        /* --- THEME VARIABLES --- */
+        /* --- CORE VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
@@ -29,63 +29,62 @@
             align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: all 0.4s ease;
         }
 
-        /* --- CHASSIS --- */
+        /* --- CHASSIS & LAYOUT --- */
         .chassis {
             background: var(--panel-bg); border: 2px solid var(--border); border-radius: 12px;
-            padding: 25px; width: 95%; max-width: 960px;
+            padding: 25px; width: 95%; max-width: 980px;
             box-shadow: 20px 20px 60px var(--shadow); backdrop-filter: blur(10px);
             transition: max-width 0.4s ease;
         }
         .chassis.skinny-mode { max-width: 480px; }
 
-        /* --- HEADER --- */
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
         
+        .main-deck { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; }
+        .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
+
+        /* --- TERMINAL --- */
         .lcd-display {
             background: var(--lcd-bg); color: var(--lcd-text); padding: 12px; border-radius: 4px; 
             font-size: 0.75rem; font-weight: normal; border: 4px solid #222; width: 100%;
             height: 60px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 3px var(--lcd-text);
             overflow-y: auto; font-family: 'Courier New', Courier, monospace;
-            display: flex; flex-direction: column-reverse; box-sizing: border-box;
+            display: flex; flex-direction: column-reverse; box-sizing: border-box; margin-bottom: 20px;
         }
         .log-entry { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 2px 0; }
-        
-        /* COUNTDOWN OVERLAY STYLE */
-        .lcd-overlay { 
-            font-size: 2rem; text-align: center; color: var(--accent); 
-            font-weight: 900; animation: pulse 0.5s infinite alternate; 
-        }
+        .lcd-overlay { font-size: 2rem; text-align: center; color: var(--accent); font-weight: 900; animation: pulse 0.5s infinite alternate; }
         @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
 
-        /* --- LAYOUT GRID --- */
-        .main-deck { display: grid; grid-template-columns: 1fr 1.2fr; gap: 25px; }
-        .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
-
+        /* --- CONTROLS --- */
         .control-group { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
-        .full-width { grid-column: span 2; }
-
+        
+        /* The Compact Swing Slider & Buttons */
+        .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+        
         label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
         select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         
-        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 75px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+        /* --- PAD GRID (3x4) --- */
+        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 80px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
         .pad-btn.hit { filter: brightness(1.5); transform: translateY(2px); }
         .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
         .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
         .active-pad.pad-btn-sq::before { background: white; }
 
+        /* --- EDITOR & SLIDERS --- */
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
-        .sound-lab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .sound-lab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 4px; margin-bottom: 15px; border: 1px solid var(--border); }
         .knob-group { text-align: center; }
         .knob { -webkit-appearance: none; width: 100%; height: 4px; background: var(--text); outline: none; border-radius: 2px; margin-top: 5px; }
-        .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
-        .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 10px; }
+        .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; }
         .step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
         .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
         .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
@@ -93,12 +92,16 @@
         .fader-step { height: 50px; background: var(--fader-track); position: relative; border-radius: 2px; cursor: crosshair; }
         .fader-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); pointer-events: none; }
 
+        /* --- BUTTONS --- */
         .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
         .btn-main { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.3); letter-spacing: 1px; font-size: 0.8rem; width: 100%; }
         .btn-main.primary { background: var(--accent); color: white; }
-        .btn-small { background: #555; color: white; border: none; padding: 10px; font-size: 0.65rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; }
+        .btn-main:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .btn-small { background: #555; color: white; border: none; padding: 10px; font-size: 0.65rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; transition: background 0.2s; }
         .btn-layout { background: transparent; border: 2px solid var(--text); color: var(--text); font-weight: bold; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
-        .btn-active { background: var(--lcd-text) !important; color: black !important; }
+        
+        /* Toggle States */
+        .btn-toggle-on { background: var(--lcd-text) !important; color: black !important; border-color: var(--lcd-text) !important; }
     </style>
 </head>
 <body id="main-body">
@@ -106,24 +109,27 @@
 <div class="chassis" id="app-chassis">
     <div class="header-row">
         <h1>EP-DC-OXO</h1>
-        <button class="btn-layout" onclick="toggleLayout()" title="Toggle View">⬌</button>
+        <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // SYNC_MASTER v9.0</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // ARCHITECT v10.0</div></div>
 
     <div class="main-deck">
         
         <div class="deck-left">
-            <button onclick="initMIDI()" class="btn-main primary" id="init-btn">INITIALIZE</button>
+            <button onclick="initMIDI()" class="btn-main primary" id="init-btn" style="margin-bottom:20px;">INITIALIZE MIDI</button>
             
-            <div class="control-group">
-                <div class="config-grid">
+            <div class="control-group" style="margin-bottom: 20px;">
+                <div class="config-grid" style="margin-bottom: 15px;">
                     <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
-                    <div><label>LENGTH</label><select id="global-bars"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="8">8</option><option value="16">16</option></select></div>
-                    <div class="full-width">
-                        <label>SWING %</label>
-                        <input type="range" class="knob" id="swing-slider" min="0" max="75" value="0">
-                    </div>
+                    <div><label>GLOBAL LENGTH</label><select id="global-bars"><option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option></select></div>
+                </div>
+                
+                <div class="split-row">
+                    <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
+                    <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
+                </div>
+                <div class="split-row" style="margin-top: 10px;">
                     <div><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
                     <div><button id="dark-btn" onclick="toggleDark()" class="btn-small">NIGHT: OFF</button></div>
                 </div>
@@ -132,7 +138,7 @@
             <div class="ep-grid" id="pad-grid"></div>
         </div>
 
-        <div class="deck-right">
+        <div class="deck-right" style="display:flex; flex-direction:column;">
             
             <div class="editor-panel" id="editor" style="display: none;">
                 <div class="editor-header">
@@ -153,17 +159,17 @@
                 </div>
 
                 <div class="config-grid" style="margin-bottom: 10px;">
-                    <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8</option><option value="16" selected>16</option><option value="32">32</option></select></div>
+                    <div><label>PATTERN LEN</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8 Steps</option><option value="16" selected>16 Steps</option><option value="32">32 Steps</option></select></div>
                     <div><label>PRESET</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
                 </div>
 
                 <div id="grid-notes" class="step-container"></div>
                 <div id="grid-auto" class="step-container" style="display:none;"></div>
                 
-                <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PAD</button></div>
+                <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PATTERN</button></div>
             </div>
 
-            <div class="control-group">
+            <div class="control-group" style="margin-top:auto; margin-bottom:10px;">
                 <div class="config-grid">
                     <button onclick="saveProject()" class="btn-small">SAVE .OXO</button>
                     <button onclick="document.getElementById('file-input').click()" class="btn-small">LOAD .OXO</button>
@@ -173,14 +179,22 @@
 
             <div class="action-row">
                 <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
-                <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">PANIC</button>
+                <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">PANIC STOP</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let midiOut = null; let midiIn = null; let timer = null; let selectedPad = 0; let countIn = false; let editMode = 'note';
+    /* --- CORE STATE --- */
+    let midiOut = null; 
+    let midiIn = null; 
+    let sequencerInterval = null; 
+    let pendingTimeouts = []; // THE KILL SWITCH ARRAY
+    let selectedPad = 0; 
+    let humanize = false; 
+    let countIn = false; 
+    let editMode = 'note';
     
     // Hardware Constants
     const legends = { 6:'7', 7:'8', 8:'9', 3:'4', 4:'5', 5:'6', 0:'1', 1:'2', 2:'3', 9:'', 10:'0', 11:'ENTER' };
@@ -188,9 +202,10 @@
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
     const oxoPresets = ["CUSTOM", "XOOO XOOO XOOO XOOO", "OOOO XOOO OOOO XOOO", "XOXO XOXO XOXO XOXO", "XOXX OOXY XOXX OOXZ", "XOOX OXOO XOOX OXOO", "XOZY XOZY XOZY XOZY"];
 
+    // Default: 4 Bars Global, 16 Steps per pad
     let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
 
-    /* --- INIT --- */
+    /* --- INITIALIZATION --- */
     const ps = document.getElementById('preset-select');
     oxoPresets.forEach((p, i) => { let o = document.createElement('option'); o.value = i; o.innerText = p; ps.appendChild(o); });
 
@@ -208,19 +223,16 @@
 
     function log(m) { 
         const l = document.getElementById('log');
-        // If message is a countdown, replace content temporarily
-        if (m.startsWith("COUNT")) {
-            l.innerHTML = `<div class="lcd-overlay">${m.split(":")[1]}</div>`;
-        } else {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            // Remove overlay if exists
+        if (m.startsWith("COUNT")) { l.innerHTML = `<div class="lcd-overlay">${m.split(":")[1]}</div>`; }
+        else {
             if (l.querySelector('.lcd-overlay')) l.innerHTML = '';
-            l.innerHTML = `<div class="log-entry"><span class="log-time">${time}</span>${m}</div>` + l.innerHTML;
+            l.innerHTML = `<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString().split(' ')[0]}</span>${m}</div>` + l.innerHTML;
         }
     }
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
 
+    /* --- MIDI ENGINE --- */
     async function initMIDI() {
         try {
             const midi = await navigator.requestMIDIAccess();
@@ -231,11 +243,11 @@
                 const n = midiOut.name.toLowerCase();
                 document.body.className = n.includes("1320") ? 'theme-1320' : n.includes("133") ? 'theme-133' : 'theme-40';
                 document.getElementById('init-btn').innerText = "LINKED: " + midiOut.name.toUpperCase();
-                log("OUTPUT CHANNEL ESTABLISHED");
+                log("OUTPUT READY");
             }
-            if (midiIn) { midiIn.onmidimessage = handleIncomingMIDI; log("INPUT CHANNEL ESTABLISHED"); }
+            if (midiIn) { midiIn.onmidimessage = handleIncomingMIDI; log("INPUT READY"); }
             if(!midiOut && !midiIn) log("ERR: DEVICE NOT DETECTED");
-        } catch(e) { log("ERR: MIDI PERMISSION DENIED"); }
+        } catch(e) { log("ERR: MIDI ACCESS DENIED"); }
     }
 
     function handleIncomingMIDI(event) {
@@ -251,19 +263,17 @@
         }
     }
 
-    /* --- UI --- */
+    /* --- UI HELPERS --- */
     function toggleDark() {
         document.body.classList.toggle('dark-mode');
         localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode'));
+        document.getElementById('dark-btn').classList.toggle('btn-toggle-on', document.body.classList.contains('dark-mode'));
         document.getElementById('dark-btn').innerText = document.body.classList.contains('dark-mode') ? "NIGHT: ON" : "NIGHT: OFF";
     }
 
-    function toggleCountIn() { 
-        countIn = !countIn; 
-        const btn = document.getElementById('count-btn');
-        btn.innerText = `COUNT: ${countIn ? '4' : 'OFF'}`;
-        btn.classList.toggle('btn-active', countIn);
-    }
+    function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); document.getElementById('human-btn').innerText = `HUMAN: ${humanize ? 'ON' : 'OFF'}`; }
+    
+    function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); document.getElementById('count-btn').innerText = `COUNT: ${countIn ? '4' : 'OFF'}`; }
 
     function setEditMode(m) {
         editMode = m;
@@ -323,57 +333,56 @@
     function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
     function loadProject(input) { const r = new FileReader(); r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); }; r.readAsText(input.files[0]); }
 
-    /* --- INJECTION ENGINE --- */
+    /* --- INJECTION ENGINE V2.0 (ROBUST) --- */
     function handleInject() {
         if (!midiOut) return log("ERR: INIT MIDI FIRST");
-        if (countIn) {
-            runCountIn();
-        } else {
-            startSequencer();
-        }
+        if (countIn) runCountIn();
+        else startSequencer();
     }
 
     function runCountIn() {
         const bpm = parseInt(document.getElementById('tempo').value);
         const beatTime = 60000 / bpm;
         let beat = 4;
-        
         log(`COUNT: ${beat}...`);
-        
-        // 4-beat visual countdown
         const countInt = setInterval(() => {
             beat--;
-            if (beat > 0) {
-                log(`COUNT: ${beat}...`);
-            } else {
-                clearInterval(countInt);
-                log("COUNT: GO!");
-                startSequencer();
-            }
+            if (beat > 0) log(`COUNT: ${beat}...`);
+            else { clearInterval(countInt); log("COUNT: GO!"); startSequencer(); }
         }, beatTime);
     }
 
     function startSequencer() {
-        stopSequencer();
+        stopSequencer(); // Safety First
+        
         const bpm = parseInt(document.getElementById('tempo').value);
         const bars = parseInt(document.getElementById('global-bars').value);
         const swing = parseInt(document.getElementById('swing-slider').value);
         const stepTime = (60000 / bpm) / 4; 
-        let currentStep = 0; const totalSteps = bars * 16;
+        
+        let currentStep = 0; 
+        const totalSteps = bars * 16;
         
         midiOut.send([0xFA]); // MIDI START
         log(`INJECTING ${bars} BARS...`);
 
-        timer = setInterval(() => {
+        sequencerInterval = setInterval(() => {
             if (currentStep >= totalSteps) { stopSequencer(); log("INJECTION COMPLETE"); return; }
-            const delay = (currentStep % 2 !== 0 ? (stepTime * (swing / 100)) : 0);
             
+            const isEven = currentStep % 2 !== 0;
+            const delay = (isEven ? (stepTime * (swing / 100)) : 0) + (humanize ? Math.random() * 20 : 0);
+            
+            // Loop through all 12 pads for this specific step
             for (let p = 0; p < 12; p++) {
                 const pad = sequencerData[p];
-                const stepIdx = currentStep % pad.steps;
+                // MATH FIX: Loop the pattern based on pad.steps
+                const stepIdx = currentStep % pad.steps; 
+                
                 const note = pad.notes[stepIdx];
                 const auto = pad.auto[stepIdx];
-                setTimeout(() => {
+                
+                // PUSH TO PENDING ARRAY for Kill Switch access
+                const tId = setTimeout(() => {
                     if (auto > 0) midiOut.send([0xB0, pad.autoTargetCC, auto]);
                     if (note !== 'O') {
                         const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
@@ -382,14 +391,27 @@
                         flashPad(padNotes[p]);
                     }
                 }, delay);
+                pendingTimeouts.push(tId);
             }
             currentStep++;
         }, stepTime);
     }
 
     function stopSequencer() { 
-        clearInterval(timer); timer = null; 
-        if (midiOut) { midiOut.send([0xFC]); for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); } 
+        // 1. Clear Main Loop
+        clearInterval(sequencerInterval); 
+        sequencerInterval = null; 
+        
+        // 2. KILL SWITCH: Clear all floating timeouts (swing/humanize delays)
+        pendingTimeouts.forEach(id => clearTimeout(id));
+        pendingTimeouts = [];
+
+        // 3. Hardware Reset
+        if (midiOut) { 
+            midiOut.send([0xFC]); // Stop
+            // Send All Notes Off to all channels just in case
+            for(let i=0; i<16; i++) midiOut.send([176, 123, 0]); 
+        } 
         log("HALTED"); 
     }
     
