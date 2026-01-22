@@ -11,29 +11,29 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EP-DC-OXO // MASTER v44</title>
+  <title>EP-DC-OXO // TACTILE</title>
   
   <style>
     /* --- VARIABLES --- */
     :root {
       --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
       --accent: #ff3e00; 
-      --ghost: rgba(255, 62, 0, 0.25);
+      --ghost: rgba(255, 62, 0, 0.5); /* Higher opacity for text visibility */
       --magic: #8a2be2; 
       --text: #1a1a1a; --lcd-bg: #080a08; --lcd-text: #39ff14; 
       --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.45);
       --shadow: rgba(0,0,0,0.4); --fader-track: #ccc;
-      --key-white: #f0f0f0; --key-black: #2a2a2a;
+      --key-white: #f5f5f5; --key-black: #2a2a2a;
     }
 
-    body.theme-40 { --bg: #f4f1e6; --accent: #006633; --ghost: rgba(0, 102, 51, 0.3); --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
-    body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --ghost: rgba(255, 62, 0, 0.3); --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
-    body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --ghost: rgba(155, 17, 30, 0.3); --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
+    body.theme-40 { --bg: #f4f1e6; --accent: #006633; --ghost: rgba(0, 102, 51, 0.5); --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
+    body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --ghost: rgba(255, 62, 0, 0.5); --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
+    body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --ghost: rgba(155, 17, 30, 0.5); --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
     
     body.dark-mode {
       --bg: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
       --text: #e0e0e0; --border: #444; --panel-bg: rgba(30,30,30,0.9); 
-      --fader-track: #444; --magic: #bd7bf0; --key-white: #aaa; --key-black: #000;
+      --fader-track: #444; --magic: #bd7bf0; --key-white: #bbb; --key-black: #111;
     }
 
     body {
@@ -51,9 +51,10 @@
     }
     .chassis.skinny-mode { max-width: 480px; }
 
-    /* --- PIANO MODULE --- */
+    /* --- PIANO MODULE (UPDATED) --- */
     .piano-wrapper {
-        display: flex; gap: 5px; align-items: stretch; margin-bottom: 15px; height: 90px;
+        display: flex; gap: 5px; align-items: stretch; margin-bottom: 15px; 
+        height: 180px; /* DOUBLED HEIGHT */
         background: transparent;
     }
     
@@ -74,24 +75,37 @@
     
     .keys-container { display: flex; height: 100%; position: relative; }
     
+    /* WHITE KEYS */
     .key-white {
         flex: 1; background: var(--key-white); border-right: 1px solid var(--border);
         cursor: pointer; position: relative; z-index: 1; border-radius: 0 0 2px 2px;
+        /* Flex formatting for text centering */
+        display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
+        font-weight: 900; font-size: 1.2rem; user-select: none;
     }
     .key-white:last-child { border-right: none; }
-    .key-white.is-root { background: var(--accent) !important; }
-    .key-white.is-chord { background: var(--ghost); }
-
+    
+    /* BLACK KEYS */
     .key-black {
         position: absolute; top: 0; height: 60%; width: 8%; background: var(--key-black);
         z-index: 2; border-radius: 0 0 2px 2px; cursor: pointer;
         transform: translateX(-50%); border: 1px solid rgba(255,255,255,0.1);
+        /* Flex formatting for text centering */
+        display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px;
+        font-weight: 900; font-size: 1rem; user-select: none;
     }
-    .key-black.is-root { background: var(--accent) !important; border: 1px solid var(--bg); }
-    .key-black.is-chord { background: var(--ghost); border: 1px solid var(--text); }
 
-    .kb-1 { left: 12.5%; } .kb-3 { left: 25%; } .kb-6 { left: 50%; } 
-    .kb-8 { left: 62.5%; } .kb-10 { left: 75%; } .kb-13 { left: 100%; transform: translateX(-100%); width: 6% !important;}
+    /* STATES (X and O) */
+    /* Remove background color change, use pseudo-elements or text content */
+    .key-white.is-root, .key-black.is-root { color: var(--accent); }
+    .key-white.is-root::after, .key-black.is-root::after { content: "X"; }
+    
+    .key-white.is-chord, .key-black.is-chord { color: var(--text); opacity: 0.7; }
+    .key-white.is-chord::after, .key-black.is-chord::after { content: "O"; }
+
+    /* Key Positioning */
+    .kb-1 { left: 12.5%; }  .kb-3 { left: 25%; }    .kb-6 { left: 50%; }    
+    .kb-8 { left: 62.5%; }  .kb-10 { left: 75%; }   .kb-13 { left: 100%; transform: translateX(-100%); width: 6% !important;} 
 
     /* --- COMPONENTS --- */
     input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); border-color: white; }
@@ -180,7 +194,7 @@
     </div>
 
     <div class="lcd-display" id="log">
-      <div class="log-entry">SYSTEM READY // MASTER v44</div>
+      <div class="log-entry">SYSTEM READY // TACTILE v45</div>
     </div>
 
     <div class="main-deck">
@@ -200,7 +214,14 @@
             <div>
               <label>LENGTH</label>
               <select id="global-bars">
-                <option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option><option value="32">32 Bars</option><option value="64">64 Bars</option><option value="128">128 Bars</option>
+                <option value="1">1 Bar</option>
+                <option value="2">2 Bars</option>
+                <option value="4">4 Bars</option>
+                <option value="8">8 Bars</option>
+                <option value="16">16 Bars</option>
+                <option value="32">32 Bars</option>
+                <option value="64">64 Bars</option>
+                <option value="128">128 Bars</option>
               </select>
             </div>
             <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
@@ -244,7 +265,8 @@
       </div>
 
       <div class="deck-right" style="display:flex; flex-direction:column;">
-        <div class="editor-panel" id="editor" style="display: block;"> <div class="editor-header">
+        <div class="editor-panel" id="editor" style="display: none;">
+          <div class="editor-header">
             <strong id="editor-title">PAD SELECT</strong>
             <div>
               <button id="pad-mode-drum" onclick="setPadMode('drum')" class="btn-small btn-toggle-on" style="width:auto;">DRUM</button>
@@ -291,7 +313,7 @@
           <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PATTERN</button></div>
         </div>
 
-        <div class="action-row">
+        <div class="action-row" style="margin-top:auto;">
           <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
           <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">STOP / PANIC</button>
         </div>
@@ -385,8 +407,14 @@
 
       document.querySelectorAll('.key-white, .key-black').forEach(k => {
           k.className = k.className.replace(' is-root', '').replace(' is-chord', '');
+          k.innerHTML = ''; // Reset content
+          
           const n = parseInt(k.getAttribute('data-note'));
-          if((n % 12) === root) k.classList.add('is-root'); 
+          if((n % 12) === root) { 
+              k.classList.add('is-root'); 
+              // Pseudo-elements don't work well for dynamic JS updates on some browsers, so we can inject text directly if needed,
+              // but CSS rules above handle content: "X".
+          }
           else if(notes.includes(n % 12)) k.classList.add('is-chord');
       });
   }
@@ -402,6 +430,7 @@
       document.getElementById('audition-toggle').classList.toggle('toggle-on', auditionMode);
   }
 
+  // ... (Standard setters for mode, chord settings etc)
   function setPadMode(mode) {
     projectData[activeGroup][selectedPad].mode = mode;
     document.getElementById('pad-mode-drum').classList.toggle('btn-toggle-on', mode === 'drum');
@@ -524,11 +553,12 @@
   const gridEl = document.getElementById('pad-grid'); [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2].forEach(idx => { const btn = document.createElement('div'); btn.className = 'pad-btn' + (idx === 0 ? ' pad-btn-sq' : ''); btn.id = `btn-${idx}`; btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`; btn.onclick = () => selectPad(idx); gridEl.appendChild(btn); });
   if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
 
+  // PIANO CLICK LOGIC
   document.querySelectorAll('.key-white, .key-black').forEach(k => {
       k.addEventListener('mousedown', function() {
           const n = parseInt(this.getAttribute('data-note'));
           if(!isNaN(n)) {
-              document.getElementById('chord-root').value = n % 12; 
+              document.getElementById('chord-root').value = n % 12; // Handle High C#
               updateChordSettings();
               if(auditionMode) previewChord(projectData[activeGroup][selectedPad]);
           }
@@ -544,8 +574,6 @@
   function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
   function openFeedback(){ document.getElementById('feedback-modal').style.display='flex'; } function closeFeedback(){ document.getElementById('feedback-modal').style.display='none'; } function submitFeedback() { const t = document.getElementById('fb-type').value; const m = document.getElementById('fb-text').value; window.open(`mailto:bryan.labchuk@gmail.com?subject=EP-DC-OXO Feedback: ${t}&body=${m}`); closeFeedback(); }
   function selectGroup(idx) { activeGroup = idx; document.querySelectorAll('.group-btn').forEach((b, i) => b.classList.toggle('active', i === idx)); document.getElementById('chan-display').innerText = `GROUP ${['A','B','C','D'][idx]} (CH ${idx+1})`; log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); selectPad(selectedPad); }
-  function selectPad(idx) { selectedPad = idx; document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad')); document.getElementById(`btn-${idx}`).classList.add('active-pad'); document.getElementById('editor').style.display = 'block'; let l = legends[idx]; if (idx === 0) l = '■'; document.getElementById('editor-title').innerText = `EDIT PAD ${l}`; syncChordUI(); syncPadPerfUI(); renderSteps(); }
-  function renderSteps() { const c = document.getElementById('grid-notes'); c.innerHTML = ''; const d = projectData[activeGroup][selectedPad]; for (let i = 0; i < d.steps; i++) { const step = document.createElement('div'); const v = d.notes[i]; step.className = `step-box ${v !== 'O' ? 'on-' + v.toLowerCase() : 'off'}`; step.innerText = v; step.onclick = () => { const cy = ['O','X','Y','Z']; d.notes[i] = cy[(cy.indexOf(v) + 1) % cy.length]; renderSteps(); }; c.appendChild(step); } }
   
   async function initAudioAndMIDI() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') await audioCtx.resume(); const m = await navigator.requestMIDIAccess(); midiOut = Array.from(m.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample")); if (midiOut) { const n = midiOut.name.toLowerCase(); document.body.className = n.includes("1320") ? "theme-1320" : n.includes("133") ? "theme-133" : "theme-40"; document.getElementById('init-btn').innerText = "LINKED"; log("READY"); } else { log("ERR: NO DEV"); } } catch (e) { log("ERR: ACCESS"); } }
   function nextNote() { const bpm = parseInt(document.getElementById('tempo').value, 10); nextNoteTime += (0.25 * (60.0 / bpm)); current16thNote++; }
