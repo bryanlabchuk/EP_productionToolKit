@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // STUDIO</title>
+    <title>EP-DC-OXO // MULTITIMBRAL</title>
     <style>
         /* --- CORE VARIABLES --- */
         :root {
@@ -157,7 +157,7 @@
         </div>
     </div>
     
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // STUDIO v26</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // MULTITIMBRAL v27</div></div>
 
     <div class="main-deck">
         
@@ -167,8 +167,8 @@
             <div class="control-group" style="margin-bottom: 20px;">
                 <div class="config-grid" style="margin-bottom: 15px;">
                     <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
-                    <div><label>MIDI CHANNEL</label>
-                        <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">AUTO-MAPPED</div>
+                    <div><label>ACTIVE GROUP</label>
+                        <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">GROUP A (CH 1)</div>
                     </div>
                 </div>
                 
@@ -254,8 +254,7 @@
     let humanize = false;
     let countIn = false;
     let editMode = 'note';
-    // --- DEFAULT: OFF (Safe Recording) ---
-    let sendTransport = false;
+    let sendTransport = false; // Default OFF for safety
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const visualOrder = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
@@ -288,7 +287,11 @@
         ]
     };
 
-    let sequencerData = Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }));
+    // --- MULTITIMBRAL DATA STRUCTURE ---
+    // projectData[GROUP_INDEX][PAD_INDEX]
+    let projectData = Array.from({length: 4}, () => 
+        Array.from({length: 12}, () => ({ steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74 }))
+    );
 
     /* --- FEEDBACK --- */
     function openFeedback() { document.getElementById('feedback-modal').style.display = 'flex'; }
@@ -333,7 +336,16 @@
     }
 
     function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
-    function selectGroup(idx) { activeGroup = idx; document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); }
+    
+    function selectGroup(idx) { 
+        activeGroup = idx; 
+        document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); 
+        document.getElementById('chan-display').innerText = `GROUP ${['A','B','C','D'][idx]} (CH ${idx+1})`;
+        log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); 
+        
+        // Refresh View for new group
+        selectPad(selectedPad);
+    }
 
     /* --- AUDIO ENGINE --- */
     async function initAudioAndMIDI() {
@@ -376,21 +388,30 @@
         const humanJitter = humanize ? (Math.random() * 0.015) : 0;
         const midiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
         
-        const noteOn = 0x90 + activeGroup;
-        const noteOff = 0x80 + activeGroup;
-        const ccStatus = 0xB0 + activeGroup;
+        // MULTITIMBRAL LOOP: Iterate ALL 4 Groups
+        for (let g = 0; g < 4; g++) {
+            const noteOn = 0x90 + g;
+            const noteOff = 0x80 + g;
+            const ccStatus = 0xB0 + g;
 
-        for (let p = 0; p < 12; p++) {
-            const pad = sequencerData[p];
-            const stepIdx = beatNumber % pad.steps;
-            const note = pad.notes[stepIdx];
-            const auto = pad.auto[stepIdx];
-            if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], midiTime);
-            if (note !== 'O') {
-                const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
-                midiOut.send([noteOn, padNotes[p], vel], midiTime);
-                midiOut.send([noteOff, padNotes[p], 0], midiTime + 100);
-                setTimeout(() => flashPad(padNotes[p]), (time + swingDelay + humanJitter - audioCtx.currentTime) * 1000);
+            for (let p = 0; p < 12; p++) {
+                const pad = projectData[g][p];
+                const stepIdx = beatNumber % pad.steps;
+                const note = pad.notes[stepIdx];
+                const auto = pad.auto[stepIdx];
+                
+                if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], midiTime);
+                
+                if (note !== 'O') {
+                    const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
+                    midiOut.send([noteOn, padNotes[p], vel], midiTime);
+                    midiOut.send([noteOff, padNotes[p], 0], midiTime + 100);
+                    
+                    // Flash Pad only if it's the Active Group
+                    if(g === activeGroup) {
+                        setTimeout(() => flashPad(padNotes[p]), (time + swingDelay + humanJitter - audioCtx.currentTime) * 1000);
+                    }
+                }
             }
         }
     }
@@ -430,7 +451,6 @@
         current16thNote = 0;
         nextNoteTime = audioCtx.currentTime + 0.1;
         
-        // FIXED LOGIC: Only send Start (0xFA) if Transport is Enabled
         if (sendTransport) {
             midiOut.send([0xFA]);
             log(`TX: START SENT...`);
@@ -446,6 +466,7 @@
         if (timerID) cancelAnimationFrame(timerID);
         if (midiOut) { 
             if (sendTransport) midiOut.send([0xFC]); 
+            // All Notes Off for active group
             midiOut.send([0xB0 + activeGroup, 123, 0]); 
         }
         log("HALTED");
@@ -478,7 +499,10 @@
         const noteContainer = document.getElementById('grid-notes');
         const autoContainer = document.getElementById('grid-auto');
         noteContainer.innerHTML = ''; autoContainer.innerHTML = '';
-        const padData = sequencerData[selectedPad];
+        
+        // PULL DATA FROM ACTIVE GROUP
+        const padData = projectData[activeGroup][selectedPad];
+        
         for (let i = 0; i < padData.steps; i++) {
             const nDiv = document.createElement('div');
             const val = padData.notes[i];
@@ -512,22 +536,23 @@
         const preset = JSON.parse(valString);
         if (preset.type === "multi") {
             for (const [padIdx, patString] of Object.entries(preset.tracks)) {
-                for(let i=0; i<32; i++) sequencerData[padIdx].notes[i] = patString[i % patString.length] || 'O';
+                // Apply to ACTIVE group
+                for(let i=0; i<32; i++) projectData[activeGroup][padIdx].notes[i] = patString[i % patString.length] || 'O';
             }
             log(`LOADED KIT: ${preset.name}`);
         } else {
             const pat = preset.pat.replace(/\s/g, '');
-            for(let i=0; i<32; i++) sequencerData[selectedPad].notes[i] = pat[i % pat.length] || 'O';
+            for(let i=0; i<32; i++) projectData[activeGroup][selectedPad].notes[i] = pat[i % pat.length] || 'O';
             log(`LOADED PAT: ${preset.name}`);
         }
         renderSteps();
         document.getElementById('preset-select').selectedIndex = 0;
     }
 
-    function updateStepCount(v) { sequencerData[selectedPad].steps = parseInt(v); renderSteps(); }
-    function clearCurrentPad() { sequencerData[selectedPad].notes.fill('O'); sequencerData[selectedPad].auto.fill(0); renderSteps(); }
-    function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sequencerData)); a.download = "ep_oxo_session.json"; a.click(); log("SESSION SAVED"); }
-    function loadProject(input) { const r = new FileReader(); r.onload = (e) => { sequencerData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); }; r.readAsText(input.files[0]); }
+    function updateStepCount(v) { projectData[activeGroup][selectedPad].steps = parseInt(v); renderSteps(); }
+    function clearCurrentPad() { projectData[activeGroup][selectedPad].notes.fill('O'); projectData[activeGroup][selectedPad].auto.fill(0); renderSteps(); }
+    function saveProject() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData)); a.download = "ep_oxo_project.json"; a.click(); log("SESSION SAVED"); }
+    function loadProject(input) { const r = new FileReader(); r.onload = (e) => { projectData = JSON.parse(e.target.result); selectPad(selectedPad); log("SESSION LOADED"); }; r.readAsText(input.files[0]); }
     
     selectPad(0);
 </script>
