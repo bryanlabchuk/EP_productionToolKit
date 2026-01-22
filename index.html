@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-FXBQBXFW44');
-    </script>
+        <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-FXBQBXFW44');
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // MASTER</title>
+    <title>EP-DC-OXO // HARMONIC ARCHIVE</title>
     
     <style>
         /* --- CORE VARIABLES --- */
@@ -172,7 +172,7 @@
             <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
         </div>
     </div>
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // MASTER v34</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // HARMONIC v32</div></div>
 
     <div class="main-deck">
         <div class="deck-left">
@@ -283,7 +283,15 @@
                 <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PATTERN</button></div>
             </div>
 
-            <div class="action-row" style="margin-top:auto;">
+            <div class="control-group" style="margin-top:auto; margin-bottom:10px;">
+                <div class="config-grid">
+                    <button onclick="saveProject()" class="btn-small">SAVE .OXO</button>
+                    <button onclick="document.getElementById('file-input').click()" class="btn-small">LOAD .OXO</button>
+                    <input type="file" id="file-input" style="display:none" onchange="loadProject(this)">
+                </div>
+            </div>
+
+            <div class="action-row">
                 <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
                 <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">STOP / PANIC</button>
             </div>
@@ -319,12 +327,6 @@
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
-    const chordShapes = {
-        'maj': [0, 4, 7], 'min': [0, 3, 7], 'dim': [0, 3, 6], 'aug': [0, 4, 8], 'sus2': [0, 2, 7], 'sus4': [0, 5, 7],
-        'maj7': [0, 4, 7, 11], 'min7': [0, 3, 7, 10], 'dom7': [0, 4, 7, 10], 'm7b5': [0, 3, 6, 10], 'dim7': [0, 3, 6, 9], 'mM7': [0, 3, 7, 11],
-        'maj9': [0, 4, 7, 11, 14], 'min9': [0, 3, 7, 10, 14], 'dom9': [0, 4, 7, 10, 14], 'add9': [0, 4, 7, 14],
-        'min11': [0, 3, 7, 10, 14, 17], 'dom13': [0, 4, 7, 10, 14, 21]
-    };
 
     // --- MASSIVE LIBRARY ---
     const oxoPresets = {
@@ -384,15 +386,18 @@
     /* --- CHORD ENGINE --- */
     function getChordIntervals(quality, ext) {
         let intervals = [0]; 
+        // 1. Thirds
         if (['min', 'dim'].includes(quality)) intervals.push(3);
         else if (['sus2'].includes(quality)) intervals.push(2);
         else if (['sus4'].includes(quality)) intervals.push(5);
-        else intervals.push(4); 
+        else intervals.push(4); // Maj/Dom/Aug
 
+        // 2. Fifths
         if (quality === 'dim') intervals.push(6);
         else if (quality === 'aug') intervals.push(8);
         else intervals.push(7);
 
+        // 3. Extensions
         if (ext !== 'none') {
             let seventh = (quality === 'maj' || quality === 'aug') ? 11 : 10;
             if (quality === 'dim') seventh = 9; 
@@ -457,7 +462,7 @@
         setPadMode(projectData[activeGroup][selectedPad].mode);
     }
 
-    /* --- SCHEDULER W/ FLUX --- */
+    /* --- SCHEDULER --- */
     function scheduleNote(beatNumber, time) {
         if (!midiOut) return;
         const bpm = parseInt(document.getElementById('tempo').value);
@@ -531,7 +536,7 @@
         }
     }
 
-    /* --- INIT & BOILERPLATE --- */
+    /* --- INIT --- */
     const ps = document.getElementById('preset-select');
     let def = document.createElement('option'); def.innerText = "-- SELECT --"; ps.appendChild(def);
     for (const [cat, list] of Object.entries(oxoPresets)) { const g = document.createElement('optgroup'); g.label = cat; list.forEach(p => { const o = document.createElement('option'); o.value = JSON.stringify(p); o.innerText = p.name; g.appendChild(o); }); ps.appendChild(g); }
@@ -555,7 +560,7 @@
     function selectPad(idx){selectedPad=idx;document.querySelectorAll('.pad-btn').forEach(b=>b.classList.remove('active-pad'));document.getElementById(`btn-${idx}`).classList.add('active-pad');document.getElementById('editor').style.display='block';let l=legends[idx];if(idx===0)l='■';document.getElementById('editor-title').innerText=`EDIT PAD ${l}`;syncChordUI();renderSteps();}
     function renderSteps(){const c=document.getElementById('grid-notes');c.innerHTML='';const d=projectData[activeGroup][selectedPad];for(let i=0;i<d.steps;i++){const n=document.createElement('div');const v=d.notes[i];n.className=`step-box ${v!=='O'?'on-'+v.toLowerCase():'off'}`;n.innerText=v;n.onclick=()=>{const cy=['O','X','Y','Z'];d.notes[i]=cy[(cy.indexOf(v)+1)%cy.length];renderSteps();};c.appendChild(n);}}
     
-    async function initAudioAndMIDI(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')await audioCtx.resume();const m=await navigator.requestMIDIAccess();midiOut=Array.from(m.outputs.values()).find(o=>o.name.toLowerCase().includes("ep")||o.name.toLowerCase().includes("sample"));if(midiOut){const n=midiOut.name.toLowerCase();document.body.className=n.includes("1320")?"theme-1320":n.includes("133")?"theme-133":"theme-133":"theme-40";document.getElementById('init-btn').innerText="LINKED";log("READY");}else log("ERR: NO DEV");}catch(e){log("ERR: ACCESS");}}
+    async function initAudioAndMIDI(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')await audioCtx.resume();const m=await navigator.requestMIDIAccess();midiOut=Array.from(m.outputs.values()).find(o=>o.name.toLowerCase().includes("ep")||o.name.toLowerCase().includes("sample"));if(midiOut){const n=midiOut.name.toLowerCase();document.body.className=n.includes("1320")?"theme-1320":n.includes("133")?"theme-133":"theme-40";document.getElementById('init-btn').innerText="LINKED";log("READY");}else log("ERR: NO DEV");}catch(e){log("ERR: ACCESS");}}
     function nextNote(){const b=parseInt(document.getElementById('tempo').value);nextNoteTime+=(0.25*(60.0/b));current16thNote++;}
     function scheduler(){while(nextNoteTime<audioCtx.currentTime+scheduleAheadTime){const t=parseInt(document.getElementById('global-bars').value);if(current16thNote>=t*16){stopSequencer();log("COMPLETE");return;}scheduleNote(current16thNote,nextNoteTime);nextNote();}if(isPlaying)timerID=requestAnimationFrame(scheduler);}
     function handleInject(){if(!midiOut||!audioCtx)return log("ERR: INIT MIDI");if(countIn)runCountIn();else startSequencer();}
@@ -565,7 +570,8 @@
     function sendLiveCC(c,v){if(midiOut)midiOut.send([0xB0+activeGroup,c,parseInt(v)]);}
     function updateStepCount(v){projectData[activeGroup][selectedPad].steps=parseInt(v);renderSteps();}
     function clearCurrentPad(){projectData[activeGroup][selectedPad].notes.fill('O');renderSteps();}
-    
+    function saveProject(){const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(projectData));a.download="ep_oxo_proj.json";a.click();log("SAVED");}
+    function loadProject(i){const r=new FileReader();r.onload=(e)=>{projectData=JSON.parse(e.target.result);selectPad(selectedPad);log("LOADED");};r.readAsText(i.files[0]);}
     function applyPreset(v){
         if(!v||v.startsWith("-"))return;
         const p=JSON.parse(v);
