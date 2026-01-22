@@ -1,9 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FXBQBXFW44');
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // HARMONIC</title>
+    <title>EP-DC-OXO // TRASH WEED</title>
+    
     <style>
         /* --- CORE VARIABLES --- */
         :root {
@@ -158,7 +168,7 @@
             <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
         </div>
     </div>
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // HARMONIC v28</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // SORCERER v29</div></div>
 
     <div class="main-deck">
         <div class="deck-left">
@@ -203,28 +213,36 @@
                     <div class="config-grid">
                         <div><label>ROOT NOTE</label>
                             <select id="chord-root" onchange="updateChordSettings()">
-                                <option value="0">C</option><option value="1">C#</option><option value="2">D</option>
-                                <option value="3">D#</option><option value="4">E</option><option value="5">F</option>
-                                <option value="6">F#</option><option value="7">G</option><option value="8">G#</option>
-                                <option value="9">A</option><option value="10">A#</option><option value="11">B</option>
+                                <option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option>
                             </select>
                         </div>
                         <div><label>OCTAVE</label>
                             <select id="chord-oct" onchange="updateChordSettings()">
-                                <option value="2">2</option><option value="3" selected>3</option><option value="4">4</option>
+                                <option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
                             </select>
                         </div>
-                        <div><label>SHAPE</label>
+                        <div style="grid-column: span 2;">
+                            <label>SHAPE & EXTENSION</label>
                             <select id="chord-shape" onchange="updateChordSettings()">
-                                <option value="maj">Major</option><option value="min">Minor</option>
-                                <option value="maj7">Maj 7</option><option value="min7">Min 7</option>
-                                <option value="dom7">Dom 7</option><option value="sus4">Sus 4</option>
-                                <option value="dim">Diminished</option>
+                                <optgroup label="Triads">
+                                    <option value="maj">Major</option><option value="min">Minor</option><option value="dim">Diminished</option><option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
+                                </optgroup>
+                                <optgroup label="7ths">
+                                    <option value="maj7">Major 7</option><option value="min7">Minor 7</option><option value="dom7">Dominant 7</option><option value="m7b5">Min 7 (b5)</option><option value="dim7">Dim 7</option><option value="mM7">Min-Maj 7</option>
+                                </optgroup>
+                                <optgroup label="Extensions (9/11/13)">
+                                    <option value="maj9">Major 9</option><option value="min9">Minor 9</option><option value="dom9">Dominant 9</option><option value="add9">Add 9</option><option value="min11">Minor 11</option><option value="dom13">Dominant 13</option>
+                                </optgroup>
                             </select>
                         </div>
-                        <div><label>VOICING</label>
-                            <select id="chord-voice" onchange="updateChordSettings()">
-                                <option value="close">Close</option><option value="wide">Wide (Spread)</option>
+                        <div><label>INVERSION</label>
+                            <select id="chord-inv" onchange="updateChordSettings()">
+                                <option value="0">Root Pos</option><option value="1">1st Inv</option><option value="2">2nd Inv</option><option value="3">3rd Inv</option>
+                            </select>
+                        </div>
+                        <div><label>STRUM</label>
+                            <select id="chord-strum" onchange="updateChordSettings()">
+                                <option value="0">Tight</option><option value="10">Human</option><option value="25">Loose</option><option value="40">Sloppy</option>
                             </select>
                         </div>
                     </div>
@@ -279,7 +297,6 @@
     let sendTransport = false;
 
     // DATA STRUCTURE
-    // Pad Object: { steps: 16, notes: [], auto: [], mode: 'drum'|'chord', chord: { root:0, oct:3, shape:'maj', voice:'close' } }
     let projectData = Array.from({length: 4}, () => 
         Array.from({length: 12}, () => ({ 
             steps: 16, 
@@ -287,73 +304,59 @@
             auto: Array(32).fill(0), 
             autoTargetCC: 74,
             mode: 'drum',
-            chord: { root:0, oct:3, shape:'maj', voice:'close' }
+            chord: { root:0, oct:3, shape:'maj', inv:0, strum:10 }
         }))
     );
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
     
-    // CHORD SHAPES (Intervals in semitones)
+    // EXTENDED CHORD LIBRARY
     const chordShapes = {
-        'maj': [0, 4, 7], 'min': [0, 3, 7], 'maj7': [0, 4, 7, 11], 'min7': [0, 3, 7, 10],
-        'dom7': [0, 4, 7, 10], 'sus4': [0, 5, 7], 'dim': [0, 3, 6]
+        'maj': [0, 4, 7], 'min': [0, 3, 7], 'dim': [0, 3, 6], 'aug': [0, 4, 8], 'sus2': [0, 2, 7], 'sus4': [0, 5, 7],
+        'maj7': [0, 4, 7, 11], 'min7': [0, 3, 7, 10], 'dom7': [0, 4, 7, 10], 'm7b5': [0, 3, 6, 10], 'dim7': [0, 3, 6, 9], 'mM7': [0, 3, 7, 11],
+        'maj9': [0, 4, 7, 11, 14], 'min9': [0, 3, 7, 10, 14], 'dom9': [0, 4, 7, 10, 14], 'add9': [0, 4, 7, 14],
+        'min11': [0, 3, 7, 10, 14, 17], 'dom13': [0, 4, 7, 10, 14, 21]
     };
 
-    /* --- INIT --- */
-    // (Library code abbreviated for clarity, same as before)
-    const oxoPresets = { "KICK": [{name:"4-Floor", pat:"XOOOXOOOXOOOXOOO"}], "SNARE": [{name:"Backbeat", pat:"OOOOXOOOOOOOXOOO"}] };
-    const ps = document.getElementById('preset-select');
-    let def = document.createElement('option'); def.innerText = "-- SELECT --"; ps.appendChild(def);
-    for (const [cat, list] of Object.entries(oxoPresets)) {
-        const g = document.createElement('optgroup'); g.label = cat;
-        list.forEach(p => { const o = document.createElement('option'); o.value = JSON.stringify(p); o.innerText = p.name; g.appendChild(o); });
-        ps.appendChild(g);
+    /* --- CHORD LOGIC --- */
+    function getInversion(intervals, invIndex) {
+        let newIntervals = [...intervals];
+        for(let i=0; i<invIndex; i++) {
+            let note = newIntervals.shift();
+            newIntervals.push(note + 12);
+        }
+        return newIntervals;
     }
 
-    const gridEl = document.getElementById('pad-grid');
-    [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2].forEach(idx => {
-        const btn = document.createElement('div');
-        btn.className = 'pad-btn' + (idx === 0 ? ' pad-btn-sq' : '');
-        btn.id = `btn-${idx}`;
-        btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`;
-        btn.onclick = () => selectPad(idx);
-        gridEl.appendChild(btn);
-    });
-
-    if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
-
-    /* --- PAD MODE LOGIC --- */
     function setPadMode(mode) {
-        const padData = projectData[activeGroup][selectedPad];
-        padData.mode = mode;
-        
-        // Toggle UI
+        projectData[activeGroup][selectedPad].mode = mode;
         document.getElementById('pad-mode-drum').classList.toggle('btn-toggle-on', mode === 'drum');
         document.getElementById('pad-mode-chord').classList.toggle('btn-toggle-on', mode === 'chord');
-        
         document.getElementById('sound-lab').style.display = mode === 'drum' ? 'grid' : 'none';
         document.getElementById('chord-lab').style.display = mode === 'chord' ? 'block' : 'none';
     }
 
     function updateChordSettings() {
-        const padData = projectData[activeGroup][selectedPad];
-        padData.chord.root = parseInt(document.getElementById('chord-root').value);
-        padData.chord.oct = parseInt(document.getElementById('chord-oct').value);
-        padData.chord.shape = document.getElementById('chord-shape').value;
-        padData.chord.voice = document.getElementById('chord-voice').value;
+        const c = projectData[activeGroup][selectedPad].chord;
+        c.root = parseInt(document.getElementById('chord-root').value);
+        c.oct = parseInt(document.getElementById('chord-oct').value);
+        c.shape = document.getElementById('chord-shape').value;
+        c.inv = parseInt(document.getElementById('chord-inv').value);
+        c.strum = parseInt(document.getElementById('chord-strum').value);
     }
 
     function syncChordUI() {
-        const padData = projectData[activeGroup][selectedPad];
-        document.getElementById('chord-root').value = padData.chord.root;
-        document.getElementById('chord-oct').value = padData.chord.oct;
-        document.getElementById('chord-shape').value = padData.chord.shape;
-        document.getElementById('chord-voice').value = padData.chord.voice;
-        setPadMode(padData.mode); // Refreshes view
+        const c = projectData[activeGroup][selectedPad].chord;
+        document.getElementById('chord-root').value = c.root;
+        document.getElementById('chord-oct').value = c.oct;
+        document.getElementById('chord-shape').value = c.shape;
+        document.getElementById('chord-inv').value = c.inv;
+        document.getElementById('chord-strum').value = c.strum;
+        setPadMode(projectData[activeGroup][selectedPad].mode);
     }
 
-    /* --- SCHEDULER W/ CHORD ENGINE --- */
+    /* --- SCHEDULER W/ SORCERER ENGINE --- */
     function scheduleNote(beatNumber, time) {
         if (!midiOut) return;
         const bpm = parseInt(document.getElementById('tempo').value);
@@ -368,11 +371,10 @@
         const isEven = beatNumber % 2 !== 0;
         const swingDelay = isEven ? ((60/bpm)/4) * (swing/100) : 0;
         const humanJitter = humanize ? (Math.random() * 0.015) : 0;
-        const midiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
+        const baseMidiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
         
-        // Loop all Groups
         for (let g = 0; g < 4; g++) {
-            const chan = g; // 0-3
+            const chan = g; 
             const noteOn = 0x90 + chan;
             const noteOff = 0x80 + chan;
             const ccStatus = 0xB0 + chan;
@@ -383,29 +385,33 @@
                 const note = pad.notes[stepIdx];
                 const auto = pad.auto[stepIdx];
                 
-                if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], midiTime);
+                if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], baseMidiTime);
                 
                 if (note !== 'O') {
                     const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
                     
                     if (pad.mode === 'chord') {
-                        // --- CHORD GENERATION ---
-                        const baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root; // MIDI Note
-                        const intervals = chordShapes[pad.chord.shape];
+                        // --- SORCERER ENGINE ---
+                        const baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
+                        let intervals = [...chordShapes[pad.chord.shape]];
                         
+                        // Apply Inversion
+                        if(pad.chord.inv > 0) intervals = getInversion(intervals, pad.chord.inv);
+
                         intervals.forEach((interval, i) => {
-                            let noteNum = baseNote + interval;
-                            // Spread Voicing: Move 2nd note up an octave
-                            if (pad.chord.voice === 'wide' && i === 1) noteNum += 12;
+                            const noteNum = baseNote + interval;
+                            // Apply Strum Delay (i * strum amount in ms)
+                            const strumDelay = i * pad.chord.strum; 
+                            // Randomize Velocity slightly per note for "Mystique"
+                            const velVar = Math.max(1, Math.min(127, vel + (Math.random() * 10 - 5)));
                             
-                            midiOut.send([noteOn, noteNum, vel], midiTime);
-                            midiOut.send([noteOff, noteNum, 0], midiTime + 100);
+                            midiOut.send([noteOn, noteNum, velVar], baseMidiTime + strumDelay);
+                            midiOut.send([noteOff, noteNum, 0], baseMidiTime + strumDelay + 100);
                         });
                         
                     } else {
-                        // --- DRUM MODE ---
-                        midiOut.send([noteOn, padNotes[p], vel], midiTime);
-                        midiOut.send([noteOff, padNotes[p], 0], midiTime + 100);
+                        midiOut.send([noteOn, padNotes[p], vel], baseMidiTime);
+                        midiOut.send([noteOff, padNotes[p], 0], baseMidiTime + 100);
                     }
 
                     if (g === activeGroup) {
@@ -416,70 +422,45 @@
         }
     }
 
-    /* --- HELPERS --- */
-    function flashPad(note) { const padIdx = padNotes.indexOf(note); if (padIdx !== -1) { const btn = document.getElementById(`btn-${padIdx}`); if (btn) { btn.classList.add('hit'); setTimeout(() => btn.classList.remove('hit'), 100); } } }
-    function log(m) { const l = document.getElementById('log'); if(m.startsWith("COUNT")) l.innerHTML = `<div class="lcd-overlay">${m.split(":")[1]}</div>`; else { if(l.querySelector('.lcd-overlay')) l.innerHTML=''; l.innerHTML = `<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString().split(' ')[0]}</span>${m}</div>` + l.innerHTML; } }
+    /* --- INIT & BOILERPLATE --- */
+    const oxoPresets = { "KICK": [{name:"4-Floor", pat:"XOOOXOOOXOOOXOOO"}], "SNARE": [{name:"Backbeat", pat:"OOOOXOOOOOOOXOOO"}] }; // Simplified for space
+    const ps = document.getElementById('preset-select');
+    let def = document.createElement('option'); def.innerText = "-- SELECT --"; ps.appendChild(def);
+    for (const [cat, list] of Object.entries(oxoPresets)) { const g = document.createElement('optgroup'); g.label = cat; list.forEach(p => { const o = document.createElement('option'); o.value = JSON.stringify(p); o.innerText = p.name; g.appendChild(o); }); ps.appendChild(g); }
+
+    const gridEl = document.getElementById('pad-grid');
+    [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2].forEach(idx => { const btn = document.createElement('div'); btn.className = 'pad-btn' + (idx === 0 ? ' pad-btn-sq' : ''); btn.id = `btn-${idx}`; btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`; btn.onclick = () => selectPad(idx); gridEl.appendChild(btn); });
+
+    if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
+
+    // Standard Helpers
+    function flashPad(n){const i=padNotes.indexOf(n);if(i!==-1){const b=document.getElementById(`btn-${i}`);if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100);}}}
+    function log(m){const l=document.getElementById('log');if(m.startsWith("COUNT"))l.innerHTML=`<div class="lcd-overlay">${m.split(":")[1]}</div>`;else{if(l.querySelector('.lcd-overlay'))l.innerHTML='';l.innerHTML=`<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString().split(' ')[0]}</span>${m}</div>`+l.innerHTML;}}
+    function toggleHuman(){humanize=!humanize;document.getElementById('human-btn').classList.toggle('btn-toggle-on',humanize);}
+    function toggleCountIn(){countIn=!countIn;document.getElementById('count-btn').classList.toggle('btn-toggle-on',countIn);}
+    function toggleTransport(){sendTransport=!sendTransport;document.getElementById('transport-btn').classList.toggle('btn-toggle-on',sendTransport);document.getElementById('transport-btn').innerText=`TX: ${sendTransport?'START/STOP':'CLOCK ONLY'}`;}
+    function toggleDark(){document.body.classList.toggle('dark-mode');localStorage.setItem('oxo_dark',document.body.classList.contains('dark-mode'));}
+    function toggleLayout(){document.getElementById('app-chassis').classList.toggle('skinny-mode');}
+    function openFeedback(){document.getElementById('feedback-modal').style.display='flex';} function closeFeedback(){document.getElementById('feedback-modal').style.display='none';} function submitFeedback(){const t=document.getElementById('fb-type').value,m=document.getElementById('fb-text').value; window.open(`mailto:bryan.labchuk@gmail.com?subject=EP-DC-OXO Feedback: ${t}&body=${m}`); closeFeedback();}
+
+    // Core Logic
+    function selectGroup(idx){activeGroup=idx;document.querySelectorAll('.group-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));document.getElementById('chan-display').innerText=`GROUP ${['A','B','C','D'][idx]} (CH ${idx+1})`;log(`GROUP ${['A','B','C','D'][idx]} SELECTED`);selectPad(selectedPad);}
+    function selectPad(idx){selectedPad=idx;document.querySelectorAll('.pad-btn').forEach(b=>b.classList.remove('active-pad'));document.getElementById(`btn-${idx}`).classList.add('active-pad');document.getElementById('editor').style.display='block';let l=legends[idx];if(idx===0)l='■';document.getElementById('editor-title').innerText=`EDIT PAD ${l}`;syncChordUI();renderSteps();}
+    function renderSteps(){const c=document.getElementById('grid-notes');c.innerHTML='';const d=projectData[activeGroup][selectedPad];for(let i=0;i<d.steps;i++){const n=document.createElement('div');const v=d.notes[i];n.className=`step-box ${v!=='O'?'on-'+v.toLowerCase():'off'}`;n.innerText=v;n.onclick=()=>{const cy=['O','X','Y','Z'];d.notes[i]=cy[(cy.indexOf(v)+1)%cy.length];renderSteps();};c.appendChild(n);}}
     
-    function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
-    function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
-    function toggleTransport() { sendTransport = !sendTransport; document.getElementById('transport-btn').classList.toggle('btn-toggle-on', sendTransport); document.getElementById('transport-btn').innerText = `TX: ${sendTransport ? 'START/STOP' : 'CLOCK ONLY'}`; }
-    function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode')); }
-    function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
-    
-    function selectPad(idx) {
-        selectedPad = idx;
-        document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
-        document.getElementById(`btn-${idx}`).classList.add('active-pad');
-        document.getElementById('editor').style.display = 'block';
-        let leg = legends[idx]; if(idx === 0) leg = '■';
-        document.getElementById('editor-title').innerText = `EDIT PAD ${leg}`;
-        
-        syncChordUI(); // Sync Mode & Chord settings
-        renderSteps();
-    }
-
-    function selectGroup(idx) { 
-        activeGroup = idx; 
-        document.querySelectorAll('.group-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx)); 
-        document.getElementById('chan-display').innerText = `GROUP ${['A','B','C','D'][idx]} (CH ${idx+1})`;
-        log(`GROUP ${['A','B','C','D'][idx]} SELECTED`);
-        selectPad(selectedPad); // Refresh view
-    }
-
-    function renderSteps() {
-        const noteContainer = document.getElementById('grid-notes');
-        noteContainer.innerHTML = '';
-        const padData = projectData[activeGroup][selectedPad];
-        for (let i = 0; i < padData.steps; i++) {
-            const nDiv = document.createElement('div');
-            const val = padData.notes[i];
-            nDiv.className = `step-box ${val !== 'O' ? 'on-' + val.toLowerCase() : 'off'}`;
-            nDiv.innerText = val;
-            nDiv.onclick = () => {
-                const cycle = ['O', 'X', 'Y', 'Z'];
-                padData.notes[i] = cycle[(cycle.indexOf(val) + 1) % cycle.length];
-                renderSteps();
-            };
-            noteContainer.appendChild(nDiv);
-        }
-    }
-
-    // --- STANDARD AUDIO/MIDI BOILERPLATE (Minified) ---
-    function nextNote() { const bpm = parseInt(document.getElementById('tempo').value); const sPerBeat = 60.0 / bpm; nextNoteTime += 0.25 * sPerBeat; current16thNote++; }
-    function scheduler() { while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) { const tBars = parseInt(document.getElementById('global-bars').value); if (current16thNote >= tBars * 16) { stopSequencer(); log("COMPLETE"); return; } scheduleNote(current16thNote, nextNoteTime); nextNote(); } if (isPlaying) timerID = requestAnimationFrame(scheduler); }
-    function handleInject() { if (!midiOut || !audioCtx) return log("ERR: INIT MIDI"); if (countIn) runCountIn(); else startSequencer(); }
-    function runCountIn() { let b=4; const bpm=parseInt(document.getElementById('tempo').value); log(`COUNT: ${b}...`); const i=setInterval(()=>{ b--; if(b>0) log(`COUNT: ${b}...`); else { clearInterval(i); log("GO!"); startSequencer(); } }, 60000/bpm); }
-    function startSequencer() { stopSequencer(); isPlaying=true; current16thNote=0; nextNoteTime=audioCtx.currentTime+0.1; if(sendTransport) midiOut.send([0xFA]); log("ROLLING..."); scheduler(); }
-    function stopSequencer() { isPlaying=false; if(timerID) cancelAnimationFrame(timerID); if(midiOut && sendTransport) midiOut.send([0xFC]); midiOut.send([0xB0+activeGroup, 123, 0]); log("HALTED"); }
-    async function initAudioAndMIDI() { try { if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') await audioCtx.resume(); const m=await navigator.requestMIDIAccess(); midiOut=Array.from(m.outputs.values()).find(o=>o.name.toLowerCase().includes("ep")||o.name.toLowerCase().includes("sample")); if(midiOut) { document.body.className = midiOut.name.toLowerCase().includes("1320") ? "theme-1320" : midiOut.name.toLowerCase().includes("133") ? "theme-133" : "theme-40"; document.getElementById('init-btn').innerText="LINKED"; log("READY"); } else log("ERR: NO DEV"); } catch(e){ log("ERR: MIDI"); } }
-    function sendLiveCC(c,v){if(midiOut) midiOut.send([0xB0+activeGroup,c,parseInt(v)]);}
+    // Engine Boilerplate
+    async function initAudioAndMIDI(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')await audioCtx.resume();const m=await navigator.requestMIDIAccess();midiOut=Array.from(m.outputs.values()).find(o=>o.name.toLowerCase().includes("ep")||o.name.toLowerCase().includes("sample"));if(midiOut){const n=midiOut.name.toLowerCase();document.body.className=n.includes("1320")?"theme-1320":n.includes("133")?"theme-133":"theme-40";document.getElementById('init-btn').innerText="LINKED";log("READY");}else log("ERR: NO DEV");}catch(e){log("ERR: ACCESS");}}
+    function nextNote(){const b=parseInt(document.getElementById('tempo').value);nextNoteTime+=(0.25*(60.0/b));current16thNote++;}
+    function scheduler(){while(nextNoteTime<audioCtx.currentTime+scheduleAheadTime){const t=parseInt(document.getElementById('global-bars').value);if(current16thNote>=t*16){stopSequencer();log("COMPLETE");return;}scheduleNote(current16thNote,nextNoteTime);nextNote();}if(isPlaying)timerID=requestAnimationFrame(scheduler);}
+    function handleInject(){if(!midiOut||!audioCtx)return log("ERR: INIT MIDI");if(countIn)runCountIn();else startSequencer();}
+    function runCountIn(){let b=4;const bpm=parseInt(document.getElementById('tempo').value);log(`COUNT: ${b}...`);const i=setInterval(()=>{b--;if(b>0)log(`COUNT: ${b}...`);else{clearInterval(i);log("GO!");startSequencer();}},60000/bpm);}
+    function startSequencer(){stopSequencer();isPlaying=true;current16thNote=0;nextNoteTime=audioCtx.currentTime+0.1;if(sendTransport)midiOut.send([0xFA]);log("ROLLING...");scheduler();}
+    function stopSequencer(){isPlaying=false;if(timerID)cancelAnimationFrame(timerID);if(midiOut){if(sendTransport)midiOut.send([0xFC]);midiOut.send([0xB0+activeGroup,123,0]);}log("HALTED");}
+    function sendLiveCC(c,v){if(midiOut)midiOut.send([0xB0+activeGroup,c,parseInt(v)]);}
     function updateStepCount(v){projectData[activeGroup][selectedPad].steps=parseInt(v);renderSteps();}
     function clearCurrentPad(){projectData[activeGroup][selectedPad].notes.fill('O');renderSteps();}
     function saveProject(){const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(projectData));a.download="ep_oxo_proj.json";a.click();log("SAVED");}
     function loadProject(i){const r=new FileReader();r.onload=(e)=>{projectData=JSON.parse(e.target.result);selectPad(selectedPad);log("LOADED");};r.readAsText(i.files[0]);}
-    
-    // --- FEEDBACK & PRESETS (Minified) ---
-    function openFeedback(){document.getElementById('feedback-modal').style.display='flex';} function closeFeedback(){document.getElementById('feedback-modal').style.display='none';} function submitFeedback(){const t=document.getElementById('fb-type').value,m=document.getElementById('fb-text').value; window.open(`mailto:bryan.labchuk@gmail.com?subject=EP-DC-OXO Feedback: ${t}&body=${m}`); closeFeedback();}
     function applyPreset(v){if(!v||v.startsWith("-"))return;const p=JSON.parse(v);if(p.type==="multi"){for(const[i,s]of Object.entries(p.tracks))for(let j=0;j<32;j++)projectData[activeGroup][i].notes[j]=s[j%s.length]||'O';}else{const s=p.pat.replace(/\s/g,'');for(let j=0;j<32;j++)projectData[activeGroup][selectedPad].notes[j]=s[j%s.length]||'O';}renderSteps();document.getElementById('preset-select').selectedIndex=0;log("LOADED");}
 
     selectPad(0);
