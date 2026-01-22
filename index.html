@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
+        <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -12,13 +12,13 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // TRASH WEED</title>
+    <title>EP-DC-OXO // ALCHEMIST</title>
     
     <style>
-        /* --- CORE VARIABLES --- */
+        /* --- VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
-            --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #080a08; 
+            --accent: #ff3e00; --magic: #8a2be2; --text: #1a1a1a; --lcd-bg: #080a08; 
             --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.45);
             --shadow: rgba(0,0,0,0.4); --fader-track: #ccc;
         }
@@ -30,7 +30,7 @@
         body.dark-mode {
             --bg: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
             --text: #e0e0e0; --border: #444; --panel-bg: rgba(30,30,30,0.9); 
-            --fader-track: #444;
+            --fader-track: #444; --magic: #bd7bf0;
         }
 
         body {
@@ -47,6 +47,10 @@
             transition: max-width 0.4s ease;
         }
         .chassis.skinny-mode { max-width: 480px; }
+
+        /* --- FLUX SLIDER --- */
+        input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); border-color: white; }
+        .magic-label { color: var(--magic); font-weight: 900; letter-spacing: 1px; }
 
         /* --- FEEDBACK MODULE --- */
         #feedback-btn {
@@ -168,7 +172,7 @@
             <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
         </div>
     </div>
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // SORCERER v29</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // ALCHEMIST v30</div></div>
 
     <div class="main-deck">
         <div class="deck-left">
@@ -211,7 +215,7 @@
 
                 <div id="chord-lab" style="display:none;" class="control-group">
                     <div class="config-grid">
-                        <div><label>ROOT NOTE</label>
+                        <div><label>ROOT</label>
                             <select id="chord-root" onchange="updateChordSettings()">
                                 <option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option>
                             </select>
@@ -221,29 +225,42 @@
                                 <option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
                             </select>
                         </div>
-                        <div style="grid-column: span 2;">
-                            <label>SHAPE & EXTENSION</label>
-                            <select id="chord-shape" onchange="updateChordSettings()">
-                                <optgroup label="Triads">
-                                    <option value="maj">Major</option><option value="min">Minor</option><option value="dim">Diminished</option><option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
-                                </optgroup>
-                                <optgroup label="7ths">
-                                    <option value="maj7">Major 7</option><option value="min7">Minor 7</option><option value="dom7">Dominant 7</option><option value="m7b5">Min 7 (b5)</option><option value="dim7">Dim 7</option><option value="mM7">Min-Maj 7</option>
-                                </optgroup>
-                                <optgroup label="Extensions (9/11/13)">
-                                    <option value="maj9">Major 9</option><option value="min9">Minor 9</option><option value="dom9">Dominant 9</option><option value="add9">Add 9</option><option value="min11">Minor 11</option><option value="dom13">Dominant 13</option>
-                                </optgroup>
+                        
+                        <div><label>QUALITY</label>
+                            <select id="chord-quality" onchange="updateChordSettings()">
+                                <option value="maj">Major</option><option value="min">Minor</option>
+                                <option value="dom">Dominant</option><option value="dim">Diminished</option>
+                                <option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
                             </select>
                         </div>
+                        
+                        <div><label>EXTENSION</label>
+                            <select id="chord-ext" onchange="updateChordSettings()">
+                                <option value="none">Triad (None)</option>
+                                <option value="7">7th</option>
+                                <option value="9">9th</option>
+                                <option value="11">11th</option>
+                                <option value="13">13th</option>
+                                <option value="6">6th</option>
+                            </select>
+                        </div>
+
                         <div><label>INVERSION</label>
                             <select id="chord-inv" onchange="updateChordSettings()">
                                 <option value="0">Root Pos</option><option value="1">1st Inv</option><option value="2">2nd Inv</option><option value="3">3rd Inv</option>
                             </select>
                         </div>
-                        <div><label>STRUM</label>
-                            <select id="chord-strum" onchange="updateChordSettings()">
-                                <option value="0">Tight</option><option value="10">Human</option><option value="25">Loose</option><option value="40">Sloppy</option>
+                        <div><label>VOICING</label>
+                            <select id="chord-voice" onchange="updateChordSettings()">
+                                <option value="close">Close (Tight)</option>
+                                <option value="wide">Wide (Spread)</option>
+                                <option value="open">Open (Shell)</option>
                             </select>
+                        </div>
+
+                        <div style="grid-column: span 2; margin-top:10px;">
+                            <label class="magic-label">FLUX (MYSTERY DIAL)</label>
+                            <input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" value="0" oninput="updateChordSettings()">
                         </div>
                     </div>
                 </div>
@@ -304,29 +321,60 @@
             auto: Array(32).fill(0), 
             autoTargetCC: 74,
             mode: 'drum',
-            chord: { root:0, oct:3, shape:'maj', inv:0, strum:10 }
+            chord: { root:0, oct:3, quality:'maj', ext:'none', inv:0, voice:'close', flux:0 }
         }))
     );
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
-    
-    // EXTENDED CHORD LIBRARY
-    const chordShapes = {
-        'maj': [0, 4, 7], 'min': [0, 3, 7], 'dim': [0, 3, 6], 'aug': [0, 4, 8], 'sus2': [0, 2, 7], 'sus4': [0, 5, 7],
-        'maj7': [0, 4, 7, 11], 'min7': [0, 3, 7, 10], 'dom7': [0, 4, 7, 10], 'm7b5': [0, 3, 6, 10], 'dim7': [0, 3, 6, 9], 'mM7': [0, 3, 7, 11],
-        'maj9': [0, 4, 7, 11, 14], 'min9': [0, 3, 7, 10, 14], 'dom9': [0, 4, 7, 10, 14], 'add9': [0, 4, 7, 14],
-        'min11': [0, 3, 7, 10, 14, 17], 'dom13': [0, 4, 7, 10, 14, 21]
-    };
 
-    /* --- CHORD LOGIC --- */
-    function getInversion(intervals, invIndex) {
-        let newIntervals = [...intervals];
-        for(let i=0; i<invIndex; i++) {
-            let note = newIntervals.shift();
-            newIntervals.push(note + 12);
+    /* --- CHORD ENGINE --- */
+    function getChordIntervals(quality, ext) {
+        let intervals = [0]; // Root
+        
+        // 1. Thirds
+        if (['min', 'dim'].includes(quality)) intervals.push(3);
+        else if (['sus2'].includes(quality)) intervals.push(2);
+        else if (['sus4'].includes(quality)) intervals.push(5);
+        else intervals.push(4); // Maj/Dom/Aug
+
+        // 2. Fifths
+        if (quality === 'dim') intervals.push(6);
+        else if (quality === 'aug') intervals.push(8);
+        else intervals.push(7);
+
+        // 3. Extensions
+        if (ext !== 'none') {
+            let seventh = (quality === 'maj' || quality === 'aug') ? 11 : 10; // Maj7 vs Min7/Dom7
+            if (quality === 'dim') seventh = 9; // Dim7
+            intervals.push(seventh); // Add 7th base
+
+            if (['9', '11', '13'].includes(ext)) intervals.push(14); // Add 9
+            if (['11', '13'].includes(ext)) intervals.push(17); // Add 11
+            if (['13'].includes(ext)) intervals.push(21); // Add 13
+            if (ext === '6') { intervals.pop(); intervals.push(9); } // Replace 7 with 6
         }
-        return newIntervals;
+        return intervals;
+    }
+
+    function applyVoicing(intervals, voice) {
+        if (voice === 'close') return intervals;
+        let newInt = [...intervals];
+        if (voice === 'wide' && newInt.length > 1) newInt[1] += 12; // Move 2nd note up
+        if (voice === 'open') {
+            if (newInt.length > 1) newInt[1] += 12;
+            if (newInt.length > 2) newInt[2] += 24;
+        }
+        return newInt;
+    }
+
+    function applyInversion(intervals, inv) {
+        let newInt = [...intervals];
+        for(let i=0; i<inv; i++) {
+            let n = newInt.shift();
+            newInt.push(n + 12);
+        }
+        return newInt;
     }
 
     function setPadMode(mode) {
@@ -341,30 +389,33 @@
         const c = projectData[activeGroup][selectedPad].chord;
         c.root = parseInt(document.getElementById('chord-root').value);
         c.oct = parseInt(document.getElementById('chord-oct').value);
-        c.shape = document.getElementById('chord-shape').value;
+        c.quality = document.getElementById('chord-quality').value;
+        c.ext = document.getElementById('chord-ext').value;
         c.inv = parseInt(document.getElementById('chord-inv').value);
-        c.strum = parseInt(document.getElementById('chord-strum').value);
+        c.voice = document.getElementById('chord-voice').value;
+        c.flux = parseInt(document.getElementById('chord-flux').value);
     }
 
     function syncChordUI() {
         const c = projectData[activeGroup][selectedPad].chord;
         document.getElementById('chord-root').value = c.root;
         document.getElementById('chord-oct').value = c.oct;
-        document.getElementById('chord-shape').value = c.shape;
+        document.getElementById('chord-quality').value = c.quality;
+        document.getElementById('chord-ext').value = c.ext;
         document.getElementById('chord-inv').value = c.inv;
-        document.getElementById('chord-strum').value = c.strum;
+        document.getElementById('chord-voice').value = c.voice;
+        document.getElementById('chord-flux').value = c.flux;
         setPadMode(projectData[activeGroup][selectedPad].mode);
     }
 
-    /* --- SCHEDULER W/ SORCERER ENGINE --- */
+    /* --- SCHEDULER W/ FLUX --- */
     function scheduleNote(beatNumber, time) {
         if (!midiOut) return;
         const bpm = parseInt(document.getElementById('tempo').value);
         const secondsPer16th = (60.0 / bpm) * 0.25;
         const pulseInterval = secondsPer16th / 6;
         for (let i = 0; i < 6; i++) {
-            const midiClockTime = performance.now() + ((time + (i * pulseInterval)) - audioCtx.currentTime) * 1000;
-            midiOut.send([0xF8], midiClockTime);
+            midiOut.send([0xF8], performance.now() + ((time + (i * pulseInterval)) - audioCtx.currentTime) * 1000);
         }
 
         const swing = parseInt(document.getElementById('swing-slider').value);
@@ -374,7 +425,7 @@
         const baseMidiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
         
         for (let g = 0; g < 4; g++) {
-            const chan = g; 
+            const chan = g;
             const noteOn = 0x90 + chan;
             const noteOff = 0x80 + chan;
             const ccStatus = 0xB0 + chan;
@@ -391,19 +442,32 @@
                     const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
                     
                     if (pad.mode === 'chord') {
-                        // --- SORCERER ENGINE ---
-                        const baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
-                        let intervals = [...chordShapes[pad.chord.shape]];
+                        // --- ALCHEMIST ENGINE ---
+                        let baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
+                        let intervals = getChordIntervals(pad.chord.quality, pad.chord.ext);
                         
-                        // Apply Inversion
-                        if(pad.chord.inv > 0) intervals = getInversion(intervals, pad.chord.inv);
+                        // FLUX LOGIC (Chaos)
+                        const fluxVal = pad.chord.flux / 100;
+                        let effectiveInv = pad.chord.inv;
+                        
+                        if (fluxVal > 0 && Math.random() < fluxVal) {
+                            // 1. Random Inversion Shift
+                            if (Math.random() > 0.5) effectiveInv = (effectiveInv + 1) % 4;
+                            // 2. Octave Shift (Rare)
+                            if (fluxVal > 0.6 && Math.random() > 0.8) baseNote += (Math.random() > 0.5 ? 12 : -12);
+                            // 3. Glimmer Note (Very Rare High Note)
+                            if (fluxVal > 0.8 && Math.random() > 0.8) intervals.push(19); // Add a 5th way up
+                        }
+
+                        // Apply Mods
+                        intervals = applyInversion(intervals, effectiveInv);
+                        intervals = applyVoicing(intervals, pad.chord.voice);
 
                         intervals.forEach((interval, i) => {
                             const noteNum = baseNote + interval;
-                            // Apply Strum Delay (i * strum amount in ms)
-                            const strumDelay = i * pad.chord.strum; 
-                            // Randomize Velocity slightly per note for "Mystique"
-                            const velVar = Math.max(1, Math.min(127, vel + (Math.random() * 10 - 5)));
+                            // Strum simulation based on Flux + standard stagger
+                            const strumDelay = i * (5 + (fluxVal * 20)); 
+                            const velVar = Math.max(1, Math.min(127, vel + ((Math.random() - 0.5) * fluxVal * 40)));
                             
                             midiOut.send([noteOn, noteNum, velVar], baseMidiTime + strumDelay);
                             midiOut.send([noteOff, noteNum, 0], baseMidiTime + strumDelay + 100);
@@ -422,8 +486,8 @@
         }
     }
 
-    /* --- INIT & BOILERPLATE --- */
-    const oxoPresets = { "KICK": [{name:"4-Floor", pat:"XOOOXOOOXOOOXOOO"}], "SNARE": [{name:"Backbeat", pat:"OOOOXOOOOOOOXOOO"}] }; // Simplified for space
+    /* --- BOILERPLATE --- */
+    const oxoPresets = { "KICK": [{name:"4-Floor", pat:"XOOOXOOOXOOOXOOO"}], "SNARE": [{name:"Backbeat", pat:"OOOOXOOOOOOOXOOO"}] }; 
     const ps = document.getElementById('preset-select');
     let def = document.createElement('option'); def.innerText = "-- SELECT --"; ps.appendChild(def);
     for (const [cat, list] of Object.entries(oxoPresets)) { const g = document.createElement('optgroup'); g.label = cat; list.forEach(p => { const o = document.createElement('option'); o.value = JSON.stringify(p); o.innerText = p.name; g.appendChild(o); }); ps.appendChild(g); }
@@ -433,7 +497,6 @@
 
     if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
 
-    // Standard Helpers
     function flashPad(n){const i=padNotes.indexOf(n);if(i!==-1){const b=document.getElementById(`btn-${i}`);if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100);}}}
     function log(m){const l=document.getElementById('log');if(m.startsWith("COUNT"))l.innerHTML=`<div class="lcd-overlay">${m.split(":")[1]}</div>`;else{if(l.querySelector('.lcd-overlay'))l.innerHTML='';l.innerHTML=`<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString().split(' ')[0]}</span>${m}</div>`+l.innerHTML;}}
     function toggleHuman(){humanize=!humanize;document.getElementById('human-btn').classList.toggle('btn-toggle-on',humanize);}
@@ -443,12 +506,10 @@
     function toggleLayout(){document.getElementById('app-chassis').classList.toggle('skinny-mode');}
     function openFeedback(){document.getElementById('feedback-modal').style.display='flex';} function closeFeedback(){document.getElementById('feedback-modal').style.display='none';} function submitFeedback(){const t=document.getElementById('fb-type').value,m=document.getElementById('fb-text').value; window.open(`mailto:bryan.labchuk@gmail.com?subject=EP-DC-OXO Feedback: ${t}&body=${m}`); closeFeedback();}
 
-    // Core Logic
     function selectGroup(idx){activeGroup=idx;document.querySelectorAll('.group-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));document.getElementById('chan-display').innerText=`GROUP ${['A','B','C','D'][idx]} (CH ${idx+1})`;log(`GROUP ${['A','B','C','D'][idx]} SELECTED`);selectPad(selectedPad);}
     function selectPad(idx){selectedPad=idx;document.querySelectorAll('.pad-btn').forEach(b=>b.classList.remove('active-pad'));document.getElementById(`btn-${idx}`).classList.add('active-pad');document.getElementById('editor').style.display='block';let l=legends[idx];if(idx===0)l='■';document.getElementById('editor-title').innerText=`EDIT PAD ${l}`;syncChordUI();renderSteps();}
     function renderSteps(){const c=document.getElementById('grid-notes');c.innerHTML='';const d=projectData[activeGroup][selectedPad];for(let i=0;i<d.steps;i++){const n=document.createElement('div');const v=d.notes[i];n.className=`step-box ${v!=='O'?'on-'+v.toLowerCase():'off'}`;n.innerText=v;n.onclick=()=>{const cy=['O','X','Y','Z'];d.notes[i]=cy[(cy.indexOf(v)+1)%cy.length];renderSteps();};c.appendChild(n);}}
     
-    // Engine Boilerplate
     async function initAudioAndMIDI(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')await audioCtx.resume();const m=await navigator.requestMIDIAccess();midiOut=Array.from(m.outputs.values()).find(o=>o.name.toLowerCase().includes("ep")||o.name.toLowerCase().includes("sample"));if(midiOut){const n=midiOut.name.toLowerCase();document.body.className=n.includes("1320")?"theme-1320":n.includes("133")?"theme-133":"theme-40";document.getElementById('init-btn').innerText="LINKED";log("READY");}else log("ERR: NO DEV");}catch(e){log("ERR: ACCESS");}}
     function nextNote(){const b=parseInt(document.getElementById('tempo').value);nextNoteTime+=(0.25*(60.0/b));current16thNote++;}
     function scheduler(){while(nextNoteTime<audioCtx.currentTime+scheduleAheadTime){const t=parseInt(document.getElementById('global-bars').value);if(current16thNote>=t*16){stopSequencer();log("COMPLETE");return;}scheduleNote(current16thNote,nextNoteTime);nextNote();}if(isPlaying)timerID=requestAnimationFrame(scheduler);}
