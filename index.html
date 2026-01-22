@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <!-- Google tag (gtag.js) -->
+            <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -12,10 +12,10 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // ALCHEMIST</title>
+    <title>EP-DC-OXO // ARCHIVE</title>
     
     <style>
-        /* --- VARIABLES --- */
+        /* --- CORE VARIABLES --- */
         :root {
             --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
             --accent: #ff3e00; --magic: #8a2be2; --text: #1a1a1a; --lcd-bg: #080a08; 
@@ -172,7 +172,7 @@
             <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
         </div>
     </div>
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // ALCHEMIST v30</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // ARCHIVE v31</div></div>
 
     <div class="main-deck">
         <div class="deck-left">
@@ -215,53 +215,18 @@
 
                 <div id="chord-lab" style="display:none;" class="control-group">
                     <div class="config-grid">
-                        <div><label>ROOT</label>
-                            <select id="chord-root" onchange="updateChordSettings()">
-                                <option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option>
+                        <div><label>ROOT</label><select id="chord-root" onchange="updateChordSettings()"><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option></select></div>
+                        <div><label>OCTAVE</label><select id="chord-oct" onchange="updateChordSettings()"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div>
+                        <div style="grid-column: span 2;"><label>SHAPE & EXTENSION</label>
+                            <select id="chord-shape" onchange="updateChordSettings()">
+                                <optgroup label="Triads"><option value="maj">Major</option><option value="min">Minor</option><option value="dim">Diminished</option><option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option></optgroup>
+                                <optgroup label="7ths"><option value="maj7">Major 7</option><option value="min7">Minor 7</option><option value="dom7">Dominant 7</option><option value="m7b5">Min 7 (b5)</option><option value="dim7">Dim 7</option><option value="mM7">Min-Maj 7</option></optgroup>
+                                <optgroup label="Extensions"><option value="maj9">Major 9</option><option value="min9">Minor 9</option><option value="dom9">Dominant 9</option><option value="add9">Add 9</option><option value="min11">Minor 11</option><option value="dom13">Dominant 13</option></optgroup>
                             </select>
                         </div>
-                        <div><label>OCTAVE</label>
-                            <select id="chord-oct" onchange="updateChordSettings()">
-                                <option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
-                            </select>
-                        </div>
-                        
-                        <div><label>QUALITY</label>
-                            <select id="chord-quality" onchange="updateChordSettings()">
-                                <option value="maj">Major</option><option value="min">Minor</option>
-                                <option value="dom">Dominant</option><option value="dim">Diminished</option>
-                                <option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
-                            </select>
-                        </div>
-                        
-                        <div><label>EXTENSION</label>
-                            <select id="chord-ext" onchange="updateChordSettings()">
-                                <option value="none">Triad (None)</option>
-                                <option value="7">7th</option>
-                                <option value="9">9th</option>
-                                <option value="11">11th</option>
-                                <option value="13">13th</option>
-                                <option value="6">6th</option>
-                            </select>
-                        </div>
-
-                        <div><label>INVERSION</label>
-                            <select id="chord-inv" onchange="updateChordSettings()">
-                                <option value="0">Root Pos</option><option value="1">1st Inv</option><option value="2">2nd Inv</option><option value="3">3rd Inv</option>
-                            </select>
-                        </div>
-                        <div><label>VOICING</label>
-                            <select id="chord-voice" onchange="updateChordSettings()">
-                                <option value="close">Close (Tight)</option>
-                                <option value="wide">Wide (Spread)</option>
-                                <option value="open">Open (Shell)</option>
-                            </select>
-                        </div>
-
-                        <div style="grid-column: span 2; margin-top:10px;">
-                            <label class="magic-label">FLUX (MYSTERY DIAL)</label>
-                            <input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" value="0" oninput="updateChordSettings()">
-                        </div>
+                        <div><label>INVERSION</label><select id="chord-inv" onchange="updateChordSettings()"><option value="0">Root Pos</option><option value="1">1st Inv</option><option value="2">2nd Inv</option><option value="3">3rd Inv</option></select></div>
+                        <div><label>STRUM</label><select id="chord-strum" onchange="updateChordSettings()"><option value="0">Tight</option><option value="10">Human</option><option value="25">Loose</option><option value="40">Sloppy</option></select></div>
+                        <div style="grid-column: span 2; margin-top:10px;"><label class="magic-label">FLUX (MYSTERY DIAL)</label><input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" value="0" oninput="updateChordSettings()"></div>
                     </div>
                 </div>
 
@@ -311,70 +276,87 @@
     let activeGroup = 0;
     let humanize = false;
     let countIn = false;
-    let sendTransport = false;
+    let sendTransport = false; // Safe Default
 
-    // DATA STRUCTURE
     let projectData = Array.from({length: 4}, () => 
         Array.from({length: 12}, () => ({ 
-            steps: 16, 
-            notes: Array(32).fill('O'), 
-            auto: Array(32).fill(0), 
-            autoTargetCC: 74,
-            mode: 'drum',
-            chord: { root:0, oct:3, quality:'maj', ext:'none', inv:0, voice:'close', flux:0 }
+            steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), 
+            autoTargetCC: 74, mode: 'drum', chord: { root:0, oct:3, shape:'maj', inv:0, strum:10, flux:0 }
         }))
     );
 
     const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
     const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
+    const chordShapes = {
+        'maj': [0, 4, 7], 'min': [0, 3, 7], 'dim': [0, 3, 6], 'aug': [0, 4, 8], 'sus2': [0, 2, 7], 'sus4': [0, 5, 7],
+        'maj7': [0, 4, 7, 11], 'min7': [0, 3, 7, 10], 'dom7': [0, 4, 7, 10], 'm7b5': [0, 3, 6, 10], 'dim7': [0, 3, 6, 9], 'mM7': [0, 3, 7, 11],
+        'maj9': [0, 4, 7, 11, 14], 'min9': [0, 3, 7, 10, 14], 'dom9': [0, 4, 7, 10, 14], 'add9': [0, 4, 7, 14],
+        'min11': [0, 3, 7, 10, 14, 17], 'dom13': [0, 4, 7, 10, 14, 21]
+    };
 
-    /* --- CHORD ENGINE --- */
-    function getChordIntervals(quality, ext) {
-        let intervals = [0]; // Root
-        
-        // 1. Thirds
-        if (['min', 'dim'].includes(quality)) intervals.push(3);
-        else if (['sus2'].includes(quality)) intervals.push(2);
-        else if (['sus4'].includes(quality)) intervals.push(5);
-        else intervals.push(4); // Maj/Dom/Aug
+    // --- MASSIVE PATTERN LIBRARY ---
+    const oxoPresets = {
+        "KICK (Single Pad)": [
+            { name: "4-Floor Basic", pat: "XOOO XOOO XOOO XOOO" },
+            { name: "4-Floor Driving", pat: "XOOX XOOX XOOX XOOX" },
+            { name: "Boom Bap 1", pat: "XOOZ OOXZ OOOO XOOO" },
+            { name: "Boom Bap 2", pat: "XOOX OOZX OOZO OOXO" },
+            { name: "Rock Kick 1", pat: "XOOO OOXZ XOOO OOXZ" },
+            { name: "Rock Kick 2", pat: "XOOO XXOO XOOO XXOO" },
+            { name: "Reggaeton Kick", pat: "XOOO OOXZ XOOO OOXZ" },
+            { name: "Dubstep Half", pat: "XOOO OOOO OOOO OOOO" },
+            { name: "Electro Break", pat: "XOOX OOOX XOOO OOOX" }
+        ],
+        "SNARE (Single Pad)": [
+            { name: "Backbeat 2/4", pat: "OOOO XOOO OOOO XOOO" },
+            { name: "Half Time 3", pat: "OOOO OOOO XOOO OOOO" },
+            { name: "Trap Snare", pat: "OOOO OOOO XOOO OOOO" },
+            { name: "Ghost Notes 1", pat: "OOOO YOOO ZZZZ YOOZ" },
+            { name: "Ghost Notes 2", pat: "OOZO YOOZ ZOZO YOOO" },
+            { name: "Marching", pat: "XOOX XOOX XOOX XXXX" },
+            { name: "Clap Layer", pat: "OOOO XOOO OOOO XOOZ" }
+        ],
+        "HATS (Single Pad)": [
+            { name: "8th Notes", pat: "XOXO XOXO XOXO XOXO" },
+            { name: "16th Notes", pat: "XXXX XXXX XXXX XXXX" },
+            { name: "Offbeat Open", pat: "OOXO OOXO OOXO OOXO" },
+            { name: "Trap Rolls 1", pat: "XZXZ XZXZ XXXX XZXZ" },
+            { name: "Trap Rolls 2", pat: "XZXZ XZXZ XZXZ ZZZZ" },
+            { name: "Shaker Feel", pat: "YXZY YXZY YXZY YXZY" },
+            { name: "Swing 16s", pat: "XOOX XOOX XOOX XOOX" }
+        ],
+        "FULL KITS (Pads 1-3)": [
+            { name: "Basic House Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } },
+            { name: "Deep House", type: "multi", tracks: { 0:"XOOOXOOXXOOOXOOX", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } },
+            { name: "Boom Bap 1", type: "multi", tracks: { 0:"XOOZOOXZOOOOXOOO", 1:"OOOOYOOOZZZZYOOZ", 2:"XOXOXOXOXOXOXOXO" } },
+            { name: "Boom Bap 2", type: "multi", tracks: { 0:"XOOXOOZXOOZOOOXO", 1:"OOOOXOOOZOOOXOOZ", 2:"XZXZXZXZXZXZXZXZ" } },
+            { name: "Rock Beat 1", type: "multi", tracks: { 0:"XOOOXXOOXOOOXXOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXOXOXXXXXOXO" } },
+            { name: "Punk Drive", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXXXXXXXXXXXX" } },
+            { name: "Dem Bow Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOXZOOXZOOXZOOXZ", 2:"XXXXXXXXXXXXXXXX" } },
+            { name: "Trap Banger", type: "multi", tracks: { 0:"XOOOOOOOXOOOOOOO", 1:"OOOOOOOOXOOOOOOO", 2:"XZXZXZXZXXXXXZXZ" } }
+        ],
+        "ODD / EUCLIDEAN (Single)": [
+            { name: "Euclidean 3/8", pat: "XOOX OOXO" },
+            { name: "Euclidean 5/8", pat: "XOXO XOXO" },
+            { name: "Tresillo", pat: "XOOXOOXO" },
+            { name: "Cinquillo", pat: "XOXOOXOO" },
+            { name: "Bossa Clave", pat: "XOOXOOXOOOXOOXOO" }
+        ],
+        "UTILITY": [
+            { name: "All Accent (16)", pat: "XXXX XXXX XXXX XXXX" },
+            { name: "All Ghost (16)", pat: "ZZZZ ZZZZ ZZZZ ZZZZ" },
+            { name: "Clear Pattern", pat: "OOOO OOOO OOOO OOOO" }
+        ]
+    };
 
-        // 2. Fifths
-        if (quality === 'dim') intervals.push(6);
-        else if (quality === 'aug') intervals.push(8);
-        else intervals.push(7);
-
-        // 3. Extensions
-        if (ext !== 'none') {
-            let seventh = (quality === 'maj' || quality === 'aug') ? 11 : 10; // Maj7 vs Min7/Dom7
-            if (quality === 'dim') seventh = 9; // Dim7
-            intervals.push(seventh); // Add 7th base
-
-            if (['9', '11', '13'].includes(ext)) intervals.push(14); // Add 9
-            if (['11', '13'].includes(ext)) intervals.push(17); // Add 11
-            if (['13'].includes(ext)) intervals.push(21); // Add 13
-            if (ext === '6') { intervals.pop(); intervals.push(9); } // Replace 7 with 6
+    /* --- LOGIC --- */
+    function getInversion(intervals, invIndex) {
+        let newIntervals = [...intervals];
+        for(let i=0; i<invIndex; i++) {
+            let note = newIntervals.shift();
+            newIntervals.push(note + 12);
         }
-        return intervals;
-    }
-
-    function applyVoicing(intervals, voice) {
-        if (voice === 'close') return intervals;
-        let newInt = [...intervals];
-        if (voice === 'wide' && newInt.length > 1) newInt[1] += 12; // Move 2nd note up
-        if (voice === 'open') {
-            if (newInt.length > 1) newInt[1] += 12;
-            if (newInt.length > 2) newInt[2] += 24;
-        }
-        return newInt;
-    }
-
-    function applyInversion(intervals, inv) {
-        let newInt = [...intervals];
-        for(let i=0; i<inv; i++) {
-            let n = newInt.shift();
-            newInt.push(n + 12);
-        }
-        return newInt;
+        return newIntervals;
     }
 
     function setPadMode(mode) {
@@ -389,10 +371,9 @@
         const c = projectData[activeGroup][selectedPad].chord;
         c.root = parseInt(document.getElementById('chord-root').value);
         c.oct = parseInt(document.getElementById('chord-oct').value);
-        c.quality = document.getElementById('chord-quality').value;
-        c.ext = document.getElementById('chord-ext').value;
+        c.shape = document.getElementById('chord-shape').value;
         c.inv = parseInt(document.getElementById('chord-inv').value);
-        c.voice = document.getElementById('chord-voice').value;
+        c.strum = parseInt(document.getElementById('chord-strum').value);
         c.flux = parseInt(document.getElementById('chord-flux').value);
     }
 
@@ -400,15 +381,13 @@
         const c = projectData[activeGroup][selectedPad].chord;
         document.getElementById('chord-root').value = c.root;
         document.getElementById('chord-oct').value = c.oct;
-        document.getElementById('chord-quality').value = c.quality;
-        document.getElementById('chord-ext').value = c.ext;
+        document.getElementById('chord-shape').value = c.shape;
         document.getElementById('chord-inv').value = c.inv;
-        document.getElementById('chord-voice').value = c.voice;
+        document.getElementById('chord-strum').value = c.strum;
         document.getElementById('chord-flux').value = c.flux;
         setPadMode(projectData[activeGroup][selectedPad].mode);
     }
 
-    /* --- SCHEDULER W/ FLUX --- */
     function scheduleNote(beatNumber, time) {
         if (!midiOut) return;
         const bpm = parseInt(document.getElementById('tempo').value);
@@ -425,7 +404,7 @@
         const baseMidiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
         
         for (let g = 0; g < 4; g++) {
-            const chan = g;
+            const chan = g; 
             const noteOn = 0x90 + chan;
             const noteOff = 0x80 + chan;
             const ccStatus = 0xB0 + chan;
@@ -444,28 +423,22 @@
                     if (pad.mode === 'chord') {
                         // --- ALCHEMIST ENGINE ---
                         let baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
-                        let intervals = getChordIntervals(pad.chord.quality, pad.chord.ext);
+                        let intervals = [...chordShapes[pad.chord.shape]];
                         
-                        // FLUX LOGIC (Chaos)
+                        // FLUX LOGIC
                         const fluxVal = pad.chord.flux / 100;
                         let effectiveInv = pad.chord.inv;
                         
                         if (fluxVal > 0 && Math.random() < fluxVal) {
-                            // 1. Random Inversion Shift
                             if (Math.random() > 0.5) effectiveInv = (effectiveInv + 1) % 4;
-                            // 2. Octave Shift (Rare)
                             if (fluxVal > 0.6 && Math.random() > 0.8) baseNote += (Math.random() > 0.5 ? 12 : -12);
-                            // 3. Glimmer Note (Very Rare High Note)
-                            if (fluxVal > 0.8 && Math.random() > 0.8) intervals.push(19); // Add a 5th way up
+                            if (fluxVal > 0.8 && Math.random() > 0.8) intervals.push(19);
                         }
 
-                        // Apply Mods
-                        intervals = applyInversion(intervals, effectiveInv);
-                        intervals = applyVoicing(intervals, pad.chord.voice);
+                        if(effectiveInv > 0) intervals = getInversion(intervals, effectiveInv);
 
                         intervals.forEach((interval, i) => {
                             const noteNum = baseNote + interval;
-                            // Strum simulation based on Flux + standard stagger
                             const strumDelay = i * (5 + (fluxVal * 20)); 
                             const velVar = Math.max(1, Math.min(127, vel + ((Math.random() - 0.5) * fluxVal * 40)));
                             
@@ -486,8 +459,7 @@
         }
     }
 
-    /* --- BOILERPLATE --- */
-    const oxoPresets = { "KICK": [{name:"4-Floor", pat:"XOOOXOOOXOOOXOOO"}], "SNARE": [{name:"Backbeat", pat:"OOOOXOOOOOOOXOOO"}] }; 
+    /* --- INIT --- */
     const ps = document.getElementById('preset-select');
     let def = document.createElement('option'); def.innerText = "-- SELECT --"; ps.appendChild(def);
     for (const [cat, list] of Object.entries(oxoPresets)) { const g = document.createElement('optgroup'); g.label = cat; list.forEach(p => { const o = document.createElement('option'); o.value = JSON.stringify(p); o.innerText = p.name; g.appendChild(o); }); ps.appendChild(g); }
@@ -497,6 +469,7 @@
 
     if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
 
+    // Helpers
     function flashPad(n){const i=padNotes.indexOf(n);if(i!==-1){const b=document.getElementById(`btn-${i}`);if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),100);}}}
     function log(m){const l=document.getElementById('log');if(m.startsWith("COUNT"))l.innerHTML=`<div class="lcd-overlay">${m.split(":")[1]}</div>`;else{if(l.querySelector('.lcd-overlay'))l.innerHTML='';l.innerHTML=`<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString().split(' ')[0]}</span>${m}</div>`+l.innerHTML;}}
     function toggleHuman(){humanize=!humanize;document.getElementById('human-btn').classList.toggle('btn-toggle-on',humanize);}
@@ -522,7 +495,23 @@
     function clearCurrentPad(){projectData[activeGroup][selectedPad].notes.fill('O');renderSteps();}
     function saveProject(){const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(projectData));a.download="ep_oxo_proj.json";a.click();log("SAVED");}
     function loadProject(i){const r=new FileReader();r.onload=(e)=>{projectData=JSON.parse(e.target.result);selectPad(selectedPad);log("LOADED");};r.readAsText(i.files[0]);}
-    function applyPreset(v){if(!v||v.startsWith("-"))return;const p=JSON.parse(v);if(p.type==="multi"){for(const[i,s]of Object.entries(p.tracks))for(let j=0;j<32;j++)projectData[activeGroup][i].notes[j]=s[j%s.length]||'O';}else{const s=p.pat.replace(/\s/g,'');for(let j=0;j<32;j++)projectData[activeGroup][selectedPad].notes[j]=s[j%s.length]||'O';}renderSteps();document.getElementById('preset-select').selectedIndex=0;log("LOADED");}
+    
+    function applyPreset(v){
+        if(!v||v.startsWith("-"))return;
+        const p=JSON.parse(v);
+        if(p.type==="multi"){
+            for(const[i,s]of Object.entries(p.tracks))
+                // Write to current active group
+                for(let j=0;j<32;j++)projectData[activeGroup][i].notes[j]=s[j%s.length]||'O';
+            log(`LOADED KIT: ${p.name}`);
+        } else {
+            const s=p.pat.replace(/\s/g,'');
+            for(let j=0;j<32;j++)projectData[activeGroup][selectedPad].notes[j]=s[j%s.length]||'O';
+            log(`LOADED PAT: ${p.name}`);
+        }
+        renderSteps();
+        document.getElementById('preset-select').selectedIndex=0;
+    }
 
     selectPad(0);
 </script>
