@@ -230,7 +230,8 @@
                             <select id="chord-quality" onchange="updateChordSettings()">
                                 <option value="maj">Major</option><option value="min">Minor</option>
                                 <option value="dom">Dominant</option><option value="dim">Diminished</option>
-                                <option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
+                                <option value="aug">Augmented</option>
+                                <option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
                             </select>
                         </div>
                         
@@ -281,14 +282,6 @@
 
                 <div id="grid-notes" class="step-container"></div>
                 <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PATTERN</button></div>
-            </div>
-
-            <div class="control-group" style="margin-top:auto; margin-bottom:10px;">
-                <div class="config-grid">
-                    <button onclick="saveProject()" class="btn-small">SAVE .OXO</button>
-                    <button onclick="document.getElementById('file-input').click()" class="btn-small">LOAD .OXO</button>
-                    <input type="file" id="file-input" style="display:none" onchange="loadProject(this)">
-                </div>
             </div>
 
             <div class="action-row">
@@ -570,8 +563,6 @@
     function sendLiveCC(c,v){if(midiOut)midiOut.send([0xB0+activeGroup,c,parseInt(v)]);}
     function updateStepCount(v){projectData[activeGroup][selectedPad].steps=parseInt(v);renderSteps();}
     function clearCurrentPad(){projectData[activeGroup][selectedPad].notes.fill('O');renderSteps();}
-    function saveProject(){const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(projectData));a.download="ep_oxo_proj.json";a.click();log("SAVED");}
-    function loadProject(i){const r=new FileReader();r.onload=(e)=>{projectData=JSON.parse(e.target.result);selectPad(selectedPad);log("LOADED");};r.readAsText(i.files[0]);}
     function applyPreset(v){
         if(!v||v.startsWith("-"))return;
         const p=JSON.parse(v);
