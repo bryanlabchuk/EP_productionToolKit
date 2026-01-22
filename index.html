@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -10,62 +9,40 @@
     gtag('config', 'G-FXBQBXFW44');
   </script>
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EP-DC-OXO // HARMONIC ARCHIVE</title>
-
+  
   <style>
     /* --- CORE VARIABLES --- */
     :root {
       --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
-      --accent: #ff3e00;
-      --magic: #8a2be2;
-      --text: #1a1a1a;
-      --lcd-bg: #080a08;
-      --lcd-text: #39ff14;
-      --border: #8e8e8e;
-      --panel-bg: rgba(255, 255, 255, 0.45);
-      --shadow: rgba(0,0,0,0.4);
-      --fader-track: #ccc;
+      --accent: #ff3e00; --magic: #8a2be2; --text: #1a1a1a; --lcd-bg: #080a08; 
+      --lcd-text: #39ff14; --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.45);
+      --shadow: rgba(0,0,0,0.4); --fader-track: #ccc;
     }
 
     body.theme-40 { --bg: #f4f1e6; --accent: #ff3e00; --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
     body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
     body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
-
+    
     body.dark-mode {
       --bg: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-      --text: #e0e0e0;
-      --border: #444;
-      --panel-bg: rgba(30,30,30,0.9);
-      --fader-track: #444;
-      --magic: #bd7bf0;
+      --text: #e0e0e0; --border: #444; --panel-bg: rgba(30,30,30,0.9); 
+      --fader-track: #444; --magic: #bd7bf0;
     }
 
     body {
-      background: var(--bg);
-      background-attachment: fixed;
-      color: var(--text);
-      font-family: 'IBM Plex Mono', monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      transition: all 0.4s ease;
+      background: var(--bg); background-attachment: fixed; color: var(--text);
+      font-family: 'IBM Plex Mono', monospace; display: flex; flex-direction: column; 
+      align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: all 0.4s ease;
     }
 
     /* --- CHASSIS --- */
     .chassis {
-      background: var(--panel-bg);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 25px;
-      width: 95%;
-      max-width: 1000px;
-      box-shadow: 20px 20px 60px var(--shadow);
-      backdrop-filter: blur(10px);
+      background: var(--panel-bg); border: 2px solid var(--border); border-radius: 12px;
+      padding: 25px; width: 95%; max-width: 1000px;
+      box-shadow: 20px 20px 60px var(--shadow); backdrop-filter: blur(10px);
       transition: max-width 0.4s ease;
     }
     .chassis.skinny-mode { max-width: 480px; }
@@ -76,71 +53,28 @@
 
     /* --- FEEDBACK MODULE --- */
     #feedback-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--text);
-      color: var(--bg);
-      border: 2px solid var(--border);
-      padding: 10px 20px;
-      font-family: inherit;
-      font-weight: 900;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      z-index: 100;
-      transition: 0.2s;
-      letter-spacing: 1px;
-      font-size: 0.75rem;
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--text); color: var(--bg); border: 2px solid var(--border);
+      padding: 10px 20px; font-family: inherit; font-weight: 900;
+      border-radius: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      z-index: 100; transition: 0.2s; letter-spacing: 1px; font-size: 0.75rem;
     }
-    #feedback-btn:hover {
-      transform: scale(1.05);
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
+    #feedback-btn:hover { transform: scale(1.05); background: var(--accent); color: white; border-color: var(--accent); }
 
     .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(5px);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 200;
+      align-items: center; justify-content: center;
     }
     .modal-box {
-      background: var(--bg);
-      border: 2px solid var(--accent);
-      width: 90%;
-      max-width: 400px;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      color: var(--text);
+      background: var(--bg); border: 2px solid var(--accent); width: 90%; max-width: 400px;
+      padding: 25px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      display: flex; flex-direction: column; gap: 15px; color: var(--text);
     }
-    .modal-title {
-      font-size: 1.2rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--text);
-      padding-bottom: 10px;
-    }
+    .modal-title { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid var(--text); padding-bottom: 10px; }
     .modal-input {
-      width: 100%;
-      padding: 10px;
-      background: rgba(0,0,0,0.05);
-      border: 1px solid var(--text);
-      color: var(--text);
-      font-family: inherit;
-      resize: vertical;
-      min-height: 100px;
-      box-sizing: border-box;
+      width: 100%; padding: 10px; background: rgba(0,0,0,0.05); border: 1px solid var(--text);
+      color: var(--text); font-family: inherit; resize: vertical; min-height: 100px; box-sizing: border-box;
     }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
@@ -148,26 +82,14 @@
     .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
     .header-controls { display: flex; gap: 10px; }
-
+    
     /* --- TERMINAL --- */
     .lcd-display {
-      background: var(--lcd-bg);
-      color: var(--lcd-text);
-      padding: 12px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: normal;
-      border: 4px solid #222;
-      width: 100%;
-      height: 60px;
-      box-shadow: inset 0 0 20px #000;
-      text-shadow: 0 0 3px var(--lcd-text);
-      overflow-y: auto;
-      font-family: 'Courier New', Courier, monospace;
-      display: flex;
-      flex-direction: column-reverse;
-      box-sizing: border-box;
-      margin-bottom: 20px;
+      background: var(--lcd-bg); color: var(--lcd-text); padding: 12px; border-radius: 4px; 
+      font-size: 0.75rem; font-weight: normal; border: 4px solid #222; width: 100%;
+      height: 60px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 3px var(--lcd-text);
+      overflow-y: auto; font-family: 'Courier New', Courier, monospace;
+      display: flex; flex-direction: column-reverse; box-sizing: border-box; margin-bottom: 20px;
     }
     .log-entry { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 2px 0; }
     .lcd-overlay { font-size: 2rem; text-align: center; color: var(--accent); font-weight: 900; animation: pulse 0.5s infinite alternate; }
@@ -175,191 +97,57 @@
 
     /* --- LAYOUT --- */
     .main-deck { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; }
-    .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; }
+    .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
 
-    .control-group {
-      background: rgba(0,0,0,0.05);
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-    }
-    .config-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      align-items: end;
-    }
-    .split-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      align-items: end;
-    }
-
-    label {
-      font-size: 0.55rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      display: block;
-      letter-spacing: 1px;
-      opacity: 0.8;
-    }
-    select, input[type="number"] {
-      width: 100%;
-      padding: 8px;
-      background: var(--bg);
-      border: 1px solid var(--text);
-      color: var(--text);
-      font-family: inherit;
-      border-radius: 2px;
-      font-weight: bold;
-      font-size: 0.75rem;
-      box-sizing: border-box;
-    }
-
+    .control-group { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
+    .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+    
+    label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
+    select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
+    
     /* PERFORMANCE */
     .performance-container { display: grid; grid-template-columns: 50px 1fr; gap: 12px; }
     .group-strip { display: flex; flex-direction: column; gap: 10px; height: 100%; }
     .group-btn {
-      flex: 1;
-      background: rgba(0,0,0,0.1);
-      border: 2px solid var(--text);
-      border-radius: 4px;
-      color: var(--text);
-      font-weight: 900;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
+      flex: 1; background: rgba(0,0,0,0.1); border: 2px solid var(--text);
+      border-radius: 4px; color: var(--text); font-weight: 900; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
       transition: 0.2s;
     }
-    .group-btn.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-    }
+    .group-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
     .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .pad-btn {
-      background: rgba(0,0,0,0.05);
-      border: 2px solid var(--border);
-      height: 80px;
-      border-radius: 6px;
-      cursor: pointer;
-      position: relative;
-      transition: 0.05s;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-    }
-    .pad-btn.active-pad {
-      border-color: var(--accent);
-      background: var(--accent) !important;
-      color: white;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
-      transform: translateY(1px);
-    }
+    .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 80px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+    .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
     .pad-btn.hit { filter: brightness(1.5); transform: translateY(2px); }
     .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
     .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
     .active-pad.pad-btn-sq::before { background: white; }
 
     /* EDITOR */
-    .editor-panel {
-      background: rgba(0,0,0,0.03);
-      border: 2px solid var(--border);
-      padding: 15px;
-      border-radius: 8px;
-      flex-grow: 1;
-    }
-    .editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-    }
-
-    .knob {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 4px;
-      background: var(--text);
-      outline: none;
-      border-radius: 2px;
-      margin-top: 5px;
-    }
-    .knob::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      background: var(--accent);
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    }
+    .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
+    .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    
+    .sound-lab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 4px; margin-bottom: 15px; border: 1px solid var(--border); }
+    .knob-group { text-align: center; }
+    .knob { -webkit-appearance: none; width: 100%; height: 4px; background: var(--text); outline: none; border-radius: 2px; margin-top: 5px; }
+    .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
     .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; }
-    .step-box {
-      aspect-ratio: 1/1;
-      border: 2px solid var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      cursor: pointer;
-      font-weight: 900;
-      border-radius: 3px;
-      opacity: 0.6;
-      transition: 0.1s;
-    }
+    .step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
     .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
     .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
     .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
+    .fader-step { height: 50px; background: var(--fader-track); position: relative; border-radius: 2px; cursor: crosshair; }
+    .fader-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent); pointer-events: none; }
 
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
-    .btn-main {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      padding: 18px;
-      font-weight: 900;
-      cursor: pointer;
-      border-radius: 4px;
-      text-transform: uppercase;
-      border-bottom: 4px solid rgba(0,0,0,0.3);
-      letter-spacing: 1px;
-      font-size: 0.8rem;
-      width: 100%;
-    }
+    .btn-main { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.3); letter-spacing: 1px; font-size: 0.8rem; width: 100%; }
     .btn-main.primary { background: var(--accent); color: white; }
     .btn-main:active { transform: translateY(2px); border-bottom-width: 2px; }
-    .btn-small {
-      background: #555;
-      color: white;
-      border: none;
-      padding: 10px;
-      font-size: 0.65rem;
-      cursor: pointer;
-      border-radius: 3px;
-      font-weight: bold;
-      width: 100%;
-      transition: background 0.2s;
-    }
-    .btn-layout {
-      background: transparent;
-      border: 2px solid var(--text);
-      color: var(--text);
-      font-weight: bold;
-      padding: 5px 10px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
+    .btn-small { background: #555; color: white; border: none; padding: 10px; font-size: 0.65rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; transition: background 0.2s; }
+    .btn-layout { background: transparent; border: 2px solid var(--text); color: var(--text); font-weight: bold; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
     .btn-toggle-on { background: var(--lcd-text) !important; color: black !important; border-color: var(--lcd-text) !important; }
   </style>
 </head>
@@ -399,7 +187,7 @@
     </div>
 
     <div class="lcd-display" id="log">
-      <div class="log-entry">SYSTEM READY // HARMONIC v32</div>
+      <div class="log-entry">SYSTEM READY // HARMONIC v38</div>
     </div>
 
     <div class="main-deck">
@@ -448,20 +236,8 @@
           </div>
           <div class="ep-grid" id="pad-grid"></div>
         </div>
-      </div>
 
-      <div class="deck-right" style="display:flex; flex-direction:column;">
-        <div class="editor-panel" id="editor" style="display: none;">
-          <div class="editor-header">
-            <strong id="editor-title">PAD SELECT</strong>
-            <div>
-              <button id="pad-mode-drum" onclick="setPadMode('drum')" class="btn-small btn-toggle-on" style="width:auto;">DRUM</button>
-              <button id="pad-mode-chord" onclick="setPadMode('chord')" class="btn-small" style="width:auto;">CHORD</button>
-            </div>
-          </div>
-
-          <!-- NEW: PAD PERFORMANCE & ROUTING -->
-          <div id="pad-perf" class="control-group" style="margin-bottom:15px;">
+        <div id="pad-perf" class="control-group" style="margin-top:20px; margin-bottom:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <strong style="letter-spacing:1px;">PAD PERFORMANCE & ROUTING</strong>
               <button class="btn-small" style="width:auto;" onclick="resetPadPerf()">RESET</button>
@@ -508,6 +284,17 @@
               <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.06); border:1px solid var(--border); border-radius:3px;">
                 NOTE PREVIEW: <span id="pad-note-preview">36</span>
               </div>
+            </div>
+          </div>
+          </div>
+
+      <div class="deck-right" style="display:flex; flex-direction:column;">
+        <div class="editor-panel" id="editor" style="display: none;">
+          <div class="editor-header">
+            <strong id="editor-title">PAD SELECT</strong>
+            <div>
+              <button id="pad-mode-drum" onclick="setPadMode('drum')" class="btn-small btn-toggle-on" style="width:auto;">DRUM</button>
+              <button id="pad-mode-chord" onclick="setPadMode('chord')" class="btn-small" style="width:auto;">CHORD</button>
             </div>
           </div>
 
@@ -569,6 +356,15 @@
                 <input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" value="0" oninput="updateChordSettings()">
               </div>
             </div>
+          </div>
+
+          <div id="sound-lab" class="sound-lab">
+            <div class="knob-group"><label>PITCH (16)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(16, this.value)"></div>
+            <div class="knob-group"><label>FILTER (74)</label><input type="range" class="knob" min="0" max="127" value="127" oninput="sendLiveCC(74, this.value)"></div>
+            <div class="knob-group"><label>DECAY (72)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(72, this.value)"></div>
+            <div class="knob-group"><label>PAN (10)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(10, this.value)"></div>
+            <div class="knob-group"><label>RVB (93)</label><input type="range" class="knob" min="0" max="127" value="0" oninput="sendLiveCC(93, this.value)"></div>
+            <div class="knob-group"><label>VOL (7)</label><input type="range" class="knob" min="0" max="127" value="100" oninput="sendLiveCC(7, this.value)"></div>
           </div>
 
           <div class="config-grid" style="margin-bottom: 10px;">
