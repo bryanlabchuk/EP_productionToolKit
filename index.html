@@ -12,7 +12,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EP-DC-OXO // PERFORMANCE</title>
+    <title>EP-DC-OXO // MASTER</title>
     
     <style>
         /* --- CORE VARIABLES --- */
@@ -51,8 +51,6 @@
         /* --- FLUX SLIDER --- */
         input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); border-color: white; }
         .magic-label { color: var(--magic); font-weight: 900; letter-spacing: 1px; }
-        .knob { -webkit-appearance: none; width: 100%; height: 4px; background: var(--text); outline: none; border-radius: 2px; margin-top: 5px; }
-        .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
         /* --- FEEDBACK MODULE --- */
         #feedback-btn {
@@ -132,6 +130,11 @@
         .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
+        .sound-lab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 4px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .knob-group { text-align: center; }
+        .knob { -webkit-appearance: none; width: 100%; height: 4px; background: var(--text); outline: none; border-radius: 2px; margin-top: 5px; }
+        .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+
         .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; }
         .step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
         .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
@@ -169,7 +172,7 @@
             <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
         </div>
     </div>
-    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // PERFORMANCE v35</div></div>
+    <div class="lcd-display" id="log"><div class="log-entry">SYSTEM READY // MASTER v34</div></div>
 
     <div class="main-deck">
         <div class="deck-left">
@@ -262,9 +265,18 @@
                     </div>
                 </div>
 
+                <div id="sound-lab" class="sound-lab">
+                    <div class="knob-group"><label>PITCH (16)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(16, this.value)"></div>
+                    <div class="knob-group"><label>FILTER (74)</label><input type="range" class="knob" min="0" max="127" value="127" oninput="sendLiveCC(74, this.value)"></div>
+                    <div class="knob-group"><label>DECAY (72)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(72, this.value)"></div>
+                    <div class="knob-group"><label>PAN (10)</label><input type="range" class="knob" min="0" max="127" value="64" oninput="sendLiveCC(10, this.value)"></div>
+                    <div class="knob-group"><label>RVB (93)</label><input type="range" class="knob" min="0" max="127" value="0" oninput="sendLiveCC(93, this.value)"></div>
+                    <div class="knob-group"><label>VOL (7)</label><input type="range" class="knob" min="0" max="127" value="100" oninput="sendLiveCC(7, this.value)"></div>
+                </div>
+
                 <div class="config-grid" style="margin-bottom: 10px;">
                     <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8 Steps</option><option value="16" selected>16 Steps</option><option value="32">32 Steps</option></select></div>
-                    <div><label>PATTERN LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
+                    <div><label>LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
                 </div>
 
                 <div id="grid-notes" class="step-container"></div>
@@ -418,6 +430,7 @@
         projectData[activeGroup][selectedPad].mode = mode;
         document.getElementById('pad-mode-drum').classList.toggle('btn-toggle-on', mode === 'drum');
         document.getElementById('pad-mode-chord').classList.toggle('btn-toggle-on', mode === 'chord');
+        document.getElementById('sound-lab').style.display = mode === 'drum' ? 'grid' : 'none';
         document.getElementById('chord-lab').style.display = mode === 'chord' ? 'block' : 'none';
     }
 
@@ -470,6 +483,9 @@
                 const pad = projectData[g][p];
                 const stepIdx = beatNumber % pad.steps;
                 const note = pad.notes[stepIdx];
+                const auto = pad.auto[stepIdx];
+                
+                if (auto > 0) midiOut.send([ccStatus, pad.autoTargetCC, auto], baseMidiTime);
                 
                 if (note !== 'O') {
                     const vel = note === 'X' ? 120 : note === 'Y' ? 85 : 50;
@@ -546,6 +562,7 @@
     function runCountIn(){let b=4;const bpm=parseInt(document.getElementById('tempo').value);log(`COUNT: ${b}...`);const i=setInterval(()=>{b--;if(b>0)log(`COUNT: ${b}...`);else{clearInterval(i);log("GO!");startSequencer();}},60000/bpm);}
     function startSequencer(){stopSequencer();isPlaying=true;current16thNote=0;nextNoteTime=audioCtx.currentTime+0.1;if(sendTransport)midiOut.send([0xFA]);log("ROLLING...");scheduler();}
     function stopSequencer(){isPlaying=false;if(timerID)cancelAnimationFrame(timerID);if(midiOut){if(sendTransport)midiOut.send([0xFC]);midiOut.send([0xB0+activeGroup,123,0]);}log("HALTED");}
+    function sendLiveCC(c,v){if(midiOut)midiOut.send([0xB0+activeGroup,c,parseInt(v)]);}
     function updateStepCount(v){projectData[activeGroup][selectedPad].steps=parseInt(v);renderSteps();}
     function clearCurrentPad(){projectData[activeGroup][selectedPad].notes.fill('O');renderSteps();}
     
