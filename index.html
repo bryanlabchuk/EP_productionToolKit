@@ -9,8 +9,8 @@
     gtag('config', 'G-FXBQBXFW44');
   </script>
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EP-DC-OXO // MASTER v44</title>
 
   <style>
@@ -57,7 +57,7 @@
       align-items:stretch;
       gap:14px;
       margin-bottom: 15px;
-      height: 180px; /* ~200% of prior */
+      height: 180px;
     }
 
     /* Left stacked octave controls */
@@ -105,7 +105,7 @@
       letter-spacing: 0;
     }
 
-    /* Audition toggle (kept) */
+    /* Audition toggle */
     .piano-audition{
       width: 56px;
       display:flex;
@@ -143,7 +143,7 @@
 
     .keys-container{
       display:flex;
-      gap: 12px; /* more space between keys */
+      gap: 12px;
       width: 100%;
       justify-content: space-between;
       align-items: center;
@@ -153,7 +153,7 @@
       position: relative;
       flex: 1;
       height: 120px;
-      border-radius: 999px; /* stretched circle */
+      border-radius: 999px;
       cursor: pointer;
       border: 2px solid var(--border);
       display:flex;
@@ -250,7 +250,15 @@
     .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; display:flex; flex-direction:column; }
     .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
-    .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; flex-grow:1; }
+    /* 64-step grid as 8x8 */
+    .step-container {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+      flex-grow: 1;
+    }
+
     .step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
     .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
     .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
@@ -445,9 +453,8 @@
             </div>
           </div>
 
-          <!-- IMPORTANT: OXYZ GRID ALWAYS VISIBLE (outside chord-lab) -->
+          <!-- PATTERN LIBRARY ONLY (no STEPS control) -->
           <div class="config-grid" style="margin-bottom: 10px;">
-            <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8 Steps</option><option value="16" selected>16 Steps</option><option value="32">32 Steps</option></select></div>
             <div><label>PATTERN LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
           </div>
 
@@ -478,6 +485,9 @@
   let sendTransport = true;
   let auditionMode = false;
 
+  // Fixed: always 64-step patterns
+  const FIXED_STEPS = 64;
+
   const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
   const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
 
@@ -486,9 +496,18 @@
 
   let projectData = Array.from({length: 4}, () =>
     Array.from({length: 12}, (_, p) => ({
-      steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74,
-      midiNote: defaultMidiNoteForPadIndex(p), gateMs: 100, velMode: 'xyz', velA: 110, velB: 125, muted: false,
-      mode: 'drum', chord: { root:0, oct:3, quality:'maj', ext:'none', inv:0, voice:'close', flux:0 }
+      steps: FIXED_STEPS,
+      notes: Array(FIXED_STEPS).fill('O'),
+      auto: Array(FIXED_STEPS).fill(0),
+      autoTargetCC: 74,
+      midiNote: defaultMidiNoteForPadIndex(p),
+      gateMs: 100,
+      velMode: 'xyz',
+      velA: 110,
+      velB: 125,
+      muted: false,
+      mode: 'drum',
+      chord: { root:0, oct:3, quality:'maj', ext:'none', inv:0, voice:'close', flux:0 }
     }))
   );
 
@@ -721,7 +740,13 @@
 
       for (let p = 0; p < 12; p++) {
         const pad = projectData[g][p];
-        const stepIdx = beatNumber % pad.steps;
+
+        // enforce fixed 64 steps even if legacy state slips in
+        pad.steps = FIXED_STEPS;
+        if (pad.notes.length !== FIXED_STEPS) pad.notes = Array(FIXED_STEPS).fill('O');
+        if (pad.auto.length !== FIXED_STEPS) pad.auto = Array(FIXED_STEPS).fill(0);
+
+        const stepIdx = beatNumber % FIXED_STEPS;
         const stepChar = pad.notes[stepIdx];
         const autoVal = pad.auto[stepIdx];
 
@@ -730,7 +755,6 @@
         if (stepChar !== 'O' && !pad.muted) {
           const velOut = computeVelocity(pad, stepChar);
 
-          // Drum and chord LIVE SEPARATELY: ONLY chord-mode pads generate multi-note chords.
           if (pad.mode === 'chord') {
             let baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
             let intervals = getChordIntervals(pad.chord.quality, pad.chord.ext);
@@ -783,8 +807,6 @@
     // Click = select for editing. Press = audition/trigger (drum OR chord depending on pad.mode).
     btn.onclick = () => selectPad(idx);
     btn.onmousedown = (e) => {
-      // Do not interfere with selection; just fire a live hit immediately.
-      // Use fixed-ish velocity unless you want to wire a UI control later.
       if (midiOut) triggerPadNow(activeGroup, idx, 110);
       flashPad(defaultMidiNoteForPadIndex(idx));
       e.preventDefault();
@@ -795,17 +817,16 @@
 
   if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
 
-  // Keyboard event binding FIXED: now binds to the redesigned 13-key chromatic pills (.kb-key).
+  // Keyboard event binding
   document.querySelectorAll('.kb-key').forEach(k => {
     k.addEventListener('mousedown', function(e) {
       const raw = parseInt(this.getAttribute('data-note'), 10);
       if (isNaN(raw)) return;
 
-      const pc = ((raw % 12) + 12) % 12; // 12 -> 0 (C)
+      const pc = ((raw % 12) + 12) % 12;
       document.getElementById('chord-root').value = pc;
       updateChordSettings();
 
-      // Optional: in chord mode, you can also trigger the chord from the keyboard itself (only if audition enabled)
       if (auditionMode) previewChord(projectData[activeGroup][selectedPad]);
 
       e.preventDefault();
@@ -853,8 +874,18 @@
     selectPad(selectedPad);
   }
 
+  function ensurePad64(pad) {
+    pad.steps = FIXED_STEPS;
+    if (!Array.isArray(pad.notes) || pad.notes.length !== FIXED_STEPS) pad.notes = Array(FIXED_STEPS).fill('O');
+    if (!Array.isArray(pad.auto)  || pad.auto.length  !== FIXED_STEPS) pad.auto  = Array(FIXED_STEPS).fill(0);
+  }
+
   function selectPad(idx) {
     selectedPad = idx;
+
+    // enforce 64 step arrays on select
+    ensurePad64(projectData[activeGroup][selectedPad]);
+
     document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
     document.getElementById(`btn-${idx}`).classList.add('active-pad');
     document.getElementById('editor').style.display = 'block';
@@ -869,15 +900,17 @@
     const c = document.getElementById('grid-notes');
     c.innerHTML = '';
     const d = projectData[activeGroup][selectedPad];
+    ensurePad64(d);
 
-    for (let i = 0; i < d.steps; i++) {
+    for (let i = 0; i < FIXED_STEPS; i++) {
       const step = document.createElement('div');
       const v = d.notes[i];
       step.className = `step-box ${v !== 'O' ? 'on-' + v.toLowerCase() : 'off'}`;
       step.innerText = v;
       step.onclick = () => {
         const cy = ['O','X','Y','Z'];
-        d.notes[i] = cy[(cy.indexOf(v) + 1) % cy.length];
+        const cur = d.notes[i];
+        d.notes[i] = cy[(cy.indexOf(cur) + 1) % cy.length];
         renderSteps();
       };
       c.appendChild(step);
@@ -950,7 +983,6 @@
     isPlaying = false;
     if (timerID) cancelAnimationFrame(timerID);
 
-    // Better panic: all-notes-off across ALL 4 channels (prevents stuck chord notes).
     if (midiOut) {
       if (sendTransport) midiOut.send([0xFC]);
       for (let ch = 0; ch < 4; ch++) midiOut.send([0xB0 + ch, 123, 0]);
@@ -958,22 +990,31 @@
     log("HALTED");
   }
 
-  function updateStepCount(v) { projectData[activeGroup][selectedPad].steps = parseInt(v, 10); renderSteps(); }
-  function clearCurrentPad() { projectData[activeGroup][selectedPad].notes.fill('O'); renderSteps(); }
+  function clearCurrentPad() {
+    const d = projectData[activeGroup][selectedPad];
+    ensurePad64(d);
+    d.notes.fill('O');
+    renderSteps();
+  }
 
   function applyPreset(v) {
     if (!v || v.startsWith("-")) return;
     const p = JSON.parse(v);
 
     if (p.type === "multi") {
-      for (const [iStr, s] of Object.entries(p.tracks)) {
+      for (const [iStr, sRaw] of Object.entries(p.tracks)) {
         const i = parseInt(iStr, 10);
-        for (let j = 0; j < 32; j++) projectData[activeGroup][i].notes[j] = s[j % s.length] || 'O';
+        const pad = projectData[activeGroup][i];
+        ensurePad64(pad);
+        const s = (sRaw || '').replace(/\s/g, '');
+        for (let j = 0; j < FIXED_STEPS; j++) pad.notes[j] = s[j % s.length] || 'O';
       }
       log(`LOADED KIT: ${p.name}`);
     } else {
+      const d = projectData[activeGroup][selectedPad];
+      ensurePad64(d);
       const s = p.pat.replace(/\s/g, '');
-      for (let j = 0; j < 32; j++) projectData[activeGroup][selectedPad].notes[j] = s[j % s.length] || 'O';
+      for (let j = 0; j < FIXED_STEPS; j++) d.notes[j] = s[j % s.length] || 'O';
       log(`LOADED PAT: ${p.name}`);
     }
 
