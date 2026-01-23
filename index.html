@@ -481,6 +481,7 @@
   let humanize = false;
   let countIn = false;
   let sendTransport = true;
+  let suppressTransportThisRun = false;
   const MIN_OCTAVE = 1;
   const MAX_OCTAVE = 6;
 
@@ -1189,13 +1190,18 @@
               if (isPlaying) timerID = requestAnimationFrame(scheduler);
             }
 
-            function handleInject() {
-              if (!midiOut || !audioCtx) return log("ERR: INIT MIDI");
-              if (countIn) runCountIn();
-              else startSequencer();
-            }
+  function handleInject() {
+    if (!midiOut || !audioCtx) return log("ERR: INIT MIDI");
 
-            function runCountIn() {
+    // If the external device is already armed/ready, avoid START/STOP which can drop record-arm
+    suppressTransportThisRun = true;
+
+    if (countIn) runCountIn();
+    else startSequencer();
+  }
+
+
+  function runCountIn() {
               let b = 4;
               const bpm = parseInt(document.getElementById('tempo').value, 10);
               log(`COUNT: ${b}...`);
@@ -1210,29 +1216,38 @@
               }, 60000 / bpm);
             }
 
-            function startSequencer() {
-              stopSequencer();
-              isPlaying = true;
-              current16thNote = 0;
-              nextNoteTime = audioCtx.currentTime + 0.1;
-              if (sendTransport) midiOut.send([0xFA]);
-              log("ROLLING...");
-              scheduler();
-            }
+  function startSequencer() {
+    stopSequencer();
+    isPlaying = true;
+    current16thNote = 0;
+    nextNoteTime = audioCtx.currentTime + 0.1;
 
-            function stopSequencer() {
-              isPlaying = false;
-              if (timerID) cancelAnimationFrame(timerID);
+    // Only send transport if enabled AND not suppressed for this run
+    if (midiOut && sendTransport && !suppressTransportThisRun) midiOut.send([0xFA]);
 
-              if (midiOut) {
-                if (sendTransport) midiOut.send([0xFC]);
-                for (let ch = 0; ch < 4; ch++) midiOut.send([0xB0 + ch, 123, 0]); // all notes off
-              }
+    log("ROLLING...");
+    scheduler();
+  }
 
-              log("HALTED");
-            }
+  function stopSequencer() {
+    isPlaying = false;
+    if (timerID) cancelAnimationFrame(timerID);
 
-            function clearCurrentPad() {
+    if (midiOut) {
+      // Only send STOP if enabled AND not suppressed for this run
+      if (sendTransport && !suppressTransportThisRun) midiOut.send([0xFC]);
+
+      for (let ch = 0; ch < 4; ch++) midiOut.send([0xB0 + ch, 123, 0]); // all notes off
+    }
+
+    // reset suppression after the run completes
+    suppressTransportThisRun = false;
+
+    log("HALTED");
+  }
+
+
+  function clearCurrentPad() {
               const d = projectData[activeGroup][selectedPad];
               ensurePad64(d);
               d.notes.fill('O');
