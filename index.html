@@ -1,241 +1,567 @@
-gtag('config', 'G-FXBQBXFW44');
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXBQBXFW44"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FXBQBXFW44');
+  </script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EP-DC-OXO // MASTER v44</title>
-
-<style>
-@@ -57,7 +57,7 @@
-align-items:stretch;
-gap:14px;
-margin-bottom: 15px;
-      height: 180px; /* ~200% of prior */
-      height: 180px;
-}
-
-/* Left stacked octave controls */
-@@ -105,7 +105,7 @@
-letter-spacing: 0;
-}
-
-    /* Audition toggle (kept) */
-    /* Audition toggle */
-.piano-audition{
-width: 56px;
-display:flex;
-@@ -143,7 +143,7 @@
-
-.keys-container{
-display:flex;
-      gap: 12px; /* more space between keys */
-      gap: 12px;
-width: 100%;
-justify-content: space-between;
-align-items: center;
-@@ -153,7 +153,7 @@
-position: relative;
-flex: 1;
-height: 120px;
-      border-radius: 999px; /* stretched circle */
-      border-radius: 999px;
-cursor: pointer;
-border: 2px solid var(--border);
-display:flex;
-@@ -250,7 +250,15 @@
-.editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; display:flex; flex-direction:column; }
-.editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-
-    .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; flex-grow:1; }
-    /* 64-step grid as 8x8 */
-    .step-container {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 6px;
-      margin-top: 10px;
-      flex-grow: 1;
+  <title>EP-DC-OXO // MASTER v44</title>
+  
+  <style>
+    /* --- VARIABLES --- */
+    :root {
+      --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
+      --accent: #ff3e00; 
+      --ghost: rgba(255, 62, 0, 0.25);
+      --magic: #8a2be2; 
+      --text: #1a1a1a; --lcd-bg: #080a08; --lcd-text: #39ff14; 
+      --border: #8e8e8e; --panel-bg: rgba(255, 255, 255, 0.45);
+      --shadow: rgba(0,0,0,0.4); --fader-track: #ccc;
+      --key-white: #f0f0f0; --key-black: #2a2a2a;
     }
 
-.step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
-.step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
-.step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
-@@ -445,9 +453,8 @@ <h1>EP-DC-OXO</h1>
-</div>
-</div>
+    body.theme-40 { --bg: #f4f1e6; --accent: #006633; --ghost: rgba(0, 102, 51, 0.3); --text: #1a1a1a; --lcd-bg: #050a05; --lcd-text: #008f11; --border: #c5c2b7; --panel-bg: #ffffff; }
+    body.theme-133 { --bg: #bcbcbc; --accent: #ff3e00; --ghost: rgba(255, 62, 0, 0.3); --text: #000000; --lcd-bg: #121212; --lcd-text: #ff4500; --border: #888888; --panel-bg: #e0e0e0; }
+    body.theme-1320 { --bg: #dccb96; --accent: #9b111e; --ghost: rgba(155, 17, 30, 0.3); --text: #3d2b1f; --lcd-bg: #2e1a0d; --lcd-text: #f3e5ab; --border: #a6894c; --panel-bg: #e6d9ad; }
+    
+    body.dark-mode {
+      --bg: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+      --text: #e0e0e0; --border: #444; --panel-bg: rgba(30,30,30,0.9); 
+      --fader-track: #444; --magic: #bd7bf0; --key-white: #aaa; --key-black: #000;
+    }
 
-          <!-- IMPORTANT: OXYZ GRID ALWAYS VISIBLE (outside chord-lab) -->
-          <!-- PATTERN LIBRARY ONLY (no STEPS control) -->
-<div class="config-grid" style="margin-bottom: 10px;">
+    body {
+      background: var(--bg); background-attachment: fixed; color: var(--text);
+      font-family: 'IBM Plex Mono', monospace; display: flex; flex-direction: column; 
+      align-items: center; justify-content: center; min-height: 100vh; margin: 0; transition: all 0.4s ease;
+    }
+
+    /* --- CHASSIS --- */
+    .chassis {
+      background: var(--panel-bg); border: 2px solid var(--border); border-radius: 12px;
+      padding: 25px; width: 95%; max-width: 1000px;
+      box-shadow: 20px 20px 60px rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+      transition: max-width 0.4s ease;
+    }
+    .chassis.skinny-mode { max-width: 480px; }
+
+    /* --- PIANO MODULE --- */
+    .piano-wrapper {
+        display: flex; gap: 5px; align-items: stretch; margin-bottom: 15px; height: 90px;
+        background: transparent;
+    }
+    
+    .piano-side-btn {
+        width: 30px; background: rgba(0,0,0,0.05); border: 1px solid var(--text);
+        color: var(--text); font-weight: 900; cursor: pointer; border-radius: 2px;
+        display: flex; align-items: center; justify-content: center; font-size: 1rem;
+        transition: 0.1s;
+    }
+    .piano-side-btn:active { background: var(--text); color: var(--bg); }
+    .piano-side-btn.toggle-on { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    .keyboard-frame {
+        flex-grow: 1; position: relative; background: transparent;
+        border: 1px solid var(--text); border-radius: 2px;
+        box-sizing: border-box; 
+    }
+    
+    .keys-container { display: flex; height: 100%; position: relative; }
+    
+    .key-white {
+        flex: 1; background: var(--key-white); border-right: 1px solid var(--border);
+        cursor: pointer; position: relative; z-index: 1; border-radius: 0 0 2px 2px;
+    }
+    .key-white:last-child { border-right: none; }
+    .key-white.is-root { background: var(--accent) !important; }
+    .key-white.is-chord { background: var(--ghost); }
+
+    .key-black {
+        position: absolute; top: 0; height: 60%; width: 8%; background: var(--key-black);
+        z-index: 2; border-radius: 0 0 2px 2px; cursor: pointer;
+        transform: translateX(-50%); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .key-black.is-root { background: var(--accent) !important; border: 1px solid var(--bg); }
+    .key-black.is-chord { background: var(--ghost); border: 1px solid var(--text); }
+
+    .kb-1 { left: 12.5%; } .kb-3 { left: 25%; } .kb-6 { left: 50%; } 
+    .kb-8 { left: 62.5%; } .kb-10 { left: 75%; } .kb-13 { left: 100%; transform: translateX(-100%); width: 6% !important;}
+
+    /* --- COMPONENTS --- */
+    input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); border-color: white; }
+    .magic-label { color: var(--magic); font-weight: 900; letter-spacing: 1px; }
+    .knob { -webkit-appearance: none; width: 100%; height: 4px; background: var(--text); outline: none; border-radius: 2px; margin-top: 5px; }
+    .knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
+    .header-controls { display: flex; gap: 10px; }
+    
+    .lcd-display { background: var(--lcd-bg); color: var(--lcd-text); padding: 12px; border-radius: 4px; font-size: 0.75rem; font-weight: normal; border: 4px solid #222; width: 100%; height: 60px; box-shadow: inset 0 0 20px #000; text-shadow: 0 0 3px var(--lcd-text); overflow-y: auto; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column-reverse; box-sizing: border-box; margin-bottom: 20px; }
+    .log-entry { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 2px 0; }
+    .lcd-overlay { font-size: 2rem; text-align: center; color: var(--accent); font-weight: 900; animation: pulse 0.5s infinite alternate; }
+    @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
+
+    .main-deck { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; }
+    .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; } 
+
+    .control-group { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
+    .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+    
+    label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 1px; opacity: 0.8; }
+    select, input[type="number"] { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-family: inherit; border-radius: 2px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
+    
+    .performance-container { display: grid; grid-template-columns: 50px 1fr; gap: 12px; }
+    .group-strip { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+    .group-btn { flex: 1; background: rgba(0,0,0,0.1); border: 2px solid var(--text); border-radius: 4px; color: var(--text); font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: 0.2s; }
+    .group-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+    .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pad-btn { background: rgba(0,0,0,0.05); border: 2px solid var(--border); height: 80px; border-radius: 6px; cursor: pointer; position: relative; transition: 0.05s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+    .pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transform: translateY(1px); }
+    .pad-btn.hit { filter: brightness(1.5); transform: translateY(2px); }
+    .legend-tag { position: absolute; top: 8px; right: 10px; font-weight: 900; font-size: 0.85rem; }
+    .pad-btn-sq::before { content: ''; position: absolute; top: 11%; left: 11%; width: 14.4%; height: 14.4%; background: var(--accent); border-radius: 1px; }
+    .active-pad.pad-btn-sq::before { background: white; }
+
+    .editor-panel { background: rgba(0,0,0,0.03); border: 2px solid var(--border); padding: 15px; border-radius: 8px; flex-grow: 1; display:flex; flex-direction:column; }
+    .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    
+    .step-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; flex-grow:1; }
+    .step-box { aspect-ratio: 1/1; border: 2px solid var(--text); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; font-weight: 900; border-radius: 3px; opacity: 0.6; transition: 0.1s; }
+    .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
+    .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
+    .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
+    
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+    .btn-main { background: var(--text); color: var(--bg); border: none; padding: 18px; font-weight: 900; cursor: pointer; border-radius: 4px; text-transform: uppercase; border-bottom: 4px solid rgba(0,0,0,0.3); letter-spacing: 1px; font-size: 0.8rem; width: 100%; }
+    .btn-main.primary { background: var(--accent); color: white; }
+    .btn-main:active { transform: translateY(2px); border-bottom-width: 2px; }
+    .btn-small { background: #555; color: white; border: none; padding: 10px; font-size: 0.65rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; transition: background 0.2s; }
+    .btn-layout { background: transparent; border: 2px solid var(--text); color: var(--text); font-weight: bold; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
+    .btn-toggle-on { background: var(--lcd-text) !important; color: black !important; border-color: var(--lcd-text) !important; }
+
+    #feedback-btn { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); border: 2px solid var(--border); padding: 10px 20px; font-family: inherit; font-weight: 900; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; transition: 0.2s; letter-spacing: 1px; font-size: 0.75rem; }
+    #feedback-btn:hover { transform: scale(1.05); background: var(--accent); color: white; border-color: var(--accent); }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
+    .modal-box { background: var(--bg); border: 2px solid var(--accent); width: 90%; max-width: 400px; padding: 25px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 15px; color: var(--text); }
+    .modal-title { font-size: 1.2rem; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid var(--text); padding-bottom: 10px; }
+    .modal-input { width: 100%; padding: 10px; background: rgba(0,0,0,0.05); border: 1px solid var(--text); color: var(--text); font-family: inherit; resize: vertical; min-height: 100px; box-sizing: border-box; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  </style>
+</head>
+
+<body id="main-body">
+
+  <button id="feedback-btn" onclick="openFeedback()">REPORT ISSUE</button>
+  <div class="modal-overlay" id="feedback-modal">
+    <div class="modal-box">
+      <div class="modal-title">SYSTEM REPORT</div>
+      <div><label>ISSUE TYPE</label><select id="fb-type"><option>BUG REPORT</option><option>FEATURE REQUEST</option><option>PATTERN IDEA</option></select></div>
+      <div><label>DETAILS</label><textarea id="fb-text" class="modal-input" placeholder="Describe behavior..."></textarea></div>
+      <div class="modal-actions"><button class="btn-small" onclick="closeFeedback()">CANCEL</button><button class="btn-small primary" onclick="submitFeedback()" style="background:var(--accent); color:white;">SEND</button></div>
+    </div>
+  </div>
+
+  <div class="chassis" id="app-chassis">
+    <div class="header-row">
+      <h1>EP-DC-OXO</h1>
+      <div class="header-controls">
+        <button id="dark-btn" onclick="toggleDark()" class="btn-layout">NIGHT</button>
+        <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
+      </div>
+    </div>
+
+    <div class="lcd-display" id="log">
+      <div class="log-entry">SYSTEM READY // MASTER v44</div>
+    </div>
+
+    <div class="main-deck">
+      <div class="deck-left">
+        <button onclick="initAudioAndMIDI()" class="btn-main primary" id="init-btn" style="margin-bottom:20px;">INITIALIZE MIDI</button>
+
+        <div class="control-group" style="margin-bottom: 20px;">
+          <div class="config-grid" style="margin-bottom: 15px;">
+            <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
+            <div>
+              <label>MIDI CHANNEL</label>
+              <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">AUTO-MAPPED</div>
+            </div>
+          </div>
+
+          <div class="split-row">
+            <div>
+              <label>LENGTH</label>
+              <select id="global-bars">
+                <option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4">4 Bars</option><option value="8">8 Bars</option><option value="16">16 Bars</option><option value="32">32 Bars</option><option value="64">64 Bars</option><option value="128">128 Bars</option>
+              </select>
+            </div>
+            <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
+          </div>
+
+          <div class="split-row" style="margin-top: 10px;">
+            <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
+            <div><button id="transport-btn" onclick="toggleTransport()" class="btn-small btn-toggle-on">TX: START/STOP</button></div>
+          </div>
+          <div style="margin-top:10px;"><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
+        </div>
+
+        <div class="performance-container">
+          <div class="group-strip">
+            <button class="group-btn active" id="grp-0" onclick="selectGroup(0)">A</button>
+            <button class="group-btn" id="grp-1" onclick="selectGroup(1)">B</button>
+            <button class="group-btn" id="grp-2" onclick="selectGroup(2)">C</button>
+            <button class="group-btn" id="grp-3" onclick="selectGroup(3)">D</button>
+          </div>
+          <div class="ep-grid" id="pad-grid"></div>
+        </div>
+
+        <div id="pad-perf" class="control-group" style="margin-top:20px; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <strong style="letter-spacing:1px;">PAD PERFORMANCE & ROUTING</strong>
+              <button class="btn-small" style="width:auto;" onclick="resetPadPerf()">RESET</button>
+            </div>
+            <div class="config-grid">
+              <div><label>MIDI NOTE</label><input type="number" id="pad-midi-note" min="0" max="127" value="36" onchange="updatePadPerfFromUI()"></div>
+              <div><label>GATE (ms)</label><input type="number" id="pad-gate-ms" min="10" max="2000" value="100" onchange="updatePadPerfFromUI()"></div>
+              <div><label>VELOCITY MODE</label><select id="pad-vel-mode" onchange="updatePadPerfFromUI()"><option value="xyz">Use X/Y/Z levels</option><option value="fixed">Fixed velocity</option><option value="range">Random range</option></select></div>
+              <div><label>FIXED / MIN</label><input type="number" id="pad-vel-a" min="1" max="127" value="110" onchange="updatePadPerfFromUI()"></div>
+              <div><label>MAX (RANGE MODE)</label><input type="number" id="pad-vel-b" min="1" max="127" value="125" onchange="updatePadPerfFromUI()"></div>
+              <div><label>AUTO CC TARGET</label><input type="number" id="pad-auto-cc" min="0" max="127" value="74" onchange="updatePadPerfFromUI()"></div>
+            </div>
+            <div class="split-row" style="margin-top:10px;">
+              <div><button id="pad-mute-btn" class="btn-small" onclick="togglePadMute()">PAD: ON</button></div>
+              <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.06); border:1px solid var(--border); border-radius:3px;">NOTE PREVIEW: <span id="pad-note-preview">36</span></div>
+            </div>
+          </div>
+      </div>
+
+      <div class="deck-right" style="display:flex; flex-direction:column;">
+        <div class="editor-panel" id="editor" style="display: block;"> <div class="editor-header">
+            <strong id="editor-title">PAD SELECT</strong>
+            <div>
+              <button id="pad-mode-drum" onclick="setPadMode('drum')" class="btn-small btn-toggle-on" style="width:auto;">DRUM</button>
+              <button id="pad-mode-chord" onclick="setPadMode('chord')" class="btn-small" style="width:auto;">CHORD</button>
+            </div>
+          </div>
+
+          <div id="chord-lab" style="display:none;" class="control-group">
+            <div class="piano-wrapper">
+                <button class="piano-side-btn" onclick="shiftOctave(-1)">&lt;</button>
+                <div class="keyboard-frame">
+                    <div class="keys-container" id="white-keys">
+                        <div class="key-white" data-note="0"></div><div class="key-white" data-note="2"></div>
+                        <div class="key-white" data-note="4"></div><div class="key-white" data-note="5"></div>
+                        <div class="key-white" data-note="7"></div><div class="key-white" data-note="9"></div>
+                        <div class="key-white" data-note="11"></div><div class="key-white" data-note="12" style="border-right:none;"></div> 
+                    </div>
+                    <div class="key-black kb-1" data-note="1"></div><div class="key-black kb-3" data-note="3"></div>
+                    <div class="key-black kb-6" data-note="6"></div><div class="key-black kb-8" data-note="8"></div>
+                    <div class="key-black kb-10" data-note="10"></div><div class="key-black kb-13" data-note="13"></div>
+                </div>
+                <button class="piano-side-btn" onclick="shiftOctave(1)">&gt;</button>
+                <button class="piano-side-btn" id="audition-toggle" onclick="toggleAudition()" title="Audition Mode">🔈</button>
+            </div>
+
+            <div class="config-grid">
+              <div style="display:none;"><label>ROOT</label><select id="chord-root" onchange="updateChordSettings()"><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option></select></div>
+              <div style="display:none;"><label>OCTAVE</label><select id="chord-oct" onchange="updateChordSettings()"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div>
+
+              <div><label>QUALITY</label><select id="chord-quality" onchange="updateChordSettings()"><option value="maj">Major</option><option value="min">Minor</option><option value="dom">Dominant</option><option value="dim">Diminished</option><option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option></select></div>
+              <div><label>EXTENSION</label><select id="chord-ext" onchange="updateChordSettings()"><option value="none">Triad (None)</option><option value="7">7th</option><option value="9">9th</option><option value="11">11th</option><option value="13">13th</option><option value="6">6th</option></select></div>
+              <div><label>INVERSION</label><select id="chord-inv" onchange="updateChordSettings()"><option value="0">Root Pos</option><option value="1">1st Inv</option><option value="2">2nd Inv</option><option value="3">3rd Inv</option></select></div>
+              <div><label>VOICING</label><select id="chord-voice" onchange="updateChordSettings()"><option value="close">Close (Tight)</option><option value="wide">Wide (Spread)</option><option value="open">Open (Shell)</option></select></div>
+              <div style="grid-column: span 2; margin-top:10px;"><label class="magic-label">FLUX (MYSTERY DIAL)</label><input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" value="0" oninput="updateChordSettings()"></div>
+            </div>
+          </div>
+
+          <div class="config-grid" style="margin-bottom: 10px;">
             <div><label>STEPS</label><select id="step-select" onchange="updateStepCount(this.value)"><option value="8">8 Steps</option><option value="16" selected>16 Steps</option><option value="32">32 Steps</option></select></div>
-<div><label>PATTERN LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
-</div>
+            <div><label>PATTERN LIBRARY</label><select id="preset-select" onchange="applyPreset(this.value)"></select></div>
+          </div>
 
-@@ -478,6 +485,9 @@ <h1>EP-DC-OXO</h1>
-let sendTransport = true;
-let auditionMode = false;
+          <div id="grid-notes" class="step-container"></div>
+          <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width: auto;">CLEAR PATTERN</button></div>
+        </div>
 
-  // Fixed: always 64-step patterns
-  const FIXED_STEPS = 64;
+        <div class="action-row">
+          <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
+          <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">STOP / PANIC</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
-const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
+<script>
+  let audioCtx = null;
+  let midiOut = null;
+  let nextNoteTime = 0.0;
+  let timerID = null;
+  let current16thNote = 0;
+  let isPlaying = false;
+  let scheduleAheadTime = 0.1;
+  let selectedPad = 0;
+  let activeGroup = 0;
+  let humanize = false;
+  let countIn = false;
+  let sendTransport = true; 
+  let auditionMode = false;
 
-@@ -486,9 +496,18 @@ <h1>EP-DC-OXO</h1>
+  const legends = { 9: '7', 10: '8', 11: '9', 6: '4', 7: '5', 8: '6', 3: '1', 4: '2', 5: '3', 0: '', 1: '0', 2: 'ENTER' };
+  const padNotes = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
+  
+  function defaultMidiNoteForPadIndex(padIndex) { return padNotes[padIndex] ?? 36; }
 
-let projectData = Array.from({length: 4}, () =>
-Array.from({length: 12}, (_, p) => ({
+  let projectData = Array.from({length: 4}, () =>
+    Array.from({length: 12}, (_, p) => ({
       steps: 16, notes: Array(32).fill('O'), auto: Array(32).fill(0), autoTargetCC: 74,
       midiNote: defaultMidiNoteForPadIndex(p), gateMs: 100, velMode: 'xyz', velA: 110, velB: 125, muted: false,
       mode: 'drum', chord: { root:0, oct:3, quality:'maj', ext:'none', inv:0, voice:'close', flux:0 }
-      steps: FIXED_STEPS,
-      notes: Array(FIXED_STEPS).fill('O'),
-      auto: Array(FIXED_STEPS).fill(0),
-      autoTargetCC: 74,
-      midiNote: defaultMidiNoteForPadIndex(p),
-      gateMs: 100,
-      velMode: 'xyz',
-      velA: 110,
-      velB: 125,
-      muted: false,
-      mode: 'drum',
-      chord: { root:0, oct:3, quality:'maj', ext:'none', inv:0, voice:'close', flux:0 }
-}))
-);
+    }))
+  );
 
-@@ -721,7 +740,13 @@ <h1>EP-DC-OXO</h1>
+  const oxoPresets = {
+    "KICK (Single Pad)": [{ name: "XOOO XOOO XOOO XOOO", pat: "XOOO XOOO XOOO XOOO" }, { name: "XOOX XOOX XOOX XOOX", pat: "XOOX XOOX XOOX XOOX" }, { name: "XOOZ OOXZ OOOO XOOO", pat: "XOOZ OOXZ OOOO XOOO" }, { name: "XOOX OOZX OOZO OOXO", pat: "XOOX OOZX OOZO OOXO" }, { name: "XOOO OOXZ XOOO OOXZ", pat: "XOOO OOXZ XOOO OOXZ" }, { name: "XOOO XXOO XOOO XXOO", pat: "XOOO XXOO XOOO XXOO" }, { name: "XOOO OOOO OOOO OOOO", pat: "XOOO OOOO OOOO OOOO" }, { name: "XOOX OOOX XOOO OOOX", pat: "XOOX OOOX XOOO OOOX" }],
+    "SNARE (Single Pad)": [{ name: "OOOO XOOO OOOO XOOO", pat: "OOOO XOOO OOOO XOOO" }, { name: "OOOO OOOO XOOO OOOO", pat: "OOOO OOOO XOOO OOOO" }, { name: "OOOO YOOO ZZZZ YOOZ", pat: "OOOO YOOO ZZZZ YOOZ" }, { name: "OOZO YOOZ ZOZO YOOO", pat: "OOZO YOOZ ZOZO YOOO" }, { name: "XOOX XOOX XOOX XXXX", pat: "XOOX XOOX XOOX XXXX" }, { name: "OOOO XOOO OOOO XOOZ", pat: "OOOO XOOO OOOO XOOZ" }],
+    "HATS (Single Pad)": [{ name: "XOXO XOXO XOXO XOXO", pat: "XOXO XOXO XOXO XOXO" }, { name: "XXXX XXXX XXXX XXXX", pat: "XXXX XXXX XXXX XXXX" }, { name: "OOXO OOXO OOXO OOXO", pat: "OOXO OOXO OOXO OOXO" }, { name: "XZXZ XZXZ XXXX XZXZ", pat: "XZXZ XZXZ XXXX XZXZ" }, { name: "XZXZ XZXZ XZXZ ZZZZ", pat: "XZXZ XZXZ XZXZ ZZZZ" }, { name: "YXZY YXZY YXZY YXZY", pat: "YXZY YXZY YXZY YXZY" }, { name: "XOOX XOOX XOOX XOOX", pat: "XOOX XOOX XOOX XOOX" }],
+    "ODD / EUCLIDEAN (Single)": [{ name: "XOOX OOXO (3/8)", pat: "XOOX OOXO" }, { name: "XOXO XOXO (5/8)", pat: "XOXO XOXO" }, { name: "XOOXOOXO (Tresillo)", pat: "XOOXOOXO" }, { name: "XOXOOXOO (Cinquillo)", pat: "XOXOOXOO" }, { name: "XOOXOOXOOOXOOXOO (Bossa)", pat: "XOOXOOXOOOXOOXOO" }],
+    "UTILITY": [{ name: "XXXX XXXX XXXX XXXX", pat: "XXXX XXXX XXXX XXXX" }, { name: "ZZZZ ZZZZ ZZZZ ZZZZ", pat: "ZZZZ ZZZZ ZZZZ ZZZZ" }, { name: "OOOO OOOO OOOO OOOO", pat: "OOOO OOOO OOOO OOOO" }],
+    "FULL KITS (Pads 1-3)": [{ name: "Basic House Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } }, { name: "Deep House", type: "multi", tracks: { 0:"XOOOXOOXXOOOXOOX", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } }, { name: "Boom Bap 1", type: "multi", tracks: { 0:"XOOZOOXZOOOOXOOO", 1:"OOOOYOOOZZZZYOOZ", 2:"XOXOXOXOXOXOXOXO" } }, { name: "Boom Bap 2", type: "multi", tracks: { 0:"XOOXOOZXOOZOOOXO", 1:"OOOOXOOOZOOOXOOZ", 2:"XZXZXZXZXZXZXZXZ" } }, { name: "Rock Beat 1", type: "multi", tracks: { 0:"XOOOXXOOXOOOXXOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXOXOXXXXXOXO" } }, { name: "Punk Drive", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXXXXXXXXXXXX" } }, { name: "Dem Bow Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOXZOOXZOOXZOOXZ", 2:"XXXXXXXXXXXXXXXX" } }, { name: "Trap Banger", type: "multi", tracks: { 0:"XOOOOOOOXOOOOOOO", 1:"OOOOOOOOXOOOOOOO", 2:"XZXZXZXZXXXXXZXZ" } }]
+  };
 
-for (let p = 0; p < 12; p++) {
-const pad = projectData[g][p];
-        const stepIdx = beatNumber % pad.steps;
-
-        // enforce fixed 64 steps even if legacy state slips in
-        pad.steps = FIXED_STEPS;
-        if (pad.notes.length !== FIXED_STEPS) pad.notes = Array(FIXED_STEPS).fill('O');
-        if (pad.auto.length !== FIXED_STEPS) pad.auto = Array(FIXED_STEPS).fill(0);
-
-        const stepIdx = beatNumber % FIXED_STEPS;
-const stepChar = pad.notes[stepIdx];
-const autoVal = pad.auto[stepIdx];
-
-@@ -730,7 +755,6 @@ <h1>EP-DC-OXO</h1>
-if (stepChar !== 'O' && !pad.muted) {
-const velOut = computeVelocity(pad, stepChar);
-
-          // Drum and chord LIVE SEPARATELY: ONLY chord-mode pads generate multi-note chords.
-if (pad.mode === 'chord') {
-let baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
-let intervals = getChordIntervals(pad.chord.quality, pad.chord.ext);
-@@ -783,8 +807,6 @@ <h1>EP-DC-OXO</h1>
-// Click = select for editing. Press = audition/trigger (drum OR chord depending on pad.mode).
-btn.onclick = () => selectPad(idx);
-btn.onmousedown = (e) => {
-      // Do not interfere with selection; just fire a live hit immediately.
-      // Use fixed-ish velocity unless you want to wire a UI control later.
-if (midiOut) triggerPadNow(activeGroup, idx, 110);
-flashPad(defaultMidiNoteForPadIndex(idx));
-e.preventDefault();
-@@ -795,17 +817,16 @@ <h1>EP-DC-OXO</h1>
-
-if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
-
-  // Keyboard event binding FIXED: now binds to the redesigned 13-key chromatic pills (.kb-key).
-  // Keyboard event binding
-document.querySelectorAll('.kb-key').forEach(k => {
-k.addEventListener('mousedown', function(e) {
-const raw = parseInt(this.getAttribute('data-note'), 10);
-if (isNaN(raw)) return;
-
-      const pc = ((raw % 12) + 12) % 12; // 12 -> 0 (C)
-      const pc = ((raw % 12) + 12) % 12;
-document.getElementById('chord-root').value = pc;
-updateChordSettings();
-
-      // Optional: in chord mode, you can also trigger the chord from the keyboard itself (only if audition enabled)
-if (auditionMode) previewChord(projectData[activeGroup][selectedPad]);
-
-e.preventDefault();
-@@ -853,8 +874,18 @@ <h1>EP-DC-OXO</h1>
-selectPad(selectedPad);
-}
-
-  function ensurePad64(pad) {
-    pad.steps = FIXED_STEPS;
-    if (!Array.isArray(pad.notes) || pad.notes.length !== FIXED_STEPS) pad.notes = Array(FIXED_STEPS).fill('O');
-    if (!Array.isArray(pad.auto)  || pad.auto.length  !== FIXED_STEPS) pad.auto  = Array(FIXED_STEPS).fill(0);
+  /* --- CHORD LOGIC --- */
+  function getChordIntervals(quality, ext) {
+    let intervals = [0];
+    if (['min', 'dim'].includes(quality)) intervals.push(3); else if (quality === 'sus2') intervals.push(2); else if (quality === 'sus4') intervals.push(5); else intervals.push(4);
+    if (quality === 'dim') intervals.push(6); else if (quality === 'aug') intervals.push(8); else intervals.push(7);
+    if (ext !== 'none') {
+      let seventh = (quality === 'maj' || quality === 'aug') ? 11 : 10; if (quality === 'dim') seventh = 9; intervals.push(seventh);
+      if (['9', '11', '13'].includes(ext)) intervals.push(14); if (['11', '13'].includes(ext)) intervals.push(17); if (ext === '13') intervals.push(21); if (ext === '6') { intervals.pop(); intervals.push(9); }
+    }
+    return intervals;
   }
 
-function selectPad(idx) {
-selectedPad = idx;
+  function applyVoicing(intervals, voice) {
+    if (voice === 'close') return intervals;
+    let newInt = [...intervals];
+    if (voice === 'wide' && newInt.length > 1) newInt[1] += 12;
+    if (voice === 'open') { if (newInt.length > 1) newInt[1] += 12; if (newInt.length > 2) newInt[2] += 24; }
+    return newInt;
+  }
 
-    // enforce 64 step arrays on select
-    ensurePad64(projectData[activeGroup][selectedPad]);
+  function applyInversion(intervals, inv) {
+    let newInt = [...intervals]; for (let i=0; i<inv; i++) { let n = newInt.shift(); newInt.push(n + 12); } return newInt;
+  }
 
-document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
-document.getElementById(`btn-${idx}`).classList.add('active-pad');
-document.getElementById('editor').style.display = 'block';
-@@ -869,15 +900,17 @@ <h1>EP-DC-OXO</h1>
-const c = document.getElementById('grid-notes');
-c.innerHTML = '';
-const d = projectData[activeGroup][selectedPad];
-    ensurePad64(d);
+  // --- PREVIEW / AUDITION ---
+  function previewChord(padData) {
+      if(!midiOut) return;
+      const chan = activeGroup; const noteOn = 0x90 + chan; const noteOff = 0x80 + chan; const vel = 100;
+      let baseNote = (padData.chord.oct + 1) * 12 + padData.chord.root;
+      let intervals = getChordIntervals(padData.chord.quality, padData.chord.ext);
+      intervals = applyInversion(intervals, padData.chord.inv);
+      intervals = applyVoicing(intervals, padData.chord.voice);
+      const now = performance.now();
+      intervals.forEach((interval, i) => {
+          const noteNum = baseNote + interval;
+          midiOut.send([noteOn, noteNum, vel], now + (i * 10)); 
+          midiOut.send([noteOff, noteNum, 0], now + 400);
+      });
+  }
 
-    for (let i = 0; i < d.steps; i++) {
-    for (let i = 0; i < FIXED_STEPS; i++) {
-const step = document.createElement('div');
-const v = d.notes[i];
-step.className = `step-box ${v !== 'O' ? 'on-' + v.toLowerCase() : 'off'}`;
-step.innerText = v;
-step.onclick = () => {
-const cy = ['O','X','Y','Z'];
-        d.notes[i] = cy[(cy.indexOf(v) + 1) % cy.length];
-        const cur = d.notes[i];
-        d.notes[i] = cy[(cy.indexOf(cur) + 1) % cy.length];
-renderSteps();
-};
-c.appendChild(step);
-@@ -950,30 +983,38 @@ <h1>EP-DC-OXO</h1>
-isPlaying = false;
-if (timerID) cancelAnimationFrame(timerID);
+  // --- PIANO UI ---
+  function updatePianoVisuals() {
+      const c = projectData[activeGroup][selectedPad].chord;
+      const root = c.root;
+      let intervals = getChordIntervals(c.quality, c.ext);
+      let notes = intervals.map(i => (root + i) % 12);
 
-    // Better panic: all-notes-off across ALL 4 channels (prevents stuck chord notes).
-if (midiOut) {
-if (sendTransport) midiOut.send([0xFC]);
-for (let ch = 0; ch < 4; ch++) midiOut.send([0xB0 + ch, 123, 0]);
-}
-log("HALTED");
-}
+      document.querySelectorAll('.key-white, .key-black').forEach(k => {
+          k.className = k.className.replace(' is-root', '').replace(' is-chord', '');
+          const n = parseInt(k.getAttribute('data-note'));
+          if((n % 12) === root) k.classList.add('is-root'); 
+          else if(notes.includes(n % 12)) k.classList.add('is-chord');
+      });
+  }
 
+  function shiftOctave(dir) {
+      const c = projectData[activeGroup][selectedPad].chord;
+      c.oct = Math.max(0, Math.min(8, c.oct + dir));
+      syncChordUI();
+  }
+
+  function toggleAudition() {
+      auditionMode = !auditionMode;
+      document.getElementById('audition-toggle').classList.toggle('toggle-on', auditionMode);
+  }
+
+  function setPadMode(mode) {
+    projectData[activeGroup][selectedPad].mode = mode;
+    document.getElementById('pad-mode-drum').classList.toggle('btn-toggle-on', mode === 'drum');
+    document.getElementById('pad-mode-chord').classList.toggle('btn-toggle-on', mode === 'chord');
+    document.getElementById('chord-lab').style.display = mode === 'chord' ? 'block' : 'none';
+    syncPadPerfUI();
+    if(mode === 'chord') updatePianoVisuals();
+  }
+
+  function updateChordSettings() {
+    const c = projectData[activeGroup][selectedPad].chord;
+    c.root = parseInt(document.getElementById('chord-root').value, 10);
+    c.oct = parseInt(document.getElementById('chord-oct').value, 10);
+    c.quality = document.getElementById('chord-quality').value;
+    c.ext = document.getElementById('chord-ext').value;
+    c.inv = parseInt(document.getElementById('chord-inv').value, 10);
+    c.voice = document.getElementById('chord-voice').value;
+    c.flux = parseInt(document.getElementById('chord-flux').value, 10);
+    updatePianoVisuals();
+  }
+
+  function syncChordUI() {
+    const c = projectData[activeGroup][selectedPad].chord;
+    document.getElementById('chord-root').value = c.root;
+    document.getElementById('chord-oct').value = c.oct;
+    document.getElementById('chord-quality').value = c.quality;
+    document.getElementById('chord-ext').value = c.ext;
+    document.getElementById('chord-inv').value = c.inv;
+    document.getElementById('chord-voice').value = c.voice;
+    document.getElementById('chord-flux').value = c.flux;
+    setPadMode(projectData[activeGroup][selectedPad].mode);
+  }
+
+  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+  function syncPadPerfUI() {
+    const pad = projectData[activeGroup][selectedPad];
+    document.getElementById('pad-midi-note').value = pad.midiNote;
+    document.getElementById('pad-gate-ms').value = pad.gateMs;
+    document.getElementById('pad-vel-mode').value = pad.velMode;
+    document.getElementById('pad-vel-a').value = pad.velA;
+    document.getElementById('pad-vel-b').value = pad.velB;
+    document.getElementById('pad-auto-cc').value = pad.autoTargetCC;
+    const muteBtn = document.getElementById('pad-mute-btn');
+    muteBtn.classList.toggle('btn-toggle-on', pad.muted);
+    muteBtn.innerText = pad.muted ? 'PAD: MUTE' : 'PAD: ON';
+    document.getElementById('pad-note-preview').innerText = pad.midiNote;
+  }
+  function updatePadPerfFromUI() {
+    const pad = projectData[activeGroup][selectedPad];
+    pad.midiNote = clamp(parseInt(document.getElementById('pad-midi-note').value || '36', 10), 0, 127);
+    pad.gateMs   = clamp(parseInt(document.getElementById('pad-gate-ms').value || '100', 10), 10, 2000);
+    pad.velMode  = document.getElementById('pad-vel-mode').value;
+    pad.velA     = clamp(parseInt(document.getElementById('pad-vel-a').value || '110', 10), 1, 127);
+    pad.velB     = clamp(parseInt(document.getElementById('pad-vel-b').value || '125', 10), 1, 127);
+    if (pad.velB < pad.velA) pad.velB = pad.velA;
+    pad.autoTargetCC = clamp(parseInt(document.getElementById('pad-auto-cc').value || '74', 10), 0, 127);
+    document.getElementById('pad-note-preview').innerText = pad.midiNote;
+  }
+  function togglePadMute() { const pad = projectData[activeGroup][selectedPad]; pad.muted = !pad.muted; syncPadPerfUI(); }
+  function resetPadPerf() { const pad = projectData[activeGroup][selectedPad]; pad.midiNote = defaultMidiNoteForPadIndex(selectedPad); pad.gateMs = 100; pad.velMode = 'xyz'; pad.velA = 110; pad.velB = 125; pad.autoTargetCC = 74; pad.muted = false; syncPadPerfUI(); }
+  function computeVelocity(pad, stepChar) {
+    let vel = stepChar === 'X' ? 120 : stepChar === 'Y' ? 85 : 50;
+    if (pad.velMode === 'fixed') vel = pad.velA; else if (pad.velMode === 'range') { const lo = Math.min(pad.velA, pad.velB); const hi = Math.max(pad.velA, pad.velB); vel = lo + Math.floor(Math.random() * (hi - lo + 1)); }
+    return clamp(Math.round(vel), 1, 127);
+  }
+
+  function scheduleNote(beatNumber, time) {
+    if (!midiOut) return;
+    const bpm = parseInt(document.getElementById('tempo').value, 10);
+    const secondsPer16th = (60.0 / bpm) * 0.25;
+    const pulseInterval = secondsPer16th / 6;
+    for (let i = 0; i < 6; i++) { midiOut.send([0xF8], performance.now() + ((time + (i * pulseInterval)) - audioCtx.currentTime) * 1000); }
+    const swing = parseInt(document.getElementById('swing-slider').value, 10);
+    const isEven = beatNumber % 2 !== 0;
+    const swingDelay = isEven ? ((60/bpm)/4) * (swing/100) : 0;
+    const humanJitter = humanize ? (Math.random() * 0.015) : 0;
+    const baseMidiTime = performance.now() + ((time + swingDelay + humanJitter) - audioCtx.currentTime) * 1000;
+
+    for (let g = 0; g < 4; g++) {
+      const chan = g; const noteOn = 0x90 + chan; const noteOff = 0x80 + chan; const ccStatus = 0xB0 + chan;
+      for (let p = 0; p < 12; p++) {
+        const pad = projectData[g][p];
+        const stepIdx = beatNumber % pad.steps;
+        const stepChar = pad.notes[stepIdx];
+        const autoVal = pad.auto[stepIdx];
+        if (autoVal > 0) midiOut.send([ccStatus, pad.autoTargetCC, autoVal], baseMidiTime);
+        if (stepChar !== 'O' && !pad.muted) {
+          const velOut = computeVelocity(pad, stepChar);
+          if (pad.mode === 'chord') {
+            let baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
+            let intervals = getChordIntervals(pad.chord.quality, pad.chord.ext);
+            const fluxVal = pad.chord.flux / 100;
+            let effectiveInv = pad.chord.inv;
+            if (fluxVal > 0 && Math.random() < fluxVal) {
+              if (Math.random() > 0.5) effectiveInv = (effectiveInv + 1) % 4;
+              if (fluxVal > 0.6 && Math.random() > 0.8) baseNote += (Math.random() > 0.5 ? 12 : -12);
+              if (fluxVal > 0.8 && Math.random() > 0.8) intervals.push(19);
+            }
+            intervals = applyInversion(intervals, effectiveInv);
+            intervals = applyVoicing(intervals, pad.chord.voice);
+            intervals.forEach((interval, i) => {
+              const noteNum = baseNote + interval;
+              const strumDelay = i * (5 + (fluxVal * 20));
+              const velVar = clamp(Math.round(velOut + ((Math.random() - 0.5) * fluxVal * 40)), 1, 127);
+              midiOut.send([noteOn, noteNum, velVar], baseMidiTime + strumDelay);
+              midiOut.send([noteOff, noteNum, 0], baseMidiTime + strumDelay + pad.gateMs);
+            });
+          } else {
+            midiOut.send([noteOn, pad.midiNote, velOut], baseMidiTime);
+            midiOut.send([noteOff, pad.midiNote, 0], baseMidiTime + pad.gateMs);
+          }
+          if (g === activeGroup) setTimeout(() => flashPad(defaultMidiNoteForPadIndex(p)), (time + swingDelay + humanJitter - audioCtx.currentTime) * 1000);
+        }
+      }
+    }
+  }
+
+  const ps = document.getElementById('preset-select'); let def = document.createElement('option'); def.innerText = "-- SELECT --"; ps.appendChild(def);
+  for (const [cat, list] of Object.entries(oxoPresets)) { const og = document.createElement('optgroup'); og.label = cat; list.forEach(p => { const o = document.createElement('option'); o.value = JSON.stringify(p); o.innerText = p.name; og.appendChild(o); }); ps.appendChild(og); }
+  const gridEl = document.getElementById('pad-grid'); [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2].forEach(idx => { const btn = document.createElement('div'); btn.className = 'pad-btn' + (idx === 0 ? ' pad-btn-sq' : ''); btn.id = `btn-${idx}`; btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`; btn.onclick = () => selectPad(idx); gridEl.appendChild(btn); });
+  if (localStorage.getItem('oxo_dark') === 'true') toggleDark();
+
+  document.querySelectorAll('.key-white, .key-black').forEach(k => {
+      k.addEventListener('mousedown', function() {
+          const n = parseInt(this.getAttribute('data-note'));
+          if(!isNaN(n)) {
+              document.getElementById('chord-root').value = n % 12; 
+              updateChordSettings();
+              if(auditionMode) previewChord(projectData[activeGroup][selectedPad]);
+          }
+      });
+  });
+
+  function flashPad(n) { const i = padNotes.indexOf(n); if (i !== -1) { const b = document.getElementById(`btn-${i}`); if (b) { b.classList.add('hit'); setTimeout(() => b.classList.remove('hit'), 100); } } }
+  function log(m) { const l = document.getElementById('log'); if (m.startsWith("COUNT")) { l.innerHTML = `<div class="lcd-overlay">${m.split(":")[1]}</div>`; } else { if (l.querySelector('.lcd-overlay')) l.innerHTML = ''; l.innerHTML = `<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString().split(' ')[0]}</span>${m}</div>` + l.innerHTML; } }
+  function toggleHuman() { humanize = !humanize; document.getElementById('human-btn').classList.toggle('btn-toggle-on', humanize); }
+  function toggleCountIn() { countIn = !countIn; document.getElementById('count-btn').classList.toggle('btn-toggle-on', countIn); }
+  function toggleTransport() { sendTransport = !sendTransport; document.getElementById('transport-btn').classList.toggle('btn-toggle-on', sendTransport); document.getElementById('transport-btn').innerText = `TX: ${sendTransport ? 'START/STOP' : 'CLOCK ONLY'}`; }
+  function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('oxo_dark', document.body.classList.contains('dark-mode')); }
+  function toggleLayout() { document.getElementById('app-chassis').classList.toggle('skinny-mode'); }
+  function openFeedback(){ document.getElementById('feedback-modal').style.display='flex'; } function closeFeedback(){ document.getElementById('feedback-modal').style.display='none'; } function submitFeedback() { const t = document.getElementById('fb-type').value; const m = document.getElementById('fb-text').value; window.open(`mailto:bryan.labchuk@gmail.com?subject=EP-DC-OXO Feedback: ${t}&body=${m}`); closeFeedback(); }
+  function selectGroup(idx) { activeGroup = idx; document.querySelectorAll('.group-btn').forEach((b, i) => b.classList.toggle('active', i === idx)); document.getElementById('chan-display').innerText = `GROUP ${['A','B','C','D'][idx]} (CH ${idx+1})`; log(`GROUP ${['A','B','C','D'][idx]} SELECTED`); selectPad(selectedPad); }
+  function selectPad(idx) { selectedPad = idx; document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad')); document.getElementById(`btn-${idx}`).classList.add('active-pad'); document.getElementById('editor').style.display = 'block'; let l = legends[idx]; if (idx === 0) l = '■'; document.getElementById('editor-title').innerText = `EDIT PAD ${l}`; syncChordUI(); syncPadPerfUI(); renderSteps(); }
+  function renderSteps() { const c = document.getElementById('grid-notes'); c.innerHTML = ''; const d = projectData[activeGroup][selectedPad]; for (let i = 0; i < d.steps; i++) { const step = document.createElement('div'); const v = d.notes[i]; step.className = `step-box ${v !== 'O' ? 'on-' + v.toLowerCase() : 'off'}`; step.innerText = v; step.onclick = () => { const cy = ['O','X','Y','Z']; d.notes[i] = cy[(cy.indexOf(v) + 1) % cy.length]; renderSteps(); }; c.appendChild(step); } }
+  
+  async function initAudioAndMIDI() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') await audioCtx.resume(); const m = await navigator.requestMIDIAccess(); midiOut = Array.from(m.outputs.values()).find(o => o.name.toLowerCase().includes("ep") || o.name.toLowerCase().includes("sample")); if (midiOut) { const n = midiOut.name.toLowerCase(); document.body.className = n.includes("1320") ? "theme-1320" : n.includes("133") ? "theme-133" : "theme-40"; document.getElementById('init-btn').innerText = "LINKED"; log("READY"); } else { log("ERR: NO DEV"); } } catch (e) { log("ERR: ACCESS"); } }
+  function nextNote() { const bpm = parseInt(document.getElementById('tempo').value, 10); nextNoteTime += (0.25 * (60.0 / bpm)); current16thNote++; }
+  function scheduler() { while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) { const bars = parseInt(document.getElementById('global-bars').value, 10); if (current16thNote >= bars * 16) { stopSequencer(); log("COMPLETE"); return; } scheduleNote(current16thNote, nextNoteTime); nextNote(); } if (isPlaying) timerID = requestAnimationFrame(scheduler); }
+  function handleInject() { if (!midiOut || !audioCtx) return log("ERR: INIT MIDI"); if (countIn) runCountIn(); else startSequencer(); }
+  function runCountIn() { let b = 4; const bpm = parseInt(document.getElementById('tempo').value, 10); log(`COUNT: ${b}...`); const i = setInterval(() => { b--; if (b > 0) log(`COUNT: ${b}...`); else { clearInterval(i); log("GO!"); startSequencer(); } }, 60000 / bpm); }
+  function startSequencer() { stopSequencer(); isPlaying = true; current16thNote = 0; nextNoteTime = audioCtx.currentTime + 0.1; if (sendTransport) midiOut.send([0xFA]); log("ROLLING..."); scheduler(); }
+  function stopSequencer() { isPlaying = false; if (timerID) cancelAnimationFrame(timerID); if (midiOut) { if (sendTransport) midiOut.send([0xFC]); midiOut.send([0xB0 + activeGroup, 123, 0]); } log("HALTED"); }
   function updateStepCount(v) { projectData[activeGroup][selectedPad].steps = parseInt(v, 10); renderSteps(); }
   function clearCurrentPad() { projectData[activeGroup][selectedPad].notes.fill('O'); renderSteps(); }
-  function clearCurrentPad() {
-    const d = projectData[activeGroup][selectedPad];
-    ensurePad64(d);
-    d.notes.fill('O');
-    renderSteps();
-  }
+  function applyPreset(v) { if (!v || v.startsWith("-")) return; const p = JSON.parse(v); if (p.type === "multi") { for (const [iStr, s] of Object.entries(p.tracks)) { const i = parseInt(iStr, 10); for (let j = 0; j < 32; j++) projectData[activeGroup][i].notes[j] = s[j % s.length] || 'O'; } log(`LOADED KIT: ${p.name}`); } else { const s = p.pat.replace(/\s/g, ''); for (let j = 0; j < 32; j++) projectData[activeGroup][selectedPad].notes[j] = s[j % s.length] || 'O'; log(`LOADED PAT: ${p.name}`); } renderSteps(); document.getElementById('preset-select').selectedIndex = 0; }
 
-function applyPreset(v) {
-if (!v || v.startsWith("-")) return;
-const p = JSON.parse(v);
+  // Boot
+  selectPad(0);
+</script>
+</body>
+</html>
 
-if (p.type === "multi") {
-      for (const [iStr, s] of Object.entries(p.tracks)) {
-      for (const [iStr, sRaw] of Object.entries(p.tracks)) {
-const i = parseInt(iStr, 10);
-        for (let j = 0; j < 32; j++) projectData[activeGroup][i].notes[j] = s[j % s.length] || 'O';
-        const pad = projectData[activeGroup][i];
-        ensurePad64(pad);
-        const s = (sRaw || '').replace(/\s/g, '');
-        for (let j = 0; j < FIXED_STEPS; j++) pad.notes[j] = s[j % s.length] || 'O';
-}
-log(`LOADED KIT: ${p.name}`);
-} else {
-      const d = projectData[activeGroup][selectedPad];
-      ensurePad64(d);
-const s = p.pat.replace(/\s/g, '');
-      for (let j = 0; j < 32; j++) projectData[activeGroup][selectedPad].notes[j] = s[j % s.length] || 'O';
-      for (let j = 0; j < FIXED_STEPS; j++) d.notes[j] = s[j % s.length] || 'O';
-log(`LOADED PAT: ${p.name}`);
-}
+
