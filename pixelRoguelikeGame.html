@@ -2,190 +2,284 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Oh no!</title>
+    <title>WICKED TIDES: POLISHED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
     <style>
-        /* --- AESTHETIC: TEEN GOTHIC --- */
+        /* --- AESTHETIC: 8-BIT RETRO OCCULT --- */
         :root {
-            --bg-dark: #1e1e24;
-            --panel-bg: #2b2b36;
-            --accent-rust: #ff6b6b; /* Prom Rose Red */
-            --accent-gold: #feca57;
-            --accent-teal: #48dbfb; /* Ghost Ectoplasm */
-            --text-main: #f5f6fa;
+            --bg-dark: #0f0f12;
+            --panel-bg: #1a1a1d;
+            --accent-rust: #c0392b;
+            --accent-gold: #f1c40f;
+            --accent-teal: #54a0ff;
+            --accent-green: #2ecc71;
+            --text-main: #ecf0f1;
+            --text-dark: #1e272e;
             --die-bone: #dcdde1;
-            --card-bg: #353b48;
+            --card-bg: #2f3640;
+
+            --border-thick: 4px solid #000;
+            --border-thin: 2px solid #000;
+            --hard-shadow: 4px 4px 0 rgba(0,0,0,0.8);
         }
+
+        * { box-sizing: border-box; image-rendering: pixelated; cursor: crosshair; }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Georgia', serif;
+            font-family: 'VT323', monospace; font-size: 1.4rem;
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; margin: 0; overflow: hidden;
 
-            /* Spooky Map Background */
+            /* MAP BACKGROUND */
             background-image:
-                    radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%),
-                    repeating-linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222),
-                    repeating-linear-gradient(45deg, #222 25%, #1a1a1a 25%, #1a1a1a 75%, #222 75%, #222);
-            background-position: 0 0, 0 0, 10px 10px;
-            background-size: 100% 100%, 20px 20px, 20px 20px;
+                    linear-gradient(rgba(15, 15, 18, 0.9), rgba(15, 15, 18, 0.9)),
+                    repeating-linear-gradient(0deg, transparent, transparent 19px, #222 20px),
+                    repeating-linear-gradient(90deg, transparent, transparent 19px, #222 20px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* --- TOP BAR (STATS) --- */
+        /* CRT SCANLINES */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        h1, h2, .stat-val, .total-display, .ghost-name, .phase-header, .die, .inv-slot-val, .char-name {
+            font-family: 'Press Start 2P', cursive; text-transform: uppercase;
+        }
+
+        /* --- TOP BAR (VITALS HUD) --- */
         .hud-bar {
-            width: 90%; max-width: 900px; margin-top: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 25px; background: rgba(0,0,0,0.8);
-            border-bottom: 3px solid var(--accent-rust); border-radius: 8px; z-index: 10;
+            width: 98%; max-width: 1200px; margin-top: 15px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;
+            padding: 12px; background: var(--panel-bg);
+            border: var(--border-thick); box-shadow: var(--hard-shadow); z-index: 10;
         }
 
-        .stat-box { text-align: center; }
-        .stat-val { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 900; color: var(--accent-gold); }
-        .stat-label { font-size: 0.7rem; color: #aaa; letter-spacing: 2px; }
+        .stat-box {
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            background: #111; padding: 8px; border: var(--border-thin);
+            position: relative;
+        }
+        /* Stat fill bar simulation */
+        .stat-box::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: #333;
+        }
+
+        .stat-icon { font-size: 1.5rem; filter: drop-shadow(2px 2px 0 #000); }
+        .stat-data { display: flex; flex-direction: column; line-height: 1.1; }
+        .stat-val { font-size: 0.8rem; color: var(--text-main); margin-bottom: 2px; }
+        .stat-label { font-size: 0.8rem; color: #777; }
+
+        .stat-chill .stat-val { color: var(--accent-teal); }
+        .stat-aura .stat-val { color: var(--accent-gold); }
+        .stat-energy .stat-val { color: var(--accent-green); }
 
         /* --- MAIN GRID --- */
         .game-grid {
             display: grid;
-            grid-template-columns: 280px 1fr 200px;
+            grid-template-columns: 300px 1fr 260px; /* Wider left/right panels */
             grid-template-rows: 1fr auto;
-            width: 95%; max-width: 1200px; flex-grow: 1;
+            width: 98%; max-width: 1300px; flex-grow: 1;
             gap: 20px; padding: 20px; z-index: 5;
         }
 
-        /* LEFT: INVESTIGATION NOTEBOOK */
+        /* LEFT: NOTEBOOK (FIXED LAYOUT) */
         .notebook-panel {
-            background: #f7f1e3; color: #2c3e50;
-            padding: 20px; border-radius: 2px;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
-            font-family: 'Courier New', monospace;
-            transform: rotate(-1deg); position: relative;
+            background: #e3dac9; color: var(--text-dark);
+            padding: 20px; border: var(--border-thick); box-shadow: var(--hard-shadow);
+            position: relative; display: flex; flex-direction: column;
+            transform: rotate(-0.5deg);
         }
-        /* Tape effect */
+
+        /* Tape Effect */
         .notebook-panel::before {
-            content: ""; position: absolute; top: -10px; left: 35%; width: 30%; height: 25px;
-            background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.2);
-            transform: rotate(2deg); backdrop-filter: blur(2px);
+            content: ""; position: absolute; top: -10px; left: 35%; width: 30%; height: 20px;
+            background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.2);
+            transform: rotate(1deg); backdrop-filter: blur(2px);
         }
 
         .phase-header {
-            font-weight: 900; font-size: 1.1rem; border-bottom: 2px solid #333;
-            margin-bottom: 15px; padding-bottom: 5px; text-transform: uppercase;
+            font-size: 0.9rem; border-bottom: 2px solid #555;
+            margin-bottom: 10px; padding-bottom: 8px; color: #000;
         }
 
-        .condition-list { list-style: none; padding: 0; margin: 0; }
+        .condition-list {
+            list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;
+        }
+
+        /* FLEXBOX FIX FOR OVERLAP */
         .condition-item {
-            margin-bottom: 10px; padding-left: 20px; position: relative; font-size: 0.85rem; font-weight: bold;
-        }
-        .condition-item::before {
-            content: "☐"; position: absolute; left: 0; font-weight: normal;
-        }
-        .condition-item.met::before { content: "☒"; color: green; }
-        .condition-item.met { text-decoration: line-through; color: #777; }
-        .condition-item.failed { color: #c0392b; }
-
-        /* CENTER: THE HAUNT */
-        .center-stage {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+            display: flex;
+            align-items: flex-start; /* Aligns box to top of text */
+            gap: 10px;
+            font-size: 1.1rem;
+            line-height: 1.1;
         }
 
-        .ghost-display {
-            text-align: center; color: var(--accent-teal);
-            text-shadow: 0 0 10px var(--accent-teal);
+        .checkbox-graphic {
+            font-family: 'VT323', monospace;
+            font-weight: bold;
+            flex-shrink: 0; /* Prevents box from squishing */
+            width: 25px;
         }
-        .ghost-name { font-size: 2rem; font-weight: 900; text-transform: uppercase; margin: 0; }
-        .ghost-flavor { font-size: 0.8rem; font-style: italic; opacity: 0.8; margin-top: 5px; color: #fff; }
 
+        .condition-text { color: #333; font-weight: bold; }
+
+        .condition-item.met .checkbox-graphic { color: #27ae60; }
+        .condition-item.met .condition-text { text-decoration: line-through; opacity: 0.5; }
+        .condition-item.failed { color: var(--accent-rust); }
+
+        /* CENTER: HAUNT */
+        .center-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+
+        .ghost-display { text-align: center; }
+        .ghost-name { font-size: 1.4rem; color: var(--accent-rust); margin: 0; text-shadow: 3px 3px 0 #000; letter-spacing: 2px; }
+        .ghost-flavor { font-size: 1.1rem; font-style: italic; opacity: 0.7; color: #fff; margin-top: 5px; }
+
+        /* RITUAL TRAY */
         .dice-tray {
-            width: 100%; height: 160px;
-            background: #2f3640; border: 4px dashed #7f8c8d; border-radius: 12px;
+            width: 100%; height: 180px;
+            background: #2a2a2a; border: var(--border-thick);
             display: flex; align-items: center; justify-content: center; gap: 15px;
             box-shadow: inset 0 0 40px #000; position: relative;
-        }
-        .tray-hint { position: absolute; bottom: 10px; font-size: 0.7rem; color: #555; text-transform: uppercase; }
 
-        .total-display {
-            font-size: 3rem; font-weight: 900; color: #fff;
-            text-shadow: 4px 4px 0 #000;
+            /* Ritual Circle Pattern */
+            background-image: radial-gradient(circle, transparent 20%, #2a2a2a 20%, #2a2a2a 22%, transparent 22%, transparent 35%, #2a2a2a 35%, #2a2a2a 37%, transparent 37%);
+            background-size: 200px 200px;
+            background-position: center;
         }
-        .target-display { font-size: 1rem; color: #aaa; }
+        .tray-hint { position: absolute; bottom: 10px; font-size: 0.9rem; color: #666; font-family: 'Press Start 2P'; font-size: 0.6rem;}
 
-        /* RIGHT: INVENTORY */
+        .total-display { font-size: 3rem; color: #fff; text-shadow: 4px 4px 0 #000; margin-top: 10px;}
+        .target-display { font-size: 1.2rem; color: #aaa; text-transform: uppercase; }
+
+        /* RIGHT: BACKPACK (Split View) */
         .inventory-panel {
-            background: rgba(0,0,0,0.3); border: 2px solid #444; border-radius: 8px;
-            padding: 15px; display: flex; flex-direction: column; align-items: center;
+            display: flex; flex-direction: column; gap: 15px; height: 100%;
         }
-        .dice-pool-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 
-        /* BOTTOM: HELPERS */
-        .card-dock {
-            grid-column: 1 / span 3;
-            display: flex; justify-content: center; gap: 15px; padding-top: 10px;
+        .inv-section {
+            background: var(--panel-bg); border: var(--border-thick); box-shadow: var(--hard-shadow);
+            padding: 10px; display: flex; flex-direction: column; align-items: center;
         }
+
+        .inv-header {
+            font-family: 'Press Start 2P'; font-size: 0.7rem; color: #777;
+            border-bottom: 2px solid #000; width: 100%; text-align: center;
+            margin-bottom: 12px; padding-bottom: 6px;
+        }
+
+        .dice-pool-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; padding: 5px; }
+
+        /* RESOURCE GRID */
+        .resource-grid {
+            display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%;
+        }
+        .inv-slot {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #111; border: var(--border-thin); padding: 8px 10px;
+            transition: 0.1s;
+        }
+        .inv-slot:hover { background: #222; }
+        .inv-slot-icon { font-size: 1.4rem; line-height: 1; }
+        .inv-slot-val { color: var(--text-main); font-size: 0.8rem; }
+        .inv-slot-name { font-size: 1rem; color: #777; margin-right: auto; margin-left: 10px; }
+
+        /* BOTTOM: CARDS */
+        .card-dock { grid-column: 1 / span 3; display: flex; justify-content: center; gap: 20px; border-top: var(--border-thin); padding-top: 20px; }
 
         .char-card {
-            width: 130px; height: 250px; background: var(--card-bg);
-            border: 2px solid #555; border-radius: 8px;
-            display: flex; flex-direction: column; cursor: pointer;
-            transition: 0.2s; position: relative; overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            width: 140px; height: 240px; background: var(--card-bg);
+            border: var(--border-thick); cursor: pointer; position: relative;
+            transition: transform 0.1s; box-shadow: var(--hard-shadow);
+            display: flex; flex-direction: column;
         }
-        .char-card:hover { transform: translateY(-15px); border-color: var(--accent-gold); z-index: 10; }
-        .char-card.selected { border-color: var(--accent-gold); transform: translateY(-15px); box-shadow: 0 0 20px var(--accent-gold); }
-        .char-card.exhausted { filter: grayscale(1) brightness(0.4); pointer-events: none; }
+        .char-card:hover { transform: translate(-4px, -4px); border-color: var(--accent-gold); box-shadow: 8px 8px 0 #000; }
+        .char-card.selected { border-color: var(--accent-gold); transform: translate(-4px, -4px); box-shadow: 8px 8px 0 #000; }
+        .char-card.exhausted { filter: grayscale(1) brightness(0.4); pointer-events: none; border-color: #555; }
 
-        .char-img {
-            flex-grow: 1; background: #222;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 3rem; border-bottom: 2px solid #444;
-            image-rendering: pixelated;
-        }
-        .char-info { padding: 8px; background: #222; text-align: center; border-top: 1px solid #444; }
-        .char-name { color: var(--accent-gold); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; }
-        .char-desc { color: #888; font-size: 0.6rem; line-height: 1.2; }
+        .char-img { flex-grow: 1; background: #222; display: flex; align-items: center; justify-content: center; font-size: 3rem; border-bottom: var(--border-thin); image-rendering: pixelated; }
+        .char-info { padding: 8px; background: #444; text-align: center; border-top: var(--border-thick); min-height: 70px; display:flex; flex-direction: column; justify-content: center; }
+        .char-name { color: var(--accent-gold); font-size: 0.65rem; margin-bottom: 6px; line-height: 1.2; }
+        .char-desc { color: #ccc; font-size: 0.9rem; line-height: 1; }
 
-        /* DICE */
+        /* DICE STYLES */
         .die {
-            width: 60px; height: 60px; background: var(--die-bone);
-            border-radius: 8px; border: 1px solid #999;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; font-weight: 900; color: #222; cursor: pointer;
-            box-shadow: 0 5px 0 #999; transition: transform 0.1s; font-family: 'Courier New', monospace;
+            width: 56px; height: 56px; background: var(--die-bone);
+            border: var(--border-thick); display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--text-dark); cursor: pointer;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.5); transition: transform 0.1s;
         }
-        .die:hover { transform: translateY(-3px); }
-        .die:active { transform: translateY(2px); box-shadow: 0 2px 0 #999; }
-        .die.rolling { animation: shake 0.3s infinite; background: #fff; color: transparent; }
-        .die.modified { border: 2px solid var(--accent-teal); }
-        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(8deg); } 75% { transform: rotate(-8deg); } }
+        .die:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(0,0,0,0.8); }
+        .die:active { transform: translate(0, 0); box-shadow: 2px 2px 0 rgba(0,0,0,0.8); }
+
+        .die.rolling { animation: shake 0.2s steps(2) infinite; background: #fff; color: transparent; }
+        @keyframes shake { 0% { transform: translate(0,0); } 100% { transform: translate(3px, -3px); } }
+
+        .die.modified { border-color: var(--accent-teal); }
+        /* Pixel Tooltip */
+        .die[title]:hover::after {
+            content: attr(title); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: #000; color: #fff; border: 2px solid #fff; padding: 5px; font-size: 0.8rem; white-space: nowrap; z-index: 100;
+            box-shadow: 4px 4px 0 #000; font-family: 'VT323';
+        }
 
     </style>
 </head>
 <body>
 
 <div class="hud-bar">
-    <div class="stat-box">
-        <div class="stat-val" id="chill-val">100%</div>
-        <div class="stat-label">CHILL LEVEL</div>
+    <div class="stat-box stat-chill">
+        <div class="stat-icon">🧠</div>
+        <div class="stat-data">
+            <span class="stat-val" id="chill-val">100%</span>
+            <span class="stat-label">CHILL</span>
+        </div>
+    </div>
+    <div class="stat-box stat-aura">
+        <div class="stat-icon">✨</div>
+        <div class="stat-data">
+            <span class="stat-val">50</span>
+            <span class="stat-label">AURA</span>
+        </div>
+    </div>
+    <div class="stat-box stat-energy">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-data">
+            <span class="stat-val">3/3</span>
+            <span class="stat-label">ENERGY</span>
+        </div>
     </div>
     <div class="stat-box">
-        <div class="stat-val" style="color:var(--text-main); font-size:1.2rem;">ANCESTOR: <span style="color:var(--accent-rust);">ZEBULON</span></div>
-        <div class="stat-label">CURRENT HAUNT</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-val" id="clues-val">0</div>
-        <div class="stat-label">CLUES FOUND</div>
+        <div class="stat-icon">🌑</div>
+        <div class="stat-data">
+            <span class="stat-val" style="color:#aaa;">NIGHT 1</span>
+            <span class="stat-label">CYCLE</span>
+        </div>
     </div>
 </div>
 
 <div class="game-grid">
 
     <div class="notebook-panel">
-        <div class="phase-header" id="phase-name">INVESTIGATION</div>
-        <div style="font-size:0.8rem; margin-bottom:15px; font-style:italic;" id="phase-desc">
+        <div class="phase-header" id="phase-name">CASE: ZEBULON</div>
+        <div style="font-size:1.1rem; margin-bottom:15px; line-height:1.2; font-style:italic;" id="phase-desc">
             Determine the binding ritual.
         </div>
-        <div style="background:rgba(0,0,0,0.05); padding:10px; border-radius:4px;">
-            <strong>CONDITIONS:</strong>
+        <div style="background:rgba(0,0,0,0.05); padding:10px; border:2px solid #000; flex-grow:1;">
+            <div style="font-weight:bold; margin-bottom:10px; font-size:0.9rem; font-family:'Press Start 2P';">REQUIRED:</div>
             <ul class="condition-list" id="condition-list">
             </ul>
         </div>
@@ -198,18 +292,43 @@
         </div>
 
         <div class="dice-tray" id="tray">
-            <div class="tray-hint">CLICK DICE FROM BAG TO ADD</div>
+            <div class="tray-hint">DRAG DICE FROM BAG</div>
         </div>
 
         <div style="text-align:center;">
             <div class="total-display" id="total-val">0</div>
-            <div class="target-display">TARGET SUM: <span id="target-sum">18</span></div>
+            <div class="target-display">TARGET: <span id="target-sum">18</span></div>
         </div>
     </div>
 
     <div class="inventory-panel">
-        <div class="stat-label" style="margin-bottom:10px;">DICE BAG</div>
-        <div class="dice-pool-grid" id="pool"></div>
+
+        <div class="inv-section" style="flex-grow:1; width:100%;">
+            <div class="inv-header">DICE BAG</div>
+            <div class="dice-pool-grid" id="pool"></div>
+        </div>
+
+        <div class="inv-section" style="width:100%; margin-top:15px;">
+            <div class="inv-header">BACKPACK</div>
+            <div class="resource-grid">
+                <div class="inv-slot">
+                    <span class="inv-slot-icon">💵</span>
+                    <span class="inv-slot-name">CASH</span>
+                    <span class="inv-slot-val">$40</span>
+                </div>
+                <div class="inv-slot">
+                    <span class="inv-slot-icon">🍔</span>
+                    <span class="inv-slot-name">FOOD</span>
+                    <span class="inv-slot-val">2</span>
+                </div>
+                <div class="inv-slot">
+                    <span class="inv-slot-icon">🔋</span>
+                    <span class="inv-slot-name">BATT</span>
+                    <span class="inv-slot-val">IIII</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="card-dock" id="townsfolk-container"></div>
@@ -217,24 +336,17 @@
 </div>
 
 <script>
-    // --- GAME DATA ---
+    // JS Logic (Identical functionality to v7/v8, using new DOM structure)
+
     const townsfolkData = [
         { id: 'cheer', name: "Cheer Captain", icon: "📣", desc: "Hype: Adds +1 to every die in tray.", action: (tray) => { tray.forEach(d => { d.modifier += 1; d.flashColor('#f1c40f'); }); } },
         { id: 'nerd', name: "A/V Club Pres", icon: "🤓", desc: "Hack: Flips all odd numbers to even.", action: (tray) => { tray.forEach(d => { d.faces = d.faces.map(f => f%2!==0 ? f+1 : f); d.flashColor('#48dbfb'); }); } },
-        { id: 'goth', name: "Mall Goth", icon: "🔮", desc: "Seance: Rerolls any 1s immediately.", action: (tray) => { tray.forEach(d => { if(d.faces[0] === 1) d.faces[0] = 6; d.flashColor('#9b59b6'); }); } }, // Simplified for proto
+        { id: 'goth', name: "Mall Goth", icon: "🔮", desc: "Seance: Rerolls any 1s immediately.", action: (tray) => { tray.forEach(d => { if(d.faces[0] === 1) d.faces[0] = 6; d.flashColor('#9b59b6'); }); } },
         { id: 'teach', name: "History Teacher", icon: "🍎", desc: "Lecture: Sets minimum roll to 3.", action: (tray) => { tray.forEach(d => { d.faces = [3,3,3,4,5,6]; d.flashColor('#e74c3c'); }); } }
     ];
 
-    // --- GAME STATE ---
     const state = {
-        phase: 'investigate', // 'investigate' or 'boss'
-        chill: 100,
-        clues: 0,
-        currentSum: 0,
-        selectedCard: null,
-
-        // Dynamic Goals
-        targetSum: 15,
+        phase: 'investigate', chill: 100, clues: 0, currentSum: 0, selectedCard: null, targetSum: 15,
         conditions: [
             { id: 'no_ones', text: "No 1s rolled", check: (dice) => !dice.some(d => d.value === 1) },
             { id: 'min_dice', text: "Use exactly 3 dice", check: (dice) => dice.length === 3 }
@@ -243,207 +355,119 @@
 
     class Die {
         constructor() {
-            this.faces = [1, 2, 3, 4, 5, 6];
-            this.modifier = 0;
-            this.value = null;
-            this.location = 'pool';
-
-            this.el = document.createElement("div");
-            this.el.className = "die";
-            this.el.innerText = "•";
+            this.faces = [1, 2, 3, 4, 5, 6]; this.modifier = 0; this.value = null; this.location = 'pool';
+            this.el = document.createElement("div"); this.el.className = "die"; this.el.innerText = "•";
             this.el.onclick = () => this.interact();
-
+            this.badge = document.createElement("div"); this.badge.className = "mod-badge"; this.el.appendChild(this.badge);
             this.updateTooltip();
         }
-
         interact() {
-            // Apply Card (Targeting specific die logic can be added, currently cards affect ALL for simplicity in v7)
-
+            if (state.selectedCard && this.location === 'tray') { this.applyCard(state.selectedCard); return; }
             if (this.location === 'pool') {
-                document.getElementById('tray').appendChild(this.el);
-                this.location = 'tray';
-                this.el.innerText = "?";
-                this.el.style.backgroundColor = "#555";
-                this.el.style.color = "#888";
-                return;
-            }
-            if (this.location === 'tray') {
-                this.roll();
-            }
+                document.getElementById('tray').appendChild(this.el); this.location = 'tray';
+                this.el.innerText = "?"; this.el.style.backgroundColor = "#555"; this.el.style.color = "#888";
+            } else if (this.location === 'tray') { this.roll(); }
         }
-
+        applyCard(cardObj) {
+            cardObj.data.action(this); this.el.classList.add('modified'); this.updateTooltip();
+            state.selectedCard = null; cardObj.el.classList.remove('selected'); cardObj.el.classList.add('exhausted');
+            document.getElementById('tray').classList.remove('active-target');
+        }
         roll() {
-            this.location = 'rolled';
-            this.el.classList.add('rolling');
-
+            this.location = 'rolled'; this.el.classList.add('rolling');
             setTimeout(() => {
                 this.el.classList.remove('rolling');
-
-                // MATH
-                const rollIndex = Math.floor(Math.random() * 6);
-                this.value = this.faces[rollIndex] + this.modifier;
-
-                // UI
+                const rollIndex = Math.floor(Math.random() * 6); this.value = this.faces[rollIndex] + this.modifier;
                 this.el.innerText = this.value;
-                this.el.style.backgroundColor = "#fff";
-                this.el.style.color = "#000";
-
-                if(this.value >= 6) this.el.style.color = "#c0392b"; // Crit color
-
+                this.el.style.backgroundColor = "#fff"; this.el.style.color = "#000";
+                if(this.value >= 6) { this.el.style.color = "#c0392b"; this.el.style.borderColor = "#c0392b"; }
                 updateGameState();
             }, 300 + Math.random() * 300);
         }
-
-        updateTooltip() {
-            let txt = `[${this.faces.join(',')}]`;
-            if(this.modifier !== 0) txt += ` +${this.modifier}`;
-            this.el.title = txt;
-        }
-
-        flashColor(color) {
-            this.el.style.borderColor = color;
-            this.el.style.boxShadow = `0 0 10px ${color}`;
-        }
+        updateTooltip() { let txt = `[${this.faces.join(',')}]`; if(this.modifier !== 0) txt += ` +${this.modifier}`; this.el.title = txt; }
+        flashColor(color) { this.el.style.borderColor = color; }
     }
 
     const diceObjects = [];
 
-    // --- ENGINE ---
     function init() {
-        // Spawn Dice
         const pool = document.getElementById('pool');
-        for(let i=0; i<6; i++) {
-            const d = new Die();
-            diceObjects.push(d);
-            pool.appendChild(d.el);
-        }
-
-        // Spawn Cards
+        for(let i=0; i<6; i++) { const d = new Die(); diceObjects.push(d); pool.appendChild(d.el); }
         const dock = document.getElementById('townsfolk-container');
         townsfolkData.forEach(char => {
-            const c = document.createElement('div');
-            c.className = 'char-card';
-            c.innerHTML = `
-                <div class="char-img">${char.icon}</div>
-                <div class="char-info">
-                    <div class="char-name">${char.name}</div>
-                    <div class="char-desc">${char.desc}</div>
-                </div>
-            `;
+            const c = document.createElement('div'); c.className = 'char-card';
+            c.innerHTML = `<div class="char-img">${char.icon}</div><div class="char-info"><div class="char-name">${char.name}</div><div class="char-desc">${char.desc}</div></div>`;
             c.onclick = () => {
                 if(c.classList.contains('exhausted')) return;
-                // Apply global effect to tray
                 const trayDice = diceObjects.filter(d => d.location === 'tray');
-                if(trayDice.length > 0) {
-                    char.action(trayDice);
-                    c.classList.add('exhausted');
-                } else {
-                    alert("Drag dice to the tray first!");
-                }
+                if(trayDice.length > 0) { char.action(trayDice); c.classList.add('exhausted'); }
             };
             dock.appendChild(c);
         });
-
         renderConditions();
     }
 
     function renderConditions() {
-        const list = document.getElementById('condition-list');
-        list.innerHTML = '';
+        const list = document.getElementById('condition-list'); list.innerHTML = '';
         state.conditions.forEach(cond => {
-            const li = document.createElement('li');
-            li.className = 'condition-item';
-            li.id = `cond-${cond.id}`;
-            li.innerText = cond.text;
+            const li = document.createElement('li'); li.className = 'condition-item'; li.id = `cond-${cond.id}`;
+            // FLEXBOX FIX: Separate checkbox and text
+            li.innerHTML = `<span class="checkbox-graphic">[ ]</span> <span class="condition-text">${cond.text}</span>`;
             list.appendChild(li);
         });
         document.getElementById('target-sum').innerText = state.targetSum;
     }
 
     function updateGameState() {
-        // 1. Calculate Sum
         const rolledDice = diceObjects.filter(d => d.location === 'rolled');
-        const trayDice = diceObjects.filter(d => d.location === 'tray'); // Still unrolled
-
-        let sum = 0;
-        rolledDice.forEach(d => sum += d.value);
-        state.currentSum = sum;
+        const trayDice = diceObjects.filter(d => d.location === 'tray');
+        let sum = 0; rolledDice.forEach(d => sum += d.value); state.currentSum = sum;
         document.getElementById('total-val').innerText = sum;
 
-        // 2. Check Conditions (Only if all selected dice are rolled)
         if (trayDice.length === 0 && rolledDice.length > 0) {
             let allConditionsMet = true;
-
-            // Check Logic
             state.conditions.forEach(cond => {
                 const met = cond.check(rolledDice);
                 const el = document.getElementById(`cond-${cond.id}`);
+                const checkGraphic = el.querySelector('.checkbox-graphic');
+
                 if(met) {
                     el.classList.add('met');
+                    checkGraphic.innerText = "[x]";
                 } else {
                     el.classList.add('failed');
                     allConditionsMet = false;
                 }
             });
-
-            // Check Sum
             const sumMet = sum >= state.targetSum;
             document.getElementById('total-val').style.color = sumMet ? "#2ecc71" : "#e74c3c";
-
-            // 3. Round Result
-            if (sumMet && allConditionsMet) {
-                setTimeout(() => handleWin(), 500);
-            } else if (!allConditionsMet || (sum < state.targetSum && trayDice.length === 0)) {
-                // If we failed conditions OR failed sum and have no dice left
-                // Ideally we wait for user to click "End Turn", but for auto-check:
-                // Let's just create visual feedback.
-            }
+            if (sumMet && allConditionsMet) { setTimeout(() => handleWin(), 500); }
         }
     }
 
     function handleWin() {
         if(state.phase === 'investigate') {
             alert("CLUE FOUND! Proceeding to EXORCISM.");
-            state.phase = 'boss';
-            state.clues += 1;
-            document.getElementById('clues-val').innerText = state.clues;
-
-            // Setup Boss Phase
+            state.phase = 'boss'; state.clues += 1;
             document.getElementById('phase-name').innerText = "THE EXORCISM";
             document.getElementById('phase-desc').innerText = "Banish Zebulon. High power needed.";
-            state.targetSum = 35; // Harder sum
-            state.conditions = [{ id: 'boss_dps', text: "Total > 35", check: (dice) => true }]; // No logic constraints
+            state.targetSum = 35;
+            state.conditions = [{ id: 'boss_dps', text: "Total > 35", check: (dice) => true }];
             resetBoard();
-        } else {
-            alert("GHOST BANISHED! DATE SAVED!");
-            location.reload(); // Hard reset
-        }
+        } else { alert("GHOST BANISHED! DATE SAVED!"); location.reload(); }
     }
 
     function resetBoard() {
-        // Return dice to pool
         const pool = document.getElementById('pool');
-        const tray = document.getElementById('tray');
-        // Simple DOM reset for prototype
         diceObjects.forEach(d => {
-            d.location = 'pool';
-            d.value = null;
-            d.el.className = "die";
-            d.el.innerText = "•";
-            d.el.style = ""; // Clear colors
+            d.location = 'pool'; d.value = null; d.el.className = "die"; d.el.innerText = "•"; d.el.style = "";
             pool.appendChild(d.el);
         });
-
-        // Restore Cards
         document.querySelectorAll('.char-card').forEach(c => c.classList.remove('exhausted'));
-
         renderConditions();
-        document.getElementById('total-val').innerText = "0";
-        document.getElementById('total-val').style.color = "#fff";
+        document.getElementById('total-val').innerText = "0"; document.getElementById('total-val').style.color = "#fff";
     }
-
     init();
-
 </script>
 </body>
 </html>
