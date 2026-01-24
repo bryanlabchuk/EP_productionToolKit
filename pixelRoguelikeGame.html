@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Oh no!</title>
+    <style>
+        /* --- AESTHETIC: TEEN GOTHIC --- */
+        :root {
+            --bg-dark: #1e1e24;
+            --panel-bg: #2b2b36;
+            --accent-rust: #ff6b6b; /* Prom Rose Red */
+            --accent-gold: #feca57;
+            --accent-teal: #48dbfb; /* Ghost Ectoplasm */
+            --text-main: #f5f6fa;
+            --die-bone: #dcdde1;
+            --card-bg: #353b48;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Georgia', serif;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; margin: 0; overflow: hidden;
+
+            /* Spooky Map Background */
+            background-image:
+                    radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%),
+                    repeating-linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222),
+                    repeating-linear-gradient(45deg, #222 25%, #1a1a1a 25%, #1a1a1a 75%, #222 75%, #222);
+            background-position: 0 0, 0 0, 10px 10px;
+            background-size: 100% 100%, 20px 20px, 20px 20px;
+        }
+
+        /* --- TOP BAR (STATS) --- */
+        .hud-bar {
+            width: 90%; max-width: 900px; margin-top: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; background: rgba(0,0,0,0.8);
+            border-bottom: 3px solid var(--accent-rust); border-radius: 8px; z-index: 10;
+        }
+
+        .stat-box { text-align: center; }
+        .stat-val { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 900; color: var(--accent-gold); }
+        .stat-label { font-size: 0.7rem; color: #aaa; letter-spacing: 2px; }
+
+        /* --- MAIN GRID --- */
+        .game-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 200px;
+            grid-template-rows: 1fr auto;
+            width: 95%; max-width: 1200px; flex-grow: 1;
+            gap: 20px; padding: 20px; z-index: 5;
+        }
+
+        /* LEFT: INVESTIGATION NOTEBOOK */
+        .notebook-panel {
+            background: #f7f1e3; color: #2c3e50;
+            padding: 20px; border-radius: 2px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            font-family: 'Courier New', monospace;
+            transform: rotate(-1deg); position: relative;
+        }
+        /* Tape effect */
+        .notebook-panel::before {
+            content: ""; position: absolute; top: -10px; left: 35%; width: 30%; height: 25px;
+            background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.2);
+            transform: rotate(2deg); backdrop-filter: blur(2px);
+        }
+
+        .phase-header {
+            font-weight: 900; font-size: 1.1rem; border-bottom: 2px solid #333;
+            margin-bottom: 15px; padding-bottom: 5px; text-transform: uppercase;
+        }
+
+        .condition-list { list-style: none; padding: 0; margin: 0; }
+        .condition-item {
+            margin-bottom: 10px; padding-left: 20px; position: relative; font-size: 0.85rem; font-weight: bold;
+        }
+        .condition-item::before {
+            content: "☐"; position: absolute; left: 0; font-weight: normal;
+        }
+        .condition-item.met::before { content: "☒"; color: green; }
+        .condition-item.met { text-decoration: line-through; color: #777; }
+        .condition-item.failed { color: #c0392b; }
+
+        /* CENTER: THE HAUNT */
+        .center-stage {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+        }
+
+        .ghost-display {
+            text-align: center; color: var(--accent-teal);
+            text-shadow: 0 0 10px var(--accent-teal);
+        }
+        .ghost-name { font-size: 2rem; font-weight: 900; text-transform: uppercase; margin: 0; }
+        .ghost-flavor { font-size: 0.8rem; font-style: italic; opacity: 0.8; margin-top: 5px; color: #fff; }
+
+        .dice-tray {
+            width: 100%; height: 160px;
+            background: #2f3640; border: 4px dashed #7f8c8d; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            box-shadow: inset 0 0 40px #000; position: relative;
+        }
+        .tray-hint { position: absolute; bottom: 10px; font-size: 0.7rem; color: #555; text-transform: uppercase; }
+
+        .total-display {
+            font-size: 3rem; font-weight: 900; color: #fff;
+            text-shadow: 4px 4px 0 #000;
+        }
+        .target-display { font-size: 1rem; color: #aaa; }
+
+        /* RIGHT: INVENTORY */
+        .inventory-panel {
+            background: rgba(0,0,0,0.3); border: 2px solid #444; border-radius: 8px;
+            padding: 15px; display: flex; flex-direction: column; align-items: center;
+        }
+        .dice-pool-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+        /* BOTTOM: HELPERS */
+        .card-dock {
+            grid-column: 1 / span 3;
+            display: flex; justify-content: center; gap: 15px; padding-top: 10px;
+        }
+
+        .char-card {
+            width: 130px; height: 250px; background: var(--card-bg);
+            border: 2px solid #555; border-radius: 8px;
+            display: flex; flex-direction: column; cursor: pointer;
+            transition: 0.2s; position: relative; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .char-card:hover { transform: translateY(-15px); border-color: var(--accent-gold); z-index: 10; }
+        .char-card.selected { border-color: var(--accent-gold); transform: translateY(-15px); box-shadow: 0 0 20px var(--accent-gold); }
+        .char-card.exhausted { filter: grayscale(1) brightness(0.4); pointer-events: none; }
+
+        .char-img {
+            flex-grow: 1; background: #222;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; border-bottom: 2px solid #444;
+            image-rendering: pixelated;
+        }
+        .char-info { padding: 8px; background: #222; text-align: center; border-top: 1px solid #444; }
+        .char-name { color: var(--accent-gold); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; }
+        .char-desc { color: #888; font-size: 0.6rem; line-height: 1.2; }
+
+        /* DICE */
+        .die {
+            width: 60px; height: 60px; background: var(--die-bone);
+            border-radius: 8px; border: 1px solid #999;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: 900; color: #222; cursor: pointer;
+            box-shadow: 0 5px 0 #999; transition: transform 0.1s; font-family: 'Courier New', monospace;
+        }
+        .die:hover { transform: translateY(-3px); }
+        .die:active { transform: translateY(2px); box-shadow: 0 2px 0 #999; }
+        .die.rolling { animation: shake 0.3s infinite; background: #fff; color: transparent; }
+        .die.modified { border: 2px solid var(--accent-teal); }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(8deg); } 75% { transform: rotate(-8deg); } }
+
+    </style>
+</head>
+<body>
+
+<div class="hud-bar">
+    <div class="stat-box">
+        <div class="stat-val" id="chill-val">100%</div>
+        <div class="stat-label">CHILL LEVEL</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-val" style="color:var(--text-main); font-size:1.2rem;">ANCESTOR: <span style="color:var(--accent-rust);">ZEBULON</span></div>
+        <div class="stat-label">CURRENT HAUNT</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-val" id="clues-val">0</div>
+        <div class="stat-label">CLUES FOUND</div>
+    </div>
+</div>
+
+<div class="game-grid">
+
+    <div class="notebook-panel">
+        <div class="phase-header" id="phase-name">INVESTIGATION</div>
+        <div style="font-size:0.8rem; margin-bottom:15px; font-style:italic;" id="phase-desc">
+            Determine the binding ritual.
+        </div>
+        <div style="background:rgba(0,0,0,0.05); padding:10px; border-radius:4px;">
+            <strong>CONDITIONS:</strong>
+            <ul class="condition-list" id="condition-list">
+            </ul>
+        </div>
+    </div>
+
+    <div class="center-stage">
+        <div class="ghost-display">
+            <h1 class="ghost-name" id="ghost-name">GREAT-UNCLE ZEBULON</h1>
+            <div class="ghost-flavor">"He hated loud music and ankles."</div>
+        </div>
+
+        <div class="dice-tray" id="tray">
+            <div class="tray-hint">CLICK DICE FROM BAG TO ADD</div>
+        </div>
+
+        <div style="text-align:center;">
+            <div class="total-display" id="total-val">0</div>
+            <div class="target-display">TARGET SUM: <span id="target-sum">18</span></div>
+        </div>
+    </div>
+
+    <div class="inventory-panel">
+        <div class="stat-label" style="margin-bottom:10px;">DICE BAG</div>
+        <div class="dice-pool-grid" id="pool"></div>
+    </div>
+
+    <div class="card-dock" id="townsfolk-container"></div>
+
+</div>
+
+<script>
+    // --- GAME DATA ---
+    const townsfolkData = [
+        { id: 'cheer', name: "Cheer Captain", icon: "📣", desc: "Hype: Adds +1 to every die in tray.", action: (tray) => { tray.forEach(d => { d.modifier += 1; d.flashColor('#f1c40f'); }); } },
+        { id: 'nerd', name: "A/V Club Pres", icon: "🤓", desc: "Hack: Flips all odd numbers to even.", action: (tray) => { tray.forEach(d => { d.faces = d.faces.map(f => f%2!==0 ? f+1 : f); d.flashColor('#48dbfb'); }); } },
+        { id: 'goth', name: "Mall Goth", icon: "🔮", desc: "Seance: Rerolls any 1s immediately.", action: (tray) => { tray.forEach(d => { if(d.faces[0] === 1) d.faces[0] = 6; d.flashColor('#9b59b6'); }); } }, // Simplified for proto
+        { id: 'teach', name: "History Teacher", icon: "🍎", desc: "Lecture: Sets minimum roll to 3.", action: (tray) => { tray.forEach(d => { d.faces = [3,3,3,4,5,6]; d.flashColor('#e74c3c'); }); } }
+    ];
+
+    // --- GAME STATE ---
+    const state = {
+        phase: 'investigate', // 'investigate' or 'boss'
+        chill: 100,
+        clues: 0,
+        currentSum: 0,
+        selectedCard: null,
+
+        // Dynamic Goals
+        targetSum: 15,
+        conditions: [
+            { id: 'no_ones', text: "No 1s rolled", check: (dice) => !dice.some(d => d.value === 1) },
+            { id: 'min_dice', text: "Use exactly 3 dice", check: (dice) => dice.length === 3 }
+        ]
+    };
+
+    class Die {
+        constructor() {
+            this.faces = [1, 2, 3, 4, 5, 6];
+            this.modifier = 0;
+            this.value = null;
+            this.location = 'pool';
+
+            this.el = document.createElement("div");
+            this.el.className = "die";
+            this.el.innerText = "•";
+            this.el.onclick = () => this.interact();
+
+            this.updateTooltip();
+        }
+
+        interact() {
+            // Apply Card (Targeting specific die logic can be added, currently cards affect ALL for simplicity in v7)
+
+            if (this.location === 'pool') {
+                document.getElementById('tray').appendChild(this.el);
+                this.location = 'tray';
+                this.el.innerText = "?";
+                this.el.style.backgroundColor = "#555";
+                this.el.style.color = "#888";
+                return;
+            }
+            if (this.location === 'tray') {
+                this.roll();
+            }
+        }
+
+        roll() {
+            this.location = 'rolled';
+            this.el.classList.add('rolling');
+
+            setTimeout(() => {
+                this.el.classList.remove('rolling');
+
+                // MATH
+                const rollIndex = Math.floor(Math.random() * 6);
+                this.value = this.faces[rollIndex] + this.modifier;
+
+                // UI
+                this.el.innerText = this.value;
+                this.el.style.backgroundColor = "#fff";
+                this.el.style.color = "#000";
+
+                if(this.value >= 6) this.el.style.color = "#c0392b"; // Crit color
+
+                updateGameState();
+            }, 300 + Math.random() * 300);
+        }
+
+        updateTooltip() {
+            let txt = `[${this.faces.join(',')}]`;
+            if(this.modifier !== 0) txt += ` +${this.modifier}`;
+            this.el.title = txt;
+        }
+
+        flashColor(color) {
+            this.el.style.borderColor = color;
+            this.el.style.boxShadow = `0 0 10px ${color}`;
+        }
+    }
+
+    const diceObjects = [];
+
+    // --- ENGINE ---
+    function init() {
+        // Spawn Dice
+        const pool = document.getElementById('pool');
+        for(let i=0; i<6; i++) {
+            const d = new Die();
+            diceObjects.push(d);
+            pool.appendChild(d.el);
+        }
+
+        // Spawn Cards
+        const dock = document.getElementById('townsfolk-container');
+        townsfolkData.forEach(char => {
+            const c = document.createElement('div');
+            c.className = 'char-card';
+            c.innerHTML = `
+                <div class="char-img">${char.icon}</div>
+                <div class="char-info">
+                    <div class="char-name">${char.name}</div>
+                    <div class="char-desc">${char.desc}</div>
+                </div>
+            `;
+            c.onclick = () => {
+                if(c.classList.contains('exhausted')) return;
+                // Apply global effect to tray
+                const trayDice = diceObjects.filter(d => d.location === 'tray');
+                if(trayDice.length > 0) {
+                    char.action(trayDice);
+                    c.classList.add('exhausted');
+                } else {
+                    alert("Drag dice to the tray first!");
+                }
+            };
+            dock.appendChild(c);
+        });
+
+        renderConditions();
+    }
+
+    function renderConditions() {
+        const list = document.getElementById('condition-list');
+        list.innerHTML = '';
+        state.conditions.forEach(cond => {
+            const li = document.createElement('li');
+            li.className = 'condition-item';
+            li.id = `cond-${cond.id}`;
+            li.innerText = cond.text;
+            list.appendChild(li);
+        });
+        document.getElementById('target-sum').innerText = state.targetSum;
+    }
+
+    function updateGameState() {
+        // 1. Calculate Sum
+        const rolledDice = diceObjects.filter(d => d.location === 'rolled');
+        const trayDice = diceObjects.filter(d => d.location === 'tray'); // Still unrolled
+
+        let sum = 0;
+        rolledDice.forEach(d => sum += d.value);
+        state.currentSum = sum;
+        document.getElementById('total-val').innerText = sum;
+
+        // 2. Check Conditions (Only if all selected dice are rolled)
+        if (trayDice.length === 0 && rolledDice.length > 0) {
+            let allConditionsMet = true;
+
+            // Check Logic
+            state.conditions.forEach(cond => {
+                const met = cond.check(rolledDice);
+                const el = document.getElementById(`cond-${cond.id}`);
+                if(met) {
+                    el.classList.add('met');
+                } else {
+                    el.classList.add('failed');
+                    allConditionsMet = false;
+                }
+            });
+
+            // Check Sum
+            const sumMet = sum >= state.targetSum;
+            document.getElementById('total-val').style.color = sumMet ? "#2ecc71" : "#e74c3c";
+
+            // 3. Round Result
+            if (sumMet && allConditionsMet) {
+                setTimeout(() => handleWin(), 500);
+            } else if (!allConditionsMet || (sum < state.targetSum && trayDice.length === 0)) {
+                // If we failed conditions OR failed sum and have no dice left
+                // Ideally we wait for user to click "End Turn", but for auto-check:
+                // Let's just create visual feedback.
+            }
+        }
+    }
+
+    function handleWin() {
+        if(state.phase === 'investigate') {
+            alert("CLUE FOUND! Proceeding to EXORCISM.");
+            state.phase = 'boss';
+            state.clues += 1;
+            document.getElementById('clues-val').innerText = state.clues;
+
+            // Setup Boss Phase
+            document.getElementById('phase-name').innerText = "THE EXORCISM";
+            document.getElementById('phase-desc').innerText = "Banish Zebulon. High power needed.";
+            state.targetSum = 35; // Harder sum
+            state.conditions = [{ id: 'boss_dps', text: "Total > 35", check: (dice) => true }]; // No logic constraints
+            resetBoard();
+        } else {
+            alert("GHOST BANISHED! DATE SAVED!");
+            location.reload(); // Hard reset
+        }
+    }
+
+    function resetBoard() {
+        // Return dice to pool
+        const pool = document.getElementById('pool');
+        const tray = document.getElementById('tray');
+        // Simple DOM reset for prototype
+        diceObjects.forEach(d => {
+            d.location = 'pool';
+            d.value = null;
+            d.el.className = "die";
+            d.el.innerText = "•";
+            d.el.style = ""; // Clear colors
+            pool.appendChild(d.el);
+        });
+
+        // Restore Cards
+        document.querySelectorAll('.char-card').forEach(c => c.classList.remove('exhausted'));
+
+        renderConditions();
+        document.getElementById('total-val').innerText = "0";
+        document.getElementById('total-val').style.color = "#fff";
+    }
+
+    init();
+
+</script>
+</body>
+</html>
