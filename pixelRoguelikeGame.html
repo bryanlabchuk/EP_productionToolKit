@@ -2,286 +2,223 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WICKED TIDES: POLISHED</title>
+    <title>WICKED TIDES: PRE-ALPHA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+          }
+        }
+    </script>
+
     <style>
-        /* --- AESTHETIC: 8-BIT RETRO OCCULT --- */
+        /* --- CORE VARS --- */
         :root {
             --bg-dark: #0f0f12;
             --panel-bg: #1a1a1d;
             --accent-rust: #c0392b;
             --accent-gold: #f1c40f;
             --accent-teal: #54a0ff;
-            --accent-green: #2ecc71;
             --text-main: #ecf0f1;
-            --text-dark: #1e272e;
             --die-bone: #dcdde1;
             --card-bg: #2f3640;
-
             --border-thick: 4px solid #000;
             --border-thin: 2px solid #000;
-            --hard-shadow: 4px 4px 0 rgba(0,0,0,0.8);
+            --hard-shadow: 4px 4px 0 rgba(0,0,0,0.9);
         }
 
-        * { box-sizing: border-box; image-rendering: pixelated; cursor: crosshair; }
+        * { box-sizing: border-box; image-rendering: pixelated; cursor: crosshair; user-select: none; }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            background-color: var(--bg-dark); color: var(--text-main);
             font-family: 'VT323', monospace; font-size: 1.4rem;
             display: flex; flex-direction: column; align-items: center;
             height: 100vh; margin: 0; overflow: hidden;
-
-            /* MAP BACKGROUND */
             background-image:
-                    linear-gradient(rgba(15, 15, 18, 0.9), rgba(15, 15, 18, 0.9)),
+                    linear-gradient(rgba(10, 10, 12, 0.92), rgba(10, 10, 12, 0.95)),
                     repeating-linear-gradient(0deg, transparent, transparent 19px, #222 20px),
                     repeating-linear-gradient(90deg, transparent, transparent 19px, #222 20px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* CRT SCANLINES */
-        body::after {
-            content: " ";
-            display: block;
-            position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
-            z-index: 100;
-            pointer-events: none;
-        }
+        #physics-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
 
-        h1, h2, .stat-val, .total-display, .ghost-name, .phase-header, .die, .inv-slot-val, .char-name {
+        h1, h2, .stat-val, .total-display, .ghost-name, .phase-header, .die-2d, .char-name, .btn-retro {
             font-family: 'Press Start 2P', cursive; text-transform: uppercase;
         }
 
-        /* --- TOP BAR (VITALS HUD) --- */
+        /* --- UI LAYOUT --- */
         .hud-bar {
             width: 98%; max-width: 1200px; margin-top: 15px;
             display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;
             padding: 12px; background: var(--panel-bg);
-            border: var(--border-thick); box-shadow: var(--hard-shadow); z-index: 10;
+            border: var(--border-thick); box-shadow: var(--hard-shadow); z-index: 30;
         }
+        .stat-box { display: flex; align-items: center; justify-content: center; gap: 15px; background: #111; padding: 8px; border: var(--border-thin); position: relative; }
+        .stat-val { font-size: 0.8rem; color: var(--text-main); margin-bottom: 4px; }
+        .stat-label { font-size: 0.8rem; color: #777; line-height: 1; }
 
-        .stat-box {
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            background: #111; padding: 8px; border: var(--border-thin);
-            position: relative;
-        }
-        /* Stat fill bar simulation */
-        .stat-box::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
-            background: #333;
-        }
-
-        .stat-icon { font-size: 1.5rem; filter: drop-shadow(2px 2px 0 #000); }
-        .stat-data { display: flex; flex-direction: column; line-height: 1.1; }
-        .stat-val { font-size: 0.8rem; color: var(--text-main); margin-bottom: 2px; }
-        .stat-label { font-size: 0.8rem; color: #777; }
-
-        .stat-chill .stat-val { color: var(--accent-teal); }
-        .stat-aura .stat-val { color: var(--accent-gold); }
-        .stat-energy .stat-val { color: var(--accent-green); }
-
-        /* --- MAIN GRID --- */
         .game-grid {
-            display: grid;
-            grid-template-columns: 300px 1fr 260px; /* Wider left/right panels */
-            grid-template-rows: 1fr auto;
-            width: 98%; max-width: 1300px; flex-grow: 1;
-            gap: 20px; padding: 20px; z-index: 5;
+            display: grid; grid-template-columns: 300px 1fr 260px; grid-template-rows: 1fr auto;
+            width: 98%; max-width: 1300px; flex-grow: 1; gap: 20px; padding: 20px; z-index: 25;
         }
 
-        /* LEFT: NOTEBOOK (FIXED LAYOUT) */
+        /* LEFT: NOTEBOOK */
         .notebook-panel {
-            background: #e3dac9; color: var(--text-dark);
-            padding: 20px; border: var(--border-thick); box-shadow: var(--hard-shadow);
-            position: relative; display: flex; flex-direction: column;
-            transform: rotate(-0.5deg);
+            background: #e3dac9; color: var(--text-dark); padding: 20px;
+            border: var(--border-thick); box-shadow: var(--hard-shadow);
+            position: relative; display: flex; flex-direction: column; transform: rotate(-0.5deg);
         }
-
-        /* Tape Effect */
         .notebook-panel::before {
             content: ""; position: absolute; top: -10px; left: 35%; width: 30%; height: 20px;
             background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.2);
             transform: rotate(1deg); backdrop-filter: blur(2px);
         }
-
-        .phase-header {
-            font-size: 0.9rem; border-bottom: 2px solid #555;
-            margin-bottom: 10px; padding-bottom: 8px; color: #000;
-        }
-
-        .condition-list {
-            list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;
-        }
-
-        /* FLEXBOX FIX FOR OVERLAP */
-        .condition-item {
-            display: flex;
-            align-items: flex-start; /* Aligns box to top of text */
-            gap: 10px;
-            font-size: 1.1rem;
-            line-height: 1.1;
-        }
-
-        .checkbox-graphic {
-            font-family: 'VT323', monospace;
-            font-weight: bold;
-            flex-shrink: 0; /* Prevents box from squishing */
-            width: 25px;
-        }
-
-        .condition-text { color: #333; font-weight: bold; }
-
+        .phase-header { font-size: 0.8rem; border-bottom: 2px solid #555; margin-bottom: 10px; padding-bottom: 8px; }
+        .condition-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+        .condition-item { display: flex; align-items: flex-start; gap: 10px; font-size: 1rem; line-height: 1.2; font-weight: bold; }
+        .checkbox-graphic { font-family: 'VT323', monospace; width: 25px; flex-shrink: 0; }
         .condition-item.met .checkbox-graphic { color: #27ae60; }
-        .condition-item.met .condition-text { text-decoration: line-through; opacity: 0.5; }
-        .condition-item.failed { color: var(--accent-rust); }
+        .condition-item.met { text-decoration: line-through; opacity: 0.5; }
 
-        /* CENTER: HAUNT */
-        .center-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
-
-        .ghost-display { text-align: center; }
+        /* CENTER: ARENA */
+        .center-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; position: relative; }
+        .ghost-display { text-align: center; margin-bottom: 10px; }
         .ghost-name { font-size: 1.4rem; color: var(--accent-rust); margin: 0; text-shadow: 3px 3px 0 #000; letter-spacing: 2px; }
         .ghost-flavor { font-size: 1.1rem; font-style: italic; opacity: 0.7; color: #fff; margin-top: 5px; }
 
-        /* RITUAL TRAY */
-        .dice-tray {
-            width: 100%; height: 180px;
-            background: #2a2a2a; border: var(--border-thick);
-            display: flex; align-items: center; justify-content: center; gap: 15px;
+        .dice-tray-visual {
+            width: 100%; height: 250px;
+            background: rgba(0,0,0,0.3); border: var(--border-thick); border-color: #555;
+            display: flex; align-items: flex-end; justify-content: center;
             box-shadow: inset 0 0 40px #000; position: relative;
-
-            /* Ritual Circle Pattern */
-            background-image: radial-gradient(circle, transparent 20%, #2a2a2a 20%, #2a2a2a 22%, transparent 22%, transparent 35%, #2a2a2a 35%, #2a2a2a 37%, transparent 37%);
-            background-size: 200px 200px;
-            background-position: center;
         }
-        .tray-hint { position: absolute; bottom: 10px; font-size: 0.9rem; color: #666; font-family: 'Press Start 2P'; font-size: 0.6rem;}
-
-        .total-display { font-size: 3rem; color: #fff; text-shadow: 4px 4px 0 #000; margin-top: 10px;}
+        .tray-hint { margin-bottom: 10px; font-size: 0.7rem; color: #666; font-family: 'Press Start 2P'; }
+        .total-display { font-size: 3rem; color: #fff; text-shadow: 4px 4px 0 #000; }
         .target-display { font-size: 1.2rem; color: #aaa; text-transform: uppercase; }
 
-        /* RIGHT: BACKPACK (Split View) */
-        .inventory-panel {
-            display: flex; flex-direction: column; gap: 15px; height: 100%;
-        }
-
+        /* RIGHT: INVENTORY */
+        .inventory-panel { display: flex; flex-direction: column; gap: 15px; height: 100%; }
         .inv-section {
             background: var(--panel-bg); border: var(--border-thick); box-shadow: var(--hard-shadow);
             padding: 10px; display: flex; flex-direction: column; align-items: center;
         }
+        .inv-header { font-family: 'Press Start 2P'; font-size: 0.7rem; color: #777; border-bottom: 2px solid #000; width: 100%; text-align: center; margin-bottom: 12px; padding-bottom: 6px; }
+        .dice-pool-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; width: 100%; }
 
-        .inv-header {
-            font-family: 'Press Start 2P'; font-size: 0.7rem; color: #777;
-            border-bottom: 2px solid #000; width: 100%; text-align: center;
-            margin-bottom: 12px; padding-bottom: 6px;
+        .die-2d {
+            width: 50px; height: 50px; background: var(--die-bone);
+            border: var(--border-thick); display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--text-dark); cursor: pointer; position: relative;
+            box-shadow: 2px 2px 0 #000; transition: transform 0.1s;
+        }
+        .die-2d:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 #000; z-index: 100;}
+        .die-2d.modified { border-color: var(--accent-teal); }
+        .mod-badge {
+            position: absolute; top: -6px; right: -6px; width: 12px; height: 12px;
+            background: var(--accent-gold); border: 2px solid #000; display: none;
+        }
+        .die-2d.modified .mod-badge { display: block; }
+        .die-2d:hover::after {
+            content: attr(data-faces); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: #000; color: #fff; border: 2px solid #fff; padding: 5px; font-size: 0.8rem;
+            white-space: nowrap; z-index: 200; font-family: 'VT323'; pointer-events: none;
         }
 
-        .dice-pool-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; padding: 5px; }
-
-        /* RESOURCE GRID */
-        .resource-grid {
-            display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%;
-        }
-        .inv-slot {
-            display: flex; align-items: center; justify-content: space-between;
-            background: #111; border: var(--border-thin); padding: 8px 10px;
-            transition: 0.1s;
-        }
-        .inv-slot:hover { background: #222; }
-        .inv-slot-icon { font-size: 1.4rem; line-height: 1; }
-        .inv-slot-val { color: var(--text-main); font-size: 0.8rem; }
-        .inv-slot-name { font-size: 1rem; color: #777; margin-right: auto; margin-left: 10px; }
-
-        /* BOTTOM: CARDS */
+        /* --- BOTTOM: CARDS (UPDATED FOR 4:3 ART) --- */
         .card-dock { grid-column: 1 / span 3; display: flex; justify-content: center; gap: 20px; border-top: var(--border-thin); padding-top: 20px; }
 
         .char-card {
-            width: 140px; height: 240px; background: var(--card-bg);
-            border: var(--border-thick); cursor: pointer; position: relative;
-            transition: transform 0.1s; box-shadow: var(--hard-shadow);
+            width: 140px;
+            height: 240px;
+            background: var(--card-bg);
+            border: var(--border-thick);
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.1s;
+            box-shadow: var(--hard-shadow);
             display: flex; flex-direction: column;
         }
-        .char-card:hover { transform: translate(-4px, -4px); border-color: var(--accent-gold); box-shadow: 8px 8px 0 #000; }
+        .char-card:hover { transform: translate(-4px, -4px); border-color: var(--accent-gold); box-shadow: 8px 8px 0 #000; z-index: 10; }
         .char-card.selected { border-color: var(--accent-gold); transform: translate(-4px, -4px); box-shadow: 8px 8px 0 #000; }
         .char-card.exhausted { filter: grayscale(1) brightness(0.4); pointer-events: none; border-color: #555; }
 
-        .char-img { flex-grow: 1; background: #222; display: flex; align-items: center; justify-content: center; font-size: 3rem; border-bottom: var(--border-thin); image-rendering: pixelated; }
-        .char-info { padding: 8px; background: #444; text-align: center; border-top: var(--border-thick); min-height: 70px; display:flex; flex-direction: column; justify-content: center; }
-        .char-name { color: var(--accent-gold); font-size: 0.65rem; margin-bottom: 6px; line-height: 1.2; }
-        .char-desc { color: #ccc; font-size: 0.9rem; line-height: 1; }
-
-        /* DICE STYLES */
-        .die {
-            width: 56px; height: 56px; background: var(--die-bone);
-            border: var(--border-thick); display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: var(--text-dark); cursor: pointer;
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.5); transition: transform 0.1s;
+        /* ART CONTAINER (4:3 RATIO) */
+        .char-img-container {
+            width: 100%;
+            height: 105px; /* 140px width * 0.75 (3/4) = 105px height */
+            background: #222;
+            border-bottom: var(--border-thin);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
         }
-        .die:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 rgba(0,0,0,0.8); }
-        .die:active { transform: translate(0, 0); box-shadow: 2px 2px 0 rgba(0,0,0,0.8); }
 
-        .die.rolling { animation: shake 0.2s steps(2) infinite; background: #fff; color: transparent; }
-        @keyframes shake { 0% { transform: translate(0,0); } 100% { transform: translate(3px, -3px); } }
-
-        .die.modified { border-color: var(--accent-teal); }
-        /* Pixel Tooltip */
-        .die[title]:hover::after {
-            content: attr(title); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
-            background: #000; color: #fff; border: 2px solid #fff; padding: 5px; font-size: 0.8rem; white-space: nowrap; z-index: 100;
-            box-shadow: 4px 4px 0 #000; font-family: 'VT323';
+        /* THE IMAGE ITSELF */
+        .char-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures pixel art covers the box without stretching */
+            image-rendering: pixelated;
         }
+
+        /* Fallback if image missing */
+        .char-placeholder { font-size: 2rem; }
+
+        .char-info {
+            padding: 8px; background: #444; text-align: center; border-top: var(--border-thick);
+            flex-grow: 1; display:flex; flex-direction: column; justify-content: flex-start;
+        }
+        .char-name { color: var(--accent-gold); font-size: 0.65rem; margin-bottom: 6px; line-height: 1.2; border-bottom: 1px solid #666; padding-bottom:4px; }
+        .char-desc { color: #ccc; font-size: 0.9rem; line-height: 1.1; margin-top: 4px; }
+
+        .btn-retro {
+            padding: 10px; width: 100%; background: var(--accent-rust); color: #fff;
+            border: var(--border-thick); cursor: pointer; font-size: 0.8rem; margin-top: auto;
+        }
+        .btn-retro:hover { background: #e74c3c; }
 
     </style>
 </head>
 <body>
 
+<canvas id="physics-canvas"></canvas>
+
 <div class="hud-bar">
     <div class="stat-box stat-chill">
-        <div class="stat-icon">🧠</div>
-        <div class="stat-data">
-            <span class="stat-val" id="chill-val">100%</span>
-            <span class="stat-label">CHILL</span>
-        </div>
+        <span class="stat-val" style="font-size:1.5rem">🧠</span>
+        <div><div class="stat-val" id="chill-val">100%</div><div class="stat-label">CHILL</div></div>
     </div>
     <div class="stat-box stat-aura">
-        <div class="stat-icon">✨</div>
-        <div class="stat-data">
-            <span class="stat-val">50</span>
-            <span class="stat-label">AURA</span>
-        </div>
+        <span class="stat-val" style="font-size:1.5rem">✨</span>
+        <div><div class="stat-val">50</div><div class="stat-label">AURA</div></div>
     </div>
     <div class="stat-box stat-energy">
-        <div class="stat-icon">⚡</div>
-        <div class="stat-data">
-            <span class="stat-val">3/3</span>
-            <span class="stat-label">ENERGY</span>
-        </div>
+        <span class="stat-val" style="font-size:1.5rem">⚡</span>
+        <div><div class="stat-val">3/3</div><div class="stat-label">ENERGY</div></div>
     </div>
     <div class="stat-box">
-        <div class="stat-icon">🌑</div>
-        <div class="stat-data">
-            <span class="stat-val" style="color:#aaa;">NIGHT 1</span>
-            <span class="stat-label">CYCLE</span>
-        </div>
+        <span class="stat-val" style="font-size:1.5rem">🌑</span>
+        <div><div class="stat-val" style="color:#aaa;">NIGHT 1</div><div class="stat-label">CYCLE</div></div>
     </div>
 </div>
 
 <div class="game-grid">
-
     <div class="notebook-panel">
         <div class="phase-header" id="phase-name">CASE: ZEBULON</div>
-        <div style="font-size:1.1rem; margin-bottom:15px; line-height:1.2; font-style:italic;" id="phase-desc">
-            Determine the binding ritual.
+        <div style="font-size:1rem; margin-bottom:15px; font-style:italic;" id="phase-desc">
+            Investigate the binding ritual.
         </div>
         <div style="background:rgba(0,0,0,0.05); padding:10px; border:2px solid #000; flex-grow:1;">
             <div style="font-weight:bold; margin-bottom:10px; font-size:0.9rem; font-family:'Press Start 2P';">REQUIRED:</div>
-            <ul class="condition-list" id="condition-list">
-            </ul>
+            <ul class="condition-list" id="condition-list"></ul>
         </div>
     </div>
 
@@ -291,8 +228,8 @@
             <div class="ghost-flavor">"He hated loud music and ankles."</div>
         </div>
 
-        <div class="dice-tray" id="tray">
-            <div class="tray-hint">DRAG DICE FROM BAG</div>
+        <div class="dice-tray-visual" id="tray-boundary">
+            <div class="tray-hint" id="status-msg">SELECT MODIFIERS OR ROLL</div>
         </div>
 
         <div style="text-align:center;">
@@ -302,172 +239,226 @@
     </div>
 
     <div class="inventory-panel">
-
         <div class="inv-section" style="flex-grow:1; width:100%;">
-            <div class="inv-header">DICE BAG</div>
+            <div class="inv-header">BACKPACK</div>
             <div class="dice-pool-grid" id="pool"></div>
         </div>
-
-        <div class="inv-section" style="width:100%; margin-top:15px;">
-            <div class="inv-header">BACKPACK</div>
-            <div class="resource-grid">
-                <div class="inv-slot">
-                    <span class="inv-slot-icon">💵</span>
-                    <span class="inv-slot-name">CASH</span>
-                    <span class="inv-slot-val">$40</span>
-                </div>
-                <div class="inv-slot">
-                    <span class="inv-slot-icon">🍔</span>
-                    <span class="inv-slot-name">FOOD</span>
-                    <span class="inv-slot-val">2</span>
-                </div>
-                <div class="inv-slot">
-                    <span class="inv-slot-icon">🔋</span>
-                    <span class="inv-slot-name">BATT</span>
-                    <span class="inv-slot-val">IIII</span>
-                </div>
-            </div>
+        <div class="inv-section" style="width:100%;">
+            <button class="btn-retro" onclick="window.clearPhysicsTray()">RESET TRAY</button>
         </div>
-
     </div>
 
     <div class="card-dock" id="townsfolk-container"></div>
-
 </div>
 
-<script>
-    // JS Logic (Identical functionality to v7/v8, using new DOM structure)
+<script type="module">
+    import * as THREE from 'three';
+    import * as CANNON from 'cannon-es';
 
+    // --- DATA WITH PNG PATHS ---
     const townsfolkData = [
-        { id: 'cheer', name: "Cheer Captain", icon: "📣", desc: "Hype: Adds +1 to every die in tray.", action: (tray) => { tray.forEach(d => { d.modifier += 1; d.flashColor('#f1c40f'); }); } },
-        { id: 'nerd', name: "A/V Club Pres", icon: "🤓", desc: "Hack: Flips all odd numbers to even.", action: (tray) => { tray.forEach(d => { d.faces = d.faces.map(f => f%2!==0 ? f+1 : f); d.flashColor('#48dbfb'); }); } },
-        { id: 'goth', name: "Mall Goth", icon: "🔮", desc: "Seance: Rerolls any 1s immediately.", action: (tray) => { tray.forEach(d => { if(d.faces[0] === 1) d.faces[0] = 6; d.flashColor('#9b59b6'); }); } },
-        { id: 'teach', name: "History Teacher", icon: "🍎", desc: "Lecture: Sets minimum roll to 3.", action: (tray) => { tray.forEach(d => { d.faces = [3,3,3,4,5,6]; d.flashColor('#e74c3c'); }); } }
+        {
+            id: 'scientist', name: "The Scientist",
+            img: "assets/characters/scientist.png", // PNG Path
+            iconFallback: "🧬",
+            desc: "Mutate: Changes '1' to '6'.",
+            action: (dieData) => { dieData.faces[0] = { val: 6, color: '#0abde3', icon: '6' }; return true; }
+        },
+        {
+            id: 'cop', name: "The Sheriff",
+            img: "assets/characters/sheriff.png",
+            iconFallback: "⭐️",
+            desc: "Patrol: Adds +1 to result.",
+            action: (dieData) => { dieData.modifier += 1; return true; }
+        },
+        {
+            id: 'goth', name: "Mall Goth",
+            img: "assets/characters/goth.png",
+            iconFallback: "🔮",
+            desc: "Void: Replaces '1' with '0'.",
+            action: (dieData) => { dieData.faces[0] = { val: 0, color: '#2f3640', icon: 'X' }; return true; }
+        },
+        {
+            id: 'teacher', name: "History Teacher",
+            img: "assets/characters/teacher.png",
+            iconFallback: "🍎",
+            desc: "History: Min roll is 3.",
+            action: (dieData) => { dieData.faces = [{val:3,icon:'3'},{val:6,icon:'6'},{val:3,icon:'3'},{val:5,icon:'5'},{val:3,icon:'3'},{val:4,icon:'4'}]; return true; }
+        }
     ];
 
-    const state = {
-        phase: 'investigate', chill: 100, clues: 0, currentSum: 0, selectedCard: null, targetSum: 15,
-        conditions: [
-            { id: 'no_ones', text: "No 1s rolled", check: (dice) => !dice.some(d => d.value === 1) },
-            { id: 'min_dice', text: "Use exactly 3 dice", check: (dice) => dice.length === 3 }
-        ]
+    // --- GAME LOGIC (Unchanged from v13) ---
+    const gameState = { phase: 'investigate', targetSum: 15, dicePool: [], rolledResults: [], selectedCard: null };
+
+    function createDieData(id) {
+        return {
+            id: id, modifier: 0,
+            faces: [ { val: 1, color: '#ecf0f1', icon: '1' }, { val: 6, color: '#ecf0f1', icon: '6' }, { val: 2, color: '#ecf0f1', icon: '2' }, { val: 5, color: '#ecf0f1', icon: '5' }, { val: 3, color: '#ecf0f1', icon: '3' }, { val: 4, color: '#ecf0f1', icon: '4' } ],
+            inTray: false
+        };
+    }
+
+    function initGame() {
+        for(let i=0; i<5; i++) gameState.dicePool.push(createDieData(i));
+        renderBackpack(); renderCards(); renderConditions();
+    }
+
+    function renderBackpack() {
+        const container = document.getElementById('pool'); container.innerHTML = '';
+        gameState.dicePool.forEach(die => {
+            if(die.inTray) return;
+            const el = document.createElement('div'); el.className = 'die-2d';
+            if(die.modifier > 0 || die.faces[0].val !== 1) el.classList.add('modified');
+            let faceText = die.faces.map(f => f.icon).join(',');
+            if(die.modifier > 0) faceText += ` +${die.modifier}`;
+            el.setAttribute('data-faces', faceText);
+            el.innerHTML = `<div class="mod-badge"></div><div>•</div>`;
+            el.onclick = () => {
+                if (gameState.selectedCard) applyCardToDie(die);
+                else throwDie(die);
+            };
+            container.appendChild(el);
+        });
+    }
+
+    function renderCards() {
+        const container = document.getElementById('townsfolk-container');
+        townsfolkData.forEach(char => {
+            const el = document.createElement('div'); el.className = 'char-card';
+            // IMAGE HANDLING: Try to load img, fallback to icon if missing
+            el.innerHTML = `
+                    <div class="char-img-container">
+                        <img src="${char.img}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="char-placeholder" style="display:none; font-size:3rem;">${char.iconFallback}</div>
+                    </div>
+                    <div class="char-info">
+                        <div class="char-name">${char.name}</div>
+                        <div class="char-desc">${char.desc}</div>
+                    </div>
+                `;
+            el.onclick = () => selectCard(el, char);
+            container.appendChild(el);
+        });
+    }
+
+    function selectCard(el, charData) {
+        if(el.classList.contains('selected')) { el.classList.remove('selected'); gameState.selectedCard = null; document.getElementById('status-msg').innerText = "SELECT DICE OR ROLL"; return; }
+        if(gameState.selectedCard) gameState.selectedCard.el.classList.remove('selected');
+        if(el.classList.contains('exhausted')) return;
+        el.classList.add('selected'); gameState.selectedCard = { el, data: charData };
+        document.getElementById('status-msg').innerText = "SELECT DIE IN BAG TO MODIFY"; document.getElementById('status-msg').style.color = "var(--accent-gold)";
+    }
+
+    function applyCardToDie(die) {
+        const card = gameState.selectedCard; card.data.action(die);
+        card.el.classList.remove('selected'); card.el.classList.add('exhausted');
+        gameState.selectedCard = null; document.getElementById('status-msg').innerText = "MODIFIED! READY TO ROLL."; document.getElementById('status-msg').style.color = "#666";
+        renderBackpack();
+    }
+
+    // --- 3D PHYSICS (Unchanged) ---
+    const canvas = document.getElementById('physics-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    const scene = new THREE.Scene();
+    const d = 15; const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+    camera.position.set(20, 20, 20); camera.lookAt(0, 0, 0);
+    const amb = new THREE.AmbientLight(0xffffff, 0.6); const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(5, 10, 5); dir.castShadow = true; scene.add(amb, dir);
+    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -30, 0) });
+    const groundMat = new CANNON.Material(); const dieMat = new CANNON.Material();
+    world.addContactMaterial(new CANNON.ContactMaterial(groundMat, dieMat, { friction: 0.3, restitution: 0.5 }));
+    const groundBody = new CANNON.Body({ mass: 0, shape: new CANNON.Plane(), material: groundMat });
+    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); world.addBody(groundBody);
+
+    function createWall(x, z, w, h, rotY) {
+        const body = new CANNON.Body({ mass: 0, shape: new CANNON.Box(new CANNON.Vec3(w, 5, h)) });
+        body.position.set(x, 2.5, z); if(rotY) body.quaternion.setFromEuler(0, rotY, 0); world.addBody(body);
+    }
+    createWall(0, -6, 10, 0.5); createWall(0, 6, 10, 0.5); createWall(-9, 0, 0.5, 10); createWall(9, 0, 0.5, 10);
+    const activeDice = [];
+
+    function createFaceTexture(face) {
+        const cvs = document.createElement('canvas'); cvs.width = 128; cvs.height = 128;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle = face.color || '#ecf0f1'; ctx.fillRect(0,0,128,128);
+        ctx.strokeStyle = '#000'; ctx.lineWidth=10; ctx.strokeRect(0,0,128,128);
+        ctx.fillStyle = '#000'; ctx.font = 'bold 80px Courier New'; ctx.textAlign = 'center'; ctx.textBaseline='middle';
+        ctx.fillText(face.icon, 64, 64);
+        const tex = new THREE.CanvasTexture(cvs); tex.magFilter = THREE.NearestFilter; return tex;
+    }
+
+    function throwDie(dieData) {
+        dieData.inTray = true; renderBackpack();
+        const materials = dieData.faces.map(f => new THREE.MeshStandardMaterial({ map: createFaceTexture(f), roughness: 0.2 }));
+        const geom = new THREE.BoxGeometry(1.5, 1.5, 1.5); const mesh = new THREE.Mesh(geom, materials);
+        mesh.castShadow = true; scene.add(mesh);
+        const shape = new CANNON.Box(new CANNON.Vec3(0.75, 0.75, 0.75));
+        const body = new CANNON.Body({ mass: 5, material: dieMat }); body.addShape(shape);
+        body.position.set((Math.random()-0.5)*5, 12, (Math.random()-0.5)*2);
+        body.angularVelocity.set(Math.random()*10, Math.random()*10, Math.random()*10);
+        world.addBody(body);
+        activeDice.push({ mesh, body, data: dieData, settled: false });
+    }
+
+    const timeStep = 1/60;
+    const FACE_NORMALS = [ new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1) ];
+    const UP = new THREE.Vector3(0, 1, 0);
+
+    function animate() {
+        requestAnimationFrame(animate); world.step(timeStep);
+        activeDice.forEach(obj => {
+            obj.mesh.position.copy(obj.body.position); obj.mesh.quaternion.copy(obj.body.quaternion);
+            if(!obj.settled) {
+                if(obj.body.velocity.length() < 0.1 && obj.body.angularVelocity.length() < 0.1 && obj.body.position.y < 2) {
+                    obj.settled = true;
+                    let maxDot = -Infinity; let winningIdx = -1;
+                    const rot = new THREE.Quaternion().copy(obj.body.quaternion);
+                    FACE_NORMALS.forEach((n, i) => {
+                        const worldN = n.clone().applyQuaternion(rot); const dot = worldN.dot(UP);
+                        if(dot > maxDot) { maxDot = dot; winningIdx = i; }
+                    });
+                    handleDieResult(obj.data.faces[winningIdx].val + obj.data.modifier);
+                }
+            }
+        });
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    function handleDieResult(val) {
+        gameState.rolledResults.push(val); const sum = gameState.rolledResults.reduce((a,b)=>a+b, 0);
+        document.getElementById('total-val').innerText = sum; checkConditions(gameState.rolledResults);
+    }
+
+    function checkConditions(results) {
+        const conditions = [ { id: 'no_ones', text: "No 1s rolled", check: (arr) => !arr.includes(1) }, { id: 'sum_18', text: "Total > 18", check: (arr) => arr.reduce((a,b)=>a+b,0) > 18 } ];
+        let allMet = true; const list = document.getElementById('condition-list'); list.innerHTML = '';
+        conditions.forEach(cond => {
+            const met = cond.check(results);
+            const li = document.createElement('li'); li.className = 'condition-item ' + (met ? 'met' : '');
+            li.innerHTML = `<span class="checkbox-graphic">[${met?'x':' '}]</span> ${cond.text}`;
+            list.appendChild(li); if(!met) allMet = false;
+        });
+        if(allMet && results.length >= 3) { document.getElementById('target-sum').style.color = '#2ecc71'; document.getElementById('target-sum').innerText = "LOCKED"; }
+    }
+
+    function renderConditions() { checkConditions([]); }
+
+    window.clearPhysicsTray = () => {
+        activeDice.forEach(obj => { scene.remove(obj.mesh); world.removeBody(obj.body); });
+        activeDice.length = 0; gameState.rolledResults = [];
+        gameState.dicePool.forEach(d => d.inTray = false);
+        document.getElementById('total-val').innerText = "0"; renderBackpack(); renderConditions();
     };
 
-    class Die {
-        constructor() {
-            this.faces = [1, 2, 3, 4, 5, 6]; this.modifier = 0; this.value = null; this.location = 'pool';
-            this.el = document.createElement("div"); this.el.className = "die"; this.el.innerText = "•";
-            this.el.onclick = () => this.interact();
-            this.badge = document.createElement("div"); this.badge.className = "mod-badge"; this.el.appendChild(this.badge);
-            this.updateTooltip();
-        }
-        interact() {
-            if (state.selectedCard && this.location === 'tray') { this.applyCard(state.selectedCard); return; }
-            if (this.location === 'pool') {
-                document.getElementById('tray').appendChild(this.el); this.location = 'tray';
-                this.el.innerText = "?"; this.el.style.backgroundColor = "#555"; this.el.style.color = "#888";
-            } else if (this.location === 'tray') { this.roll(); }
-        }
-        applyCard(cardObj) {
-            cardObj.data.action(this); this.el.classList.add('modified'); this.updateTooltip();
-            state.selectedCard = null; cardObj.el.classList.remove('selected'); cardObj.el.classList.add('exhausted');
-            document.getElementById('tray').classList.remove('active-target');
-        }
-        roll() {
-            this.location = 'rolled'; this.el.classList.add('rolling');
-            setTimeout(() => {
-                this.el.classList.remove('rolling');
-                const rollIndex = Math.floor(Math.random() * 6); this.value = this.faces[rollIndex] + this.modifier;
-                this.el.innerText = this.value;
-                this.el.style.backgroundColor = "#fff"; this.el.style.color = "#000";
-                if(this.value >= 6) { this.el.style.color = "#c0392b"; this.el.style.borderColor = "#c0392b"; }
-                updateGameState();
-            }, 300 + Math.random() * 300);
-        }
-        updateTooltip() { let txt = `[${this.faces.join(',')}]`; if(this.modifier !== 0) txt += ` +${this.modifier}`; this.el.title = txt; }
-        flashColor(color) { this.el.style.borderColor = color; }
-    }
+    window.addEventListener('resize', () => {
+        const a = window.innerWidth / window.innerHeight; camera.left = -d*a; camera.right = d*a; camera.top = d; camera.bottom = -d;
+        camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+    });
 
-    const diceObjects = [];
-
-    function init() {
-        const pool = document.getElementById('pool');
-        for(let i=0; i<6; i++) { const d = new Die(); diceObjects.push(d); pool.appendChild(d.el); }
-        const dock = document.getElementById('townsfolk-container');
-        townsfolkData.forEach(char => {
-            const c = document.createElement('div'); c.className = 'char-card';
-            c.innerHTML = `<div class="char-img">${char.icon}</div><div class="char-info"><div class="char-name">${char.name}</div><div class="char-desc">${char.desc}</div></div>`;
-            c.onclick = () => {
-                if(c.classList.contains('exhausted')) return;
-                const trayDice = diceObjects.filter(d => d.location === 'tray');
-                if(trayDice.length > 0) { char.action(trayDice); c.classList.add('exhausted'); }
-            };
-            dock.appendChild(c);
-        });
-        renderConditions();
-    }
-
-    function renderConditions() {
-        const list = document.getElementById('condition-list'); list.innerHTML = '';
-        state.conditions.forEach(cond => {
-            const li = document.createElement('li'); li.className = 'condition-item'; li.id = `cond-${cond.id}`;
-            // FLEXBOX FIX: Separate checkbox and text
-            li.innerHTML = `<span class="checkbox-graphic">[ ]</span> <span class="condition-text">${cond.text}</span>`;
-            list.appendChild(li);
-        });
-        document.getElementById('target-sum').innerText = state.targetSum;
-    }
-
-    function updateGameState() {
-        const rolledDice = diceObjects.filter(d => d.location === 'rolled');
-        const trayDice = diceObjects.filter(d => d.location === 'tray');
-        let sum = 0; rolledDice.forEach(d => sum += d.value); state.currentSum = sum;
-        document.getElementById('total-val').innerText = sum;
-
-        if (trayDice.length === 0 && rolledDice.length > 0) {
-            let allConditionsMet = true;
-            state.conditions.forEach(cond => {
-                const met = cond.check(rolledDice);
-                const el = document.getElementById(`cond-${cond.id}`);
-                const checkGraphic = el.querySelector('.checkbox-graphic');
-
-                if(met) {
-                    el.classList.add('met');
-                    checkGraphic.innerText = "[x]";
-                } else {
-                    el.classList.add('failed');
-                    allConditionsMet = false;
-                }
-            });
-            const sumMet = sum >= state.targetSum;
-            document.getElementById('total-val').style.color = sumMet ? "#2ecc71" : "#e74c3c";
-            if (sumMet && allConditionsMet) { setTimeout(() => handleWin(), 500); }
-        }
-    }
-
-    function handleWin() {
-        if(state.phase === 'investigate') {
-            alert("CLUE FOUND! Proceeding to EXORCISM.");
-            state.phase = 'boss'; state.clues += 1;
-            document.getElementById('phase-name').innerText = "THE EXORCISM";
-            document.getElementById('phase-desc').innerText = "Banish Zebulon. High power needed.";
-            state.targetSum = 35;
-            state.conditions = [{ id: 'boss_dps', text: "Total > 35", check: (dice) => true }];
-            resetBoard();
-        } else { alert("GHOST BANISHED! DATE SAVED!"); location.reload(); }
-    }
-
-    function resetBoard() {
-        const pool = document.getElementById('pool');
-        diceObjects.forEach(d => {
-            d.location = 'pool'; d.value = null; d.el.className = "die"; d.el.innerText = "•"; d.el.style = "";
-            pool.appendChild(d.el);
-        });
-        document.querySelectorAll('.char-card').forEach(c => c.classList.remove('exhausted'));
-        renderConditions();
-        document.getElementById('total-val').innerText = "0"; document.getElementById('total-val').style.color = "#fff";
-    }
-    init();
+    initGame();
 </script>
 </body>
 </html>
