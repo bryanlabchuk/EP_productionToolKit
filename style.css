@@ -484,26 +484,41 @@ input[type=range].magic-knob::-webkit-slider-thumb {
 .step-container {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 3px; /* Tight gap */
+  /* Use a tiny gap to save space */
+  gap: 2px; 
+  
+  /* Make the container flexible */
   margin-top: 10px;
-  
-  /* FIX: Remove scrollbars, constrain width instead */
   width: 100%;
-  max-width: 360px; /* Limits height effectively since aspect-ratio is 1/1 */
-  margin-left: auto;
-  margin-right: auto; /* Centers the grid */
   
-  /* Ensure it doesn't overlap action buttons */
-  margin-bottom: 10px;
+  /* FIX: Remove scrollbars completely */
+  overflow: visible; 
+  max-height: none;
+  
+  /* Center the grid horizontally */
+  margin-left: auto;
+  margin-right: auto;
+  
+  /* Prevent it from growing wider than the panel can handle vertically */
+  /* Since aspect-ratio is 1/1, limiting width limits height */
+  max-width: 340px; 
 }
 
+/* Remove custom scrollbar styling since we aren't scrolling anymore */
+.step-container::-webkit-scrollbar { display: none; }
+
 .step-box {
-  aspect-ratio: 1/1; /* Keeps them perfectly square */
+  /* Force square shape */
+  aspect-ratio: 1/1;
   border: 2px solid var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem; 
+  
+  /* Responsive font size: grows/shrinks with the button width */
+  /* '2.5cqw' is relative to container width, or use calc() */
+  font-size: clamp(0.5rem, 2vw, 0.8rem); 
+  
   cursor: pointer;
   font-weight: 900;
   border-radius: 2px;
@@ -520,7 +535,6 @@ input[type=range].magic-knob::-webkit-slider-thumb {
 .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
 .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
 .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
-
 /* --- 9. ACTION BUTTONS & MODALS --- */
 .action-row {
   display: grid;
