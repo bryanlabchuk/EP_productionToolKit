@@ -1,9 +1,11 @@
 import { SequencerEngine, PRESETS, FIXED_STEPS, clamp } from './engine.js';
 
+// --- GLOBAL STATE ---
 const engine = new SequencerEngine();
-let activeGroup = 0;
-let selectedPad = 0;
+let activeGroup = 0; // 0=A, 1=B, 2=C, 3=D
+let selectedPad = 0; // 0-11
 
+// --- DOM ELEMENTS ---
 const ui = {
     grid: document.getElementById('grid-notes'),
     pads: document.getElementById('pad-grid'),
@@ -11,36 +13,32 @@ const ui = {
     piano: document.getElementById('kb-keys'),
     octaveDisp: document.getElementById('octave-display'),
     tempo: document.getElementById('tempo'),
-    themeSel: document.getElementById('theme-select')
+    themeSel: document.getElementById('theme-select'),
+    editorTitle: document.getElementById('editor-title'),
+    chordRoot: document.getElementById('chord-root')
 };
 
+// --- INITIALIZATION ---
 async function initInterface() {
-    const ready = await engine.init();
-    if (!ready) log("OFFLINE MODE (NO MIDI)");
-    
-    engine.onLog = log;
-    engine.onStepTrigger = (g, p, vel) => {
-        if (g === activeGroup) flashPad(p);
-    };
-    engine.onClockTick = (stepIndex) => {
-        document.querySelectorAll('.step-box').forEach((el, i) => {
-            el.style.borderColor = (i === stepIndex) ? 'var(--accent)' : 'var(--text)';
-        });
-    };
-
+    // 1. RENDER VISUALS IMMEDIATELY (Do not wait for MIDI)
     initTheme();
     renderGroupTabs();
-    renderPads();
-    selectPad(0);
+    renderPads(); // This draws the 12 pads
     populatePresets();
     
+    // Select default pad to populate the editor/piano
+    selectPad(0);
+
+    // 2. Bind Global Controls
     document.getElementById('init-btn').onclick = () => engine.init();
     document.getElementById('transport-btn').onclick = toggleTransport;
     
+    // Bind Input Listeners (BPM, Swing, etc)
     document.getElementById('tempo').onchange = (e) => engine.bpm = parseInt(e.target.value, 10);
     document.getElementById('swing-slider').oninput = (e) => engine.swing = parseInt(e.target.value, 10);
     document.getElementById('global-bars').onchange = (e) => engine.globalBars = parseInt(e.target.value, 10);
     
+    // Bind Piano Keys (Mouse Clicks)
     document.querySelectorAll('.kb-key').forEach(k => {
         k.onmousedown = (e) => {
             const note = parseInt(k.getAttribute('data-note'), 10);
@@ -48,8 +46,27 @@ async function initInterface() {
             e.preventDefault();
         };
     });
-    log("XOZY-EP INTERFACE READY");
+
+    log("VISUAL INTERFACE READY. CLICK INIT MIDI TO START.");
+
+    // 3. Initialize Engine (Audio/MIDI) in background
+    const ready = await engine.init();
+    if (!ready) log("OFFLINE MODE (NO MIDI FOUND)");
+    
+    // 4. Setup Engine Callbacks (Visuals sync)
+    engine.onLog = log;
+    engine.onStepTrigger = (g, p, vel) => {
+        if (g === activeGroup) flashPad(p);
+    };
+    engine.onClockTick = (stepIndex) => {
+        // Highlight current step column
+        document.querySelectorAll('.step-box').forEach((el, i) => {
+            el.style.borderColor = (i === stepIndex) ? 'var(--accent)' : 'var(--text)';
+        });
+    };
 }
+
+// --- CORE RENDERING ---
 
 function renderGroupTabs() {
     for(let i=0; i<4; i++) {
@@ -59,8 +76,8 @@ function renderGroupTabs() {
             btn.onclick = () => {
                 activeGroup = i;
                 renderGroupTabs();
-                renderPads();
-                selectPad(selectedPad);
+                renderPads(); // Re-render pads to show correct state for this group
+                selectPad(selectedPad); // Refresh editor
                 log(`GROUP ${['A','B','C','D'][i]} SELECTED`);
             };
         }
@@ -68,71 +85,92 @@ function renderGroupTabs() {
 }
 
 function renderPads() {
+    if (!ui.pads) return console.error("Pad Grid Element Missing!");
     ui.pads.innerHTML = '';
+    
     const legends = { 9:'7', 10:'8', 11:'9', 6:'4', 7:'5', 8:'6', 3:'1', 4:'2', 5:'3', 0:'', 1:'0', 2:'ENTER' };
     
-    // Original HTML order: 9,10,11 (Row 1), 6,7,8 (Row 2), etc.
+    // Visual Map: Top row (7,8,9), Middle (4,5,6)...
     const mapIdx = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2];
     
     mapIdx.forEach(idx => {
         const btn = document.createElement('div');
+        // Add specific classes for styling
         btn.className = 'pad-btn' + (idx === 0 ? ' pad-btn-sq' : '');
-        if (idx === selectedPad) btn.classList.add('active-pad');
-        btn.id = `pad-${idx}`;
         
+        // Highlight if selected
+        if (idx === selectedPad) btn.classList.add('active-pad');
+        
+        btn.id = `pad-${idx}`;
         btn.innerHTML = `<div class="legend-tag">${legends[idx]}</div>`;
+        
+        // Select logic
         btn.onclick = () => selectPad(idx);
+        
+        // Play/Audition logic
         btn.onmousedown = (e) => {
-            if(e.button === 0) { // Left click only for audition
+            if(e.button === 0) { 
                 triggerLivePad(idx);
             }
         };
+        
         ui.pads.appendChild(btn);
     });
 }
 
-// Make selectPad globally available for HTML onclicks
+// Make selectPad globally available so HTML onclicks work if needed
 window.selectPad = function(idx) {
     selectedPad = idx;
+    
+    // Visual Update: Highlight selected pad
     document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active-pad'));
     const btn = document.getElementById(`pad-${idx}`);
     if(btn) btn.classList.add('active-pad');
     
+    // Visual Update: Editor Title
     const l = idx === 0 ? '■' : idx;
-    document.getElementById('editor-title').innerText = `EDIT: PAD ${l}`;
+    if(ui.editorTitle) ui.editorTitle.innerText = `EDIT: PAD ${l}`;
     
+    // Visual Update: Editor Panels
     syncPadSettingsUI();
     renderSteps();
 };
 
-// Internal reference for interface logic
 function selectPad(idx) { window.selectPad(idx); }
 
 function renderSteps() {
+    if (!ui.grid) return;
     ui.grid.innerHTML = '';
     const padData = engine.projectData[activeGroup][selectedPad];
     
     for(let i=0; i<FIXED_STEPS; i++) {
         const step = document.createElement('div');
         const val = padData.notes[i];
+        
         step.className = `step-box ${val !== 'O' ? 'on-'+val.toLowerCase() : ''}`;
         step.innerText = val === 'O' ? '' : val;
         
         step.onmousedown = () => {
             const cycle = ['O', 'X', 'Y', 'Z'];
             padData.notes[i] = cycle[(cycle.indexOf(val) + 1) % cycle.length];
-            renderSteps();
+            renderSteps(); // Redraw
         };
+        
         ui.grid.appendChild(step);
     }
 }
+
+// --- LOGIC INTERACTION ---
 
 function triggerLivePad(padIdx) {
     const pad = engine.projectData[activeGroup][padIdx];
     const chan = activeGroup;
     if (engine.midiOut) {
-        if(pad.mode === 'chord') engine.sendChord(pad, chan, 110, performance.now());
-        else engine.sendMidiNote(chan, pad.midiNote, 110, pad.gateMs, performance.now());
+        if(pad.mode === 'chord') {
+            engine.sendChord(pad, chan, 110, performance.now());
+        } else {
+            engine.sendMidiNote(chan, pad.midiNote, 110, pad.gateMs, performance.now());
+        }
     }
     flashPad(padIdx);
 }
@@ -158,13 +196,18 @@ function flashPad(padIdx) {
 }
 
 function log(msg) {
+    if(!ui.lcd) return;
     const t = new Date().toLocaleTimeString().split(' ')[0];
     ui.lcd.innerHTML = `<div class="log-entry"><span style="opacity:0.5; margin-right:5px;">${t}</span>${msg}</div>` + ui.lcd.innerHTML;
 }
 
+// --- PRESETS ---
+
 function populatePresets() {
     const sel = document.getElementById('preset-select');
+    if(!sel) return;
     sel.innerHTML = '<option value="">-- LOAD PRESET --</option>';
+    
     for (const [category, patterns] of Object.entries(PRESETS)) {
         const group = document.createElement('optgroup');
         group.label = category;
@@ -176,6 +219,7 @@ function populatePresets() {
         });
         sel.appendChild(group);
     }
+    
     sel.onchange = (e) => {
         if(!e.target.value) return;
         loadPreset(JSON.parse(e.target.value));
@@ -200,32 +244,63 @@ function loadPreset(preset) {
     renderSteps();
 }
 
+// --- SYNC UI TO DATA ---
+
 function syncPadSettingsUI() {
     const pad = engine.projectData[activeGroup][selectedPad];
     
-    document.getElementById('pad-midi-note').value = pad.midiNote;
-    document.getElementById('pad-gate-ms').value = pad.gateMs;
-    document.getElementById('pad-vel-mode').value = pad.velMode;
-    document.getElementById('pad-vel-a').value = pad.velA;
-    document.getElementById('pad-vel-b').value = pad.velB;
+    // Performance Controls
+    const elNote = document.getElementById('pad-midi-note');
+    if(elNote) elNote.value = pad.midiNote;
     
-    document.getElementById('chord-root').value = pad.chord.root;
-    document.getElementById('chord-oct').value = pad.chord.oct;
-    document.getElementById('chord-quality').value = pad.chord.quality;
-    document.getElementById('chord-ext').value = pad.chord.ext;
-    document.getElementById('chord-inv').value = pad.chord.inv;
-    document.getElementById('chord-voice').value = pad.chord.voice;
-    document.getElementById('chord-flux').value = pad.chord.flux;
+    const elGate = document.getElementById('pad-gate-ms');
+    if(elGate) elGate.value = pad.gateMs;
     
+    const elVelMode = document.getElementById('pad-vel-mode');
+    if(elVelMode) elVelMode.value = pad.velMode;
+    
+    const elVelA = document.getElementById('pad-vel-a');
+    if(elVelA) elVelA.value = pad.velA;
+    
+    const elVelB = document.getElementById('pad-vel-b');
+    if(elVelB) elVelB.value = pad.velB;
+    
+    // Chord Controls
+    const elRoot = document.getElementById('chord-root');
+    if(elRoot) elRoot.value = pad.chord.root;
+    
+    const elOct = document.getElementById('chord-oct');
+    if(elOct) elOct.value = pad.chord.oct;
+    
+    const elQual = document.getElementById('chord-quality');
+    if(elQual) elQual.value = pad.chord.quality;
+
+    const elExt = document.getElementById('chord-ext');
+    if(elExt) elExt.value = pad.chord.ext;
+
+    const elInv = document.getElementById('chord-inv');
+    if(elInv) elInv.value = pad.chord.inv;
+    
+    const elFlux = document.getElementById('chord-flux');
+    if(elFlux) elFlux.value = pad.chord.flux;
+    
+    // Mode Buttons
     const isChord = pad.mode === 'chord';
-    document.getElementById('pad-mode-drum').classList.toggle('btn-toggle-on', !isChord);
-    document.getElementById('pad-mode-chord').classList.toggle('btn-toggle-on', isChord);
-    document.getElementById('chord-lab').style.display = isChord ? 'block' : 'none';
+    const btnDrum = document.getElementById('pad-mode-drum');
+    const btnChord = document.getElementById('pad-mode-chord');
     
-    ui.octaveDisp.innerText = pad.chord.oct;
+    if(btnDrum) btnDrum.classList.toggle('btn-toggle-on', !isChord);
+    if(btnChord) btnChord.classList.toggle('btn-toggle-on', isChord);
+    
+    const chordLab = document.getElementById('chord-lab');
+    if(chordLab) chordLab.style.display = isChord ? 'block' : 'none';
+    
+    if(ui.octaveDisp) ui.octaveDisp.innerText = pad.chord.oct;
+    
     updatePianoVisuals(pad.chord);
 }
 
+// Expose these helpers to HTML
 window.updatePadParam = (key, val) => {
     const pad = engine.projectData[activeGroup][selectedPad];
     pad[key] = isNaN(val) ? val : parseInt(val, 10);
@@ -253,7 +328,7 @@ window.clearCurrentPad = () => {
 function updateChordRoot(noteIndex) {
     const pad = engine.projectData[activeGroup][selectedPad];
     pad.chord.root = noteIndex;
-    document.getElementById('chord-root').value = noteIndex;
+    if(ui.chordRoot) ui.chordRoot.value = noteIndex;
     updatePianoVisuals(pad.chord);
     triggerLivePad(selectedPad);
 }
@@ -274,7 +349,7 @@ window.shiftOctave = (dir) => {
 
 function initTheme() {
     const saved = localStorage.getItem('oxo_theme') || 'auto';
-    ui.themeSel.value = saved;
+    if(ui.themeSel) ui.themeSel.value = saved;
     applyTheme(saved);
 }
 
@@ -290,4 +365,5 @@ function applyTheme(t) {
 
 window.toggleDark = () => { document.body.classList.toggle('dark-mode'); };
 
+// START APP
 initInterface();
