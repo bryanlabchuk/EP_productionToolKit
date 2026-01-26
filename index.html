@@ -2,10 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>XOZY-EP // ARCH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XOZY-EP // MODULAR v1.0</title>
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body id="main-body">
+
+<button id="feedback-btn" onclick="openFeedback()">REPORT ISSUE</button>
+<div class="modal-overlay" id="feedback-modal">
+  <div class="modal-box">
+    <div class="modal-title">SYSTEM REPORT</div>
+    <div>
+        <label>ISSUE TYPE</label>
+        <select id="fb-type"><option>BUG REPORT</option><option>FEATURE REQUEST</option></select>
+    </div>
+    <div>
+        <label>DETAILS</label>
+        <textarea id="fb-text" class="modal-input" placeholder="Describe behavior..."></textarea>
+    </div>
+    <div class="modal-actions">
+        <button class="btn-small" onclick="closeFeedback()">CANCEL</button>
+        <button class="btn-small primary" onclick="submitFeedback()">SEND</button>
+    </div>
+  </div>
+</div>
 
 <div class="chassis" id="app-chassis">
   <div class="header-row">
@@ -17,12 +38,13 @@
         <option value="133">THEME: 133</option>
         <option value="1320">THEME: 1320</option>
       </select>
-      <button onclick="toggleDark()" class="btn-layout">NIGHT</button>
+      <button id="dark-btn" onclick="toggleDark()" class="btn-layout">NIGHT</button>
+      <button class="btn-layout" onclick="toggleLayout()" title="View Toggle">⬌</button>
     </div>
   </div>
 
   <div class="lcd-display" id="log">
-    <div class="log-entry">SYSTEM LOADING...</div>
+    <div class="log-entry">SYSTEM BOOT...</div>
   </div>
 
   <div class="main-deck">
@@ -30,31 +52,57 @@
       <button class="btn-main primary" id="init-btn" style="margin-bottom:20px;">INITIALIZE MIDI</button>
 
       <div class="control-group" style="margin-bottom: 20px;">
-        <div class="config-grid">
-          <div><label>BPM</label><input type="number" id="tempo" value="120"></div>
-          <div><label>LENGTH</label><select id="global-bars"><option value="4">4 Bars</option><option value="8">8 Bars</option></select></div>
+        <div class="config-grid" style="margin-bottom: 15px;">
+          <div><label>BPM (MASTER)</label><input type="number" id="tempo" value="120"></div>
+          <div>
+            <label>MIDI CHANNEL</label>
+            <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.1); border:1px solid var(--text); border-radius:2px;" id="chan-display">AUTO-MAPPED</div>
+          </div>
         </div>
-        <div style="margin-top:10px;"><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
-        <div style="margin-top:10px;"><button id="transport-btn" class="btn-small btn-toggle-on">TX: START/STOP</button></div>
+
+        <div class="split-row">
+          <div>
+            <label>LENGTH</label>
+            <select id="global-bars">
+              <option value="1">1 Bar</option><option value="2">2 Bars</option><option value="4" selected>4 Bars</option><option value="8">8 Bars</option>
+            </select>
+          </div>
+          <div><label>SWING</label><input type="range" class="knob" id="swing-slider" min="0" max="75" value="0"></div>
+        </div>
+
+        <div class="split-row" style="margin-top: 10px;">
+          <div><button id="human-btn" onclick="toggleHuman()" class="btn-small">HUMAN: OFF</button></div>
+          <div><button id="transport-btn" class="btn-small btn-toggle-on">TX: START/STOP</button></div>
+        </div>
+        <div style="margin-top:10px;"><button id="count-btn" onclick="toggleCountIn()" class="btn-small">COUNT: OFF</button></div>
       </div>
 
       <div class="performance-container">
         <div class="group-strip">
-          <button class="group-btn active" id="grp-0">A</button>
-          <button class="group-btn" id="grp-1">B</button>
-          <button class="group-btn" id="grp-2">C</button>
-          <button class="group-btn" id="grp-3">D</button>
+          <button class="group-btn active" id="grp-0" onclick="selectGroup(0)">A</button>
+          <button class="group-btn" id="grp-1" onclick="selectGroup(1)">B</button>
+          <button class="group-btn" id="grp-2" onclick="selectGroup(2)">C</button>
+          <button class="group-btn" id="grp-3" onclick="selectGroup(3)">D</button>
         </div>
         <div class="ep-grid" id="pad-grid"></div>
       </div>
 
-      <div id="pad-perf" class="control-group" style="margin-top:20px;">
+      <div id="pad-perf" class="control-group" style="margin-top:20px; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong style="letter-spacing:1px;">PAD PERFORMANCE</strong>
+          <button class="btn-small" style="width:auto;" onclick="resetPadPerf()">RESET</button>
+        </div>
         <div class="config-grid">
-          <div><label>NOTE</label><input type="number" id="pad-midi-note" onchange="updatePadParam('midiNote', this.value)"></div>
-          <div><label>GATE</label><input type="number" id="pad-gate-ms" onchange="updatePadParam('gateMs', this.value)"></div>
-          <div><label>VEL MODE</label><select id="pad-vel-mode" onchange="updatePadParam('velMode', this.value)"><option value="xyz">XYZ Levels</option><option value="fixed">Fixed</option><option value="range">Random</option></select></div>
-          <div><label>VEL A</label><input type="number" id="pad-vel-a" onchange="updatePadParam('velA', this.value)"></div>
-          <div><label>VEL B</label><input type="number" id="pad-vel-b" onchange="updatePadParam('velB', this.value)"></div>
+          <div><label>MIDI NOTE</label><input type="number" id="pad-midi-note" min="0" max="127" onchange="updatePadPerfFromUI()"></div>
+          <div><label>GATE (ms)</label><input type="number" id="pad-gate-ms" min="10" max="2000" onchange="updatePadPerfFromUI()"></div>
+          <div><label>VEL MODE</label><select id="pad-vel-mode" onchange="updatePadPerfFromUI()"><option value="xyz">Use X/Y/Z</option><option value="fixed">Fixed</option><option value="range">Random</option></select></div>
+          <div><label>VEL A (MIN)</label><input type="number" id="pad-vel-a" min="1" max="127" onchange="updatePadPerfFromUI()"></div>
+          <div><label>VEL B (MAX)</label><input type="number" id="pad-vel-b" min="1" max="127" onchange="updatePadPerfFromUI()"></div>
+          <div><label>AUTO CC</label><input type="number" id="pad-auto-cc" min="0" max="127" onchange="updatePadPerfFromUI()"></div>
+        </div>
+        <div class="split-row" style="margin-top:10px;">
+          <div><button id="pad-mute-btn" class="btn-small" onclick="togglePadMute()">PAD: ON</button></div>
+          <div style="font-size:0.7rem; font-weight:900; padding:10px; background:rgba(0,0,0,0.06); border:1px solid var(--border); border-radius:3px;">PREVIEW: <span id="pad-note-preview">--</span></div>
         </div>
       </div>
     </div>
@@ -69,42 +117,68 @@
           </div>
         </div>
 
-        <div id="chord-lab" class="control-group" style="display:none;">
+        <div id="chord-lab" style="display:none;" class="control-group">
           <div class="piano-wrapper">
             <div class="octave-stack">
               <button class="oct-btn" onclick="shiftOctave(1)">+</button>
               <div class="oct-readout"><span id="octave-display">3</span></div>
               <button class="oct-btn" onclick="shiftOctave(-1)">–</button>
             </div>
-            
+
             <div class="kb-octave" id="kb-keys">
-               <div class="kb-whites">
-                 <div class="kb-white kb-key" data-note="0"></div>
-                 <div class="kb-white kb-key" data-note="2"></div>
-                 <div class="kb-white kb-key" data-note="4"></div>
-                 <div class="kb-white kb-key" data-note="5"></div>
-                 <div class="kb-white kb-key" data-note="7"></div>
-                 <div class="kb-white kb-key" data-note="9"></div>
-                 <div class="kb-white kb-key" data-note="11"></div>
-               </div>
-               <div class="kb-blacks">
-                 <div class="kb-black kb-key" data-note="1" style="left: 10.8%;"></div>
-                 <div class="kb-black kb-key" data-note="3" style="left: 25.6%;"></div>
-                 <div class="kb-black kb-key" data-note="6" style="left: 54.0%;"></div>
-                 <div class="kb-black kb-key" data-note="8" style="left: 69.0%;"></div>
-                 <div class="kb-black kb-key" data-note="10" style="left: 83.8%;"></div>
-               </div>
+              <div class="kb-whites">
+                <div class="kb-white kb-key" data-note="0" title="C"></div>
+                <div class="kb-white kb-key" data-note="2" title="D"></div>
+                <div class="kb-white kb-key" data-note="4" title="E"></div>
+                <div class="kb-white kb-key" data-note="5" title="F"></div>
+                <div class="kb-white kb-key" data-note="7" title="G"></div>
+                <div class="kb-white kb-key" data-note="9" title="A"></div>
+                <div class="kb-white kb-key" data-note="11" title="B"></div>
+              </div>
+              <div class="kb-blacks">
+                <div class="kb-black kb-key" data-note="1" title="C#" style="left: 10.8%;"></div>
+                <div class="kb-black kb-key" data-note="3" title="D#" style="left: 25.6%;"></div>
+                <div class="kb-black kb-key" data-note="6" title="F#" style="left: 54.0%;"></div>
+                <div class="kb-black kb-key" data-note="8" title="G#" style="left: 69.0%;"></div>
+                <div class="kb-black kb-key" data-note="10" title="A#" style="left: 83.8%;"></div>
+              </div>
             </div>
           </div>
-          
-          <div class="config-grid">
-             <select id="chord-root" style="display:none;" onchange="updateChordParam('root', this.value)"><option value="0">C</option></select>
-             <select id="chord-oct" style="display:none;" onchange="updateChordParam('oct', this.value)"><option value="3">3</option></select>
 
-             <div><label>QUALITY</label><select id="chord-quality" onchange="updateChordParam('quality', this.value)"><option value="maj">Major</option><option value="min">Minor</option></select></div>
-             <div><label>EXT</label><select id="chord-ext" onchange="updateChordParam('ext', this.value)"><option value="none">None</option><option value="7">7th</option><option value="9">9th</option></select></div>
-             <div><label>INV</label><select id="chord-inv" onchange="updateChordParam('inv', this.value)"><option value="0">Root</option><option value="1">1st</option><option value="2">2nd</option></select></div>
-             <div><label>FLUX</label><input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" onchange="updateChordParam('flux', this.value)"></div>
+          <div class="config-grid">
+            <select id="chord-root" style="display:none;"><option value="0">C</option></select>
+            <select id="chord-oct" style="display:none;"><option value="3">3</option></select>
+
+            <div>
+              <label>QUALITY</label>
+              <select id="chord-quality" onchange="updateChordSettings()">
+                <option value="maj">Major</option><option value="min">Minor</option><option value="dom">Dominant</option>
+                <option value="dim">Diminished</option><option value="aug">Augmented</option><option value="sus2">Sus 2</option><option value="sus4">Sus 4</option>
+              </select>
+            </div>
+            <div>
+              <label>EXTENSION</label>
+              <select id="chord-ext" onchange="updateChordSettings()">
+                <option value="none">None</option><option value="7">7th</option><option value="9">9th</option>
+                <option value="11">11th</option><option value="13">13th</option><option value="6">6th</option>
+              </select>
+            </div>
+            <div>
+              <label>INVERSION</label>
+              <select id="chord-inv" onchange="updateChordSettings()">
+                <option value="0">Root</option><option value="1">1st Inv</option><option value="2">2nd Inv</option><option value="3">3rd Inv</option>
+              </select>
+            </div>
+            <div>
+              <label>VOICING</label>
+              <select id="chord-voice" onchange="updateChordSettings()">
+                <option value="close">Close</option><option value="wide">Wide</option><option value="open">Open</option>
+              </select>
+            </div>
+            <div style="grid-column: span 2; margin-top:10px;">
+              <label class="magic-label">Non-Conformity</label>
+              <input type="range" class="knob magic-knob" id="chord-flux" min="0" max="100" value="0" oninput="updateChordSettings()">
+            </div>
           </div>
         </div>
 
@@ -113,7 +187,15 @@
         </div>
 
         <div id="grid-notes" class="step-container"></div>
-        <div style="margin-top:15px; text-align:right;"><button onclick="clearCurrentPad()" class="btn-small" style="width:auto;">CLEAR PATTERN</button></div>
+        
+        <div style="margin-top:15px; text-align:right;">
+            <button onclick="clearCurrentPad()" class="btn-small" style="width:auto;">CLEAR PATTERN</button>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button onclick="handleInject()" class="btn-main primary" id="inject-btn">INJECT</button>
+        <button onclick="stopSequencer()" class="btn-main" style="background:#333; color:#fff;">STOP / PANIC</button>
       </div>
     </div>
   </div>
