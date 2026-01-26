@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>XOZY-EP // MODULAR v1.0</title>
+  <title>XOZY-EP // MODULAR</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body id="main-body">
@@ -76,17 +76,27 @@
               <div class="oct-readout"><span id="octave-display">3</span></div>
               <button class="oct-btn" onclick="shiftOctave(-1)">–</button>
             </div>
+            
             <div class="kb-octave" id="kb-keys">
                <div class="kb-whites">
-                 <div class="kb-white kb-key" data-note="0"></div><div class="kb-white kb-key" data-note="2"></div><div class="kb-white kb-key" data-note="4"></div>
-                 <div class="kb-white kb-key" data-note="5"></div><div class="kb-white kb-key" data-note="7"></div><div class="kb-white kb-key" data-note="9"></div><div class="kb-white kb-key" data-note="11"></div>
+                 <div class="kb-white kb-key" data-note="0"></div>
+                 <div class="kb-white kb-key" data-note="2"></div>
+                 <div class="kb-white kb-key" data-note="4"></div>
+                 <div class="kb-white kb-key" data-note="5"></div>
+                 <div class="kb-white kb-key" data-note="7"></div>
+                 <div class="kb-white kb-key" data-note="9"></div>
+                 <div class="kb-white kb-key" data-note="11"></div>
                </div>
                <div class="kb-blacks">
-                 <div class="kb-black kb-key" data-note="1" style="left: 10.8%;"></div><div class="kb-black kb-key" data-note="3" style="left: 25.6%;"></div>
-                 <div class="kb-black kb-key" data-note="6" style="left: 54.0%;"></div><div class="kb-black kb-key" data-note="8" style="left: 69.0%;"></div><div class="kb-black kb-key" data-note="10" style="left: 83.8%;"></div>
+                 <div class="kb-black kb-key" data-note="1" style="left: 10.8%;"></div>
+                 <div class="kb-black kb-key" data-note="3" style="left: 25.6%;"></div>
+                 <div class="kb-black kb-key" data-note="6" style="left: 54.0%;"></div>
+                 <div class="kb-black kb-key" data-note="8" style="left: 69.0%;"></div>
+                 <div class="kb-black kb-key" data-note="10" style="left: 83.8%;"></div>
                </div>
             </div>
           </div>
+          
           <div class="config-grid">
              <select id="chord-root" style="display:none;" onchange="updateChordParam('root', this.value)"><option value="0">C</option></select>
              <select id="chord-oct" style="display:none;" onchange="updateChordParam('oct', this.value)"><option value="3">3</option></select>
