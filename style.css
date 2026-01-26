@@ -1,8 +1,8 @@
 /* =========================================
-   XOZY-EP STYLESHEET v1.2
+   XOZY-EP STYLESHEET v2.0 (AGGRESSIVE)
    ========================================= */
 
-/* --- 1. VARIABLES & THEMES --- */
+/* --- 1. VARIABLES --- */
 :root {
   --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
   --accent: #ff3e00;
@@ -13,43 +13,8 @@
   --lcd-text: #39ff14;
   --border: #8e8e8e;
   --panel-bg: rgba(255, 255, 255, 0.45);
-  --shadow: rgba(0, 0, 0, 0.4);
-  --fader-track: #ccc;
   --key-white: #f0f0f0;
   --key-black: #2a2a2a;
-}
-
-body.theme-40 {
-  --bg: #f4f1e6;
-  --accent: #006633;
-  --ghost: rgba(0, 102, 51, 0.3);
-  --text: #1a1a1a;
-  --lcd-bg: #050a05;
-  --lcd-text: #008f11;
-  --border: #c5c2b7;
-  --panel-bg: #ffffff;
-}
-
-body.theme-133 {
-  --bg: #bcbcbc;
-  --accent: #ff3e00;
-  --ghost: rgba(255, 62, 0, 0.3);
-  --text: #000000;
-  --lcd-bg: #121212;
-  --lcd-text: #ff4500;
-  --border: #888888;
-  --panel-bg: #e0e0e0;
-}
-
-body.theme-1320 {
-  --bg: #dccb96;
-  --accent: #9b111e;
-  --ghost: rgba(155, 17, 30, 0.3);
-  --text: #3d2b1f;
-  --lcd-bg: #2e1a0d;
-  --lcd-text: #f3e5ab;
-  --border: #a6894c;
-  --panel-bg: #e6d9ad;
 }
 
 body.dark-mode {
@@ -57,13 +22,11 @@ body.dark-mode {
   --text: #e0e0e0;
   --border: #444;
   --panel-bg: rgba(30, 30, 30, 0.9);
-  --fader-track: #444;
-  --magic: #bd7bf0;
   --key-white: #aaa;
   --key-black: #000;
 }
 
-/* --- 2. GLOBAL LAYOUT --- */
+/* --- 2. LAYOUT --- */
 body {
   background: var(--bg);
   background-attachment: fixed;
@@ -75,7 +38,6 @@ body {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
-  transition: all 0.4s ease;
 }
 
 .chassis {
@@ -84,603 +46,173 @@ body {
   border-radius: 12px;
   padding: 25px;
   width: 95%;
-  max-width: 1000px;
+  max-width: 1100px; /* Slightly wider to fit everything */
   box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  transition: max-width 0.4s ease;
   margin: 20px 0;
 }
 
-.chassis.skinny-mode {
-  max-width: 480px;
-}
-
-/* --- 3. HEADER & LCD --- */
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  letter-spacing: 4px;
-  font-weight: 900;
-}
-
-.header-controls {
-  display: flex;
-  gap: 10px;
-}
-
-.lcd-display {
-  background: var(--lcd-bg);
-  color: var(--lcd-text);
-  padding: 12px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: normal;
-  border: 4px solid #222;
-  width: 100%;
-  height: 60px;
-  box-shadow: inset 0 0 20px #000;
-  text-shadow: 0 0 3px var(--lcd-text);
-  overflow-y: auto;
-  font-family: 'Courier New', Courier, monospace;
-  display: flex;
-  flex-direction: column-reverse;
-  box-sizing: border-box;
-  margin-bottom: 20px;
-}
-
-.log-entry {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2px 0;
-}
-
-/* --- 4. MAIN DECK LAYOUT --- */
 .main-deck {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: 1fr 1.4fr; /* Give Right Deck more space */
   gap: 30px;
 }
 
-.chassis.skinny-mode .main-deck {
-  grid-template-columns: 1fr;
-}
+.chassis.skinny-mode .main-deck { grid-template-columns: 1fr; }
 
-/* --- 5. LEFT DECK (Controls & Pads) --- */
+/* --- 3. HEADER & LCD --- */
+.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
+.header-controls { display: flex; gap: 10px; }
+
+.lcd-display {
+  background: var(--lcd-bg); color: var(--lcd-text); padding: 12px;
+  border-radius: 4px; border: 4px solid #222; width: 100%; height: 60px;
+  box-shadow: inset 0 0 20px #000; overflow-y: auto;
+  font-family: 'Courier New', monospace; display: flex; flex-direction: column-reverse;
+  box-sizing: border-box; margin-bottom: 20px;
+}
+.log-entry { border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 2px 0; font-size: 0.8rem; }
+
+/* --- 4. CONTROLS (Left Deck) --- */
 .control-group {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.05); padding: 15px; border-radius: 8px;
+  border: 1px solid var(--border); margin-bottom: 20px;
 }
+.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
+.split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
 
-.config-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  align-items: end;
-}
+label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; opacity: 0.8; }
+select, input { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
 
-.split-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  align-items: end;
-}
+/* Knobs */
+input[type=range].knob { -webkit-appearance: none; height: 4px; background: var(--text); border-radius: 2px; }
+input[type=range].knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); border-color: white; }
+.magic-label { color: var(--magic); font-weight: 900; }
 
-label {
-  font-size: 0.55rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-  display: block;
-  letter-spacing: 1px;
-  opacity: 0.8;
-}
-
-select,
-input[type="number"] {
-  width: 100%;
-  padding: 8px;
-  background: var(--bg);
-  border: 1px solid var(--text);
-  color: var(--text);
-  font-family: inherit;
-  border-radius: 2px;
-  font-weight: bold;
-  font-size: 0.75rem;
-  box-sizing: border-box;
-}
-
-input[type=range].magic-knob::-webkit-slider-thumb {
-  background: var(--magic);
-  border-color: white;
-}
-
-.magic-label {
-  color: var(--magic);
-  font-weight: 900;
-  letter-spacing: 1px;
-}
-
-.knob {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 4px;
-  background: var(--text);
-  outline: none;
-  border-radius: 2px;
-  margin-top: 5px;
-}
-
-.knob::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  background: var(--accent);
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-/* --- 6. PERFORMANCE PADS (Left Deck) --- */
+/* --- 5. PERFORMANCE AREA (Left Deck) --- */
 .performance-container {
   display: grid;
-  /* 40px for Strip, 1fr for Pads. */
-  grid-template-columns: 40px 1fr; 
-  /* FIX: Increased gap between Group Strip (A/B) and Pads */
-  gap: 25px; 
+  grid-template-columns: 45px 1fr;
+  /* GAP FIX: Separate Groups from Pads */
+  gap: 30px !important; 
   min-width: 0;
 }
 
-.group-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  height: 100%;
-}
-
+.group-strip { display: flex; flex-direction: column; gap: 6px; height: 100%; }
 .group-btn {
-  flex: 1;
-  background: rgba(0, 0, 0, 0.1);
-  border: 2px solid var(--text);
-  border-radius: 4px;
-  color: var(--text);
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  transition: 0.2s;
-  padding: 0;
+  flex: 1; background: rgba(0,0,0,0.1); border: 2px solid var(--text);
+  border-radius: 4px; color: var(--text); font-weight: 900; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
 }
+.group-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-.group-btn.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
-}
-
+/* DRUM PADS */
 .ep-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* FIX: Tighter gap inside the numpad */
-  gap: 4px; 
+  /* GAP FIX: Tighten the numpad */
+  gap: 4px !important; 
 }
 
 .pad-btn {
-  background: rgba(0, 0, 0, 0.05);
-  border: 2px solid var(--border);
-  aspect-ratio: 4/3;
-  max-height: 60px;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  transition: 0.05s;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
+  background: rgba(0,0,0,0.05); border: 2px solid var(--border);
+  aspect-ratio: 4/3; max-height: 60px; border-radius: 6px;
+  cursor: pointer; position: relative; box-shadow: 0 3px 0 rgba(0,0,0,0.1);
 }
+.pad-btn.active-pad { border-color: var(--accent); background: var(--accent) !important; color: white; transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+.pad-btn.hit { filter: brightness(1.5); transform: translateY(2px); box-shadow: none; }
 
-.pad-btn.active-pad {
-  border-color: var(--accent);
-  background: var(--accent) !important;
-  color: white;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
-  transform: translateY(1px);
-}
+.legend-tag { position: absolute; top: 4px; right: 6px; font-weight: 900; font-size: 0.7rem; opacity: 0.7; }
+.pad-btn-sq::before { content: ''; position: absolute; top: 15%; left: 10%; width: 12%; height: 16%; background: var(--accent); border-radius: 1px; }
+.active-pad.pad-btn-sq::before { background: white; }
 
-.pad-btn.hit {
-  filter: brightness(1.5);
-  transform: translateY(2px);
-  box-shadow: none;
-}
-
-.legend-tag {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  font-weight: 900;
-  font-size: 0.7rem;
-  opacity: 0.7;
-}
-
-.pad-btn-sq::before {
-  content: '';
-  position: absolute;
-  top: 15%;
-  left: 10%;
-  width: 12%;
-  height: 16%;
-  background: var(--accent);
-  border-radius: 1px;
-}
-
-.active-pad.pad-btn-sq::before {
-  background: white;
-}
-
-/* --- 7. RIGHT DECK (Editor) --- */
+/* --- 6. EDITOR PANEL (Right Deck) --- */
 .editor-panel {
-  background: rgba(0, 0, 0, 0.03);
-  border: 2px solid var(--border);
-  padding: 15px;
-  border-radius: 8px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
+  background: rgba(0, 0, 0, 0.03); border: 2px solid var(--border);
+  padding: 15px; border-radius: 8px; flex-grow: 1; display: flex; flex-direction: column;
 }
 
 .editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 10px;
-  gap: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
 }
 
-.editor-header > div {
-  display: flex;
-  gap: 8px;
-}
-
-/* --- 8. PIANO MODULE --- */
-.piano-wrapper {
-  display: flex;
-  align-items: stretch;
-  gap: 14px;
-  margin-bottom: 15px;
-  height: 190px;
-}
-
-.octave-stack {
-  width: 62px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.oct-btn {
-  flex: 0 0 58px;
-  background: rgba(0, 0, 0, 0.05);
-  border: 2px solid var(--text);
-  color: var(--text);
-  font-weight: 900;
-  cursor: pointer;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  line-height: 1;
-  transition: 0.1s;
-}
-
-.oct-btn:active {
-  background: var(--text);
-  color: var(--bg);
-}
-
-.oct-readout {
-  flex: 1;
-  border: 2px solid var(--border);
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  font-size: 0.70rem;
-  text-transform: uppercase;
-}
-
-.oct-readout span {
-  font-size: 1.15rem;
-  letter-spacing: 0;
-}
-
-.kb-octave {
-  position: relative;
-  width: 100%;
-  height: 170px;
-  border-radius: 14px;
-}
-
-.kb-whites {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
-}
-
-.kb-white {
-  position: relative;
-  flex: 1;
-  background: var(--key-white);
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.kb-white::after {
-  content: '';
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.25);
-  background: rgba(255, 255, 255, 0.35);
-  opacity: 0.35;
-}
-
-.kb-blacks {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.kb-black {
-  position: absolute;
-  top: 8px;
-  height: 90px;
-  width: 10.5%;
-  border-radius: 999px;
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 3px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.kb-white.is-root,
-.kb-black.is-root {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--ghost);
-}
-
-.kb-white.is-chord,
-.kb-black.is-chord {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--ghost);
-}
-
-.kb-white:active,
-.kb-black:active {
-  transform: translateY(2px);
-}
-
-/* --- 9. SEQUENCER GRID (Full Width Fix) --- */
-.step-container {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 2px;
-  
-  margin-top: 10px;
-  /* FIX: 100% width, remove max-width constraint */
-  width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-  
-  overflow: visible;
-  /* Let it fill the panel; buttons scale to fit width */
-}
-
-.step-container::-webkit-scrollbar { display: none; }
-
-.step-box {
-  aspect-ratio: 1/1;
-  border: 2px solid var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Font size scales with button width */
-  font-size: clamp(0.5rem, 1.5vw, 0.9rem);
-  cursor: pointer;
-  font-weight: 900;
-  border-radius: 2px;
-  opacity: 0.6;
-  transition: 0.1s;
-}
-
-.step-box:hover {
-  opacity: 0.9;
-  transform: scale(0.95);
-  box-shadow: 0 0 5px var(--accent);
-}
-
-.step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
-.step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
-.step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
-
-/* --- 10. ACTION BUTTONS & MODALS --- */
-.action-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 15px;
-}
-
-.btn-main {
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  padding: 18px;
-  font-weight: 900;
-  cursor: pointer;
-  border-radius: 4px;
-  text-transform: uppercase;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.3);
-  letter-spacing: 1px;
-  font-size: 0.8rem;
-  width: 100%;
-}
-
-.btn-main.primary {
-  background: var(--accent);
-  color: white;
-}
-
-.btn-main:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
-}
-
-.btn-small {
-  background: #555;
-  color: white;
-  border: none;
-  padding: 10px;
-  font-size: 0.65rem;
-  cursor: pointer;
-  border-radius: 3px;
-  font-weight: bold;
-  width: 100%;
-  transition: background 0.2s;
-}
-
-.btn-layout {
-  background: transparent;
-  border: 2px solid var(--text);
-  color: var(--text);
-  font-weight: bold;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-.btn-toggle-on {
-  background: var(--lcd-text) !important;
-  color: black !important;
-  border-color: var(--lcd-text) !important;
-}
-
-#feedback-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: var(--text);
-  color: var(--bg);
-  border: 2px solid var(--border);
-  padding: 10px 20px;
-  font-family: inherit;
-  font-weight: 900;
-  border-radius: 30px;
-  cursor: pointer;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  z-index: 100;
-  transition: 0.2s;
-  letter-spacing: 1px;
-  font-size: 0.75rem;
-}
-
-#feedback-btn:hover {
-  transform: scale(1.05);
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
-.modal-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-box {
-  background: var(--bg);
-  border: 2px solid var(--accent);
-  width: 90%;
-  max-width: 400px;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  color: var(--text);
-}
-
-.modal-title {
-  font-size: 1.2rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--text);
-  padding-bottom: 10px;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--text);
-  color: var(--text);
-  font-family: inherit;
-  resize: vertical;
-  min-height: 100px;
-  box-sizing: border-box;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-/* BIGGER TOGGLES */
-#pad-mode-drum, 
-#pad-mode-chord {
+/* BIGGER MODE TOGGLES */
+.editor-header > div { display: flex; gap: 10px; }
+#pad-mode-drum, #pad-mode-chord {
   width: auto !important;
-  min-width: 80px;
-  font-size: 0.85rem;
-  padding: 8px 16px;
+  min-width: 90px !important; /* Force width */
+  padding: 10px 20px !important; /* Force chunky size */
+  font-size: 0.9rem !important;
   border-width: 2px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
+/* --- 7. PIANO --- */
+.piano-wrapper { display: flex; gap: 14px; margin-bottom: 15px; height: 160px; }
+.octave-stack { width: 62px; display: flex; flex-direction: column; gap: 10px; }
+.oct-btn { flex: 0 0 50px; background: rgba(0,0,0,0.05); border: 2px solid var(--text); color: var(--text); font-weight: 900; cursor: pointer; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.oct-readout { flex: 1; border: 2px solid var(--border); background: rgba(0,0,0,0.06); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; }
+.oct-readout span { font-size: 1.2rem; }
+
+.kb-octave { position: relative; width: 100%; height: 100%; border-radius: 14px; overflow: hidden; }
+.kb-whites { position: absolute; inset: 0; display: flex; }
+.kb-white { flex: 1; background: var(--key-white); border-right: 1px solid var(--border); cursor: pointer; border-bottom: 4px solid rgba(0,0,0,0.1); }
+.kb-blacks { position: absolute; inset: 0; pointer-events: none; }
+.kb-black { position: absolute; top: 0; height: 60%; width: 8%; background: #111; border-radius: 0 0 4px 4px; cursor: pointer; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); }
+
+.kb-white.is-root, .kb-black.is-root { background: var(--accent) !important; }
+.kb-white.is-chord, .kb-black.is-chord { background: var(--ghost) !important; }
+
+/* --- 8. SEQUENCER GRID (Full Width) --- */
+.step-container {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  
+  /* FILL THE CONTAINER */
+  width: 100% !important;
+  max-width: none !important; /* Remove constraints */
+  margin-top: 15px;
+  
+  overflow: visible;
+}
+
+.step-box {
+  /* Force square shape */
+  aspect-ratio: 1/1;
+  border: 2px solid var(--text);
+  display: flex; align-items: center; justify-content: center;
+  
+  /* Font size scales with box size */
+  font-size: clamp(0.7rem, 2vw, 1.1rem);
+  
+  cursor: pointer; font-weight: 900; border-radius: 4px;
+  opacity: 0.6; transition: 0.1s;
+}
+
+.step-box:hover { opacity: 0.9; transform: scale(0.95); box-shadow: 0 0 8px var(--accent); }
+.step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
+.step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
+.step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
+
+/* --- 9. BUTTONS & MODAL --- */
+.action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: auto; padding-top: 20px; }
+.btn-main { background: var(--text); color: var(--bg); border: none; padding: 20px; font-weight: 900; cursor: pointer; border-radius: 4px; letter-spacing: 1px; font-size: 0.9rem; width: 100%; border-bottom: 4px solid rgba(0,0,0,0.2); }
+.btn-main.primary { background: var(--accent); color: white; }
+.btn-main:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+.btn-small { background: #555; color: white; border: none; padding: 12px; font-size: 0.7rem; cursor: pointer; border-radius: 3px; font-weight: bold; width: 100%; }
+.btn-layout { background: transparent; border: 2px solid var(--text); color: var(--text); font-weight: bold; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
+.btn-toggle-on { background: var(--lcd-text) !important; color: black !important; border-color: var(--lcd-text) !important; }
+
+/* Feedback */
+#feedback-btn { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); border: 2px solid var(--border); padding: 10px 20px; font-weight: 900; border-radius: 30px; cursor: pointer; z-index: 100; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
+.modal-box { background: var(--bg); border: 2px solid var(--accent); width: 90%; max-width: 400px; padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px; color: var(--text); }
+.modal-title { font-size: 1.2rem; font-weight: 900; border-bottom: 2px solid var(--text); padding-bottom: 10px; }
+.modal-input { width: 100%; padding: 12px; background: rgba(0,0,0,0.05); border: 1px solid var(--text); color: var(--text); font-family: inherit; box-sizing: border-box; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
