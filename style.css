@@ -1,5 +1,5 @@
 /* =========================================
-   XOZY-EP STYLESHEET v2.0 (AGGRESSIVE)
+   XOZY-EP STYLESHEET v3.0 (SPACING FIX)
    ========================================= */
 
 /* --- 1. VARIABLES --- */
@@ -46,7 +46,7 @@ body {
   border-radius: 12px;
   padding: 25px;
   width: 95%;
-  max-width: 1100px; /* Slightly wider to fit everything */
+  max-width: 1100px;
   box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   margin: 20px 0;
@@ -54,8 +54,8 @@ body {
 
 .main-deck {
   display: grid;
-  grid-template-columns: 1fr 1.4fr; /* Give Right Deck more space */
-  gap: 30px;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 40px; /* Increased gap between Left and Right decks */
 }
 
 .chassis.skinny-mode .main-deck { grid-template-columns: 1fr; }
@@ -74,7 +74,7 @@ h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
 }
 .log-entry { border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 2px 0; font-size: 0.8rem; }
 
-/* --- 4. CONTROLS (Left Deck) --- */
+/* --- 4. CONTROLS --- */
 .control-group {
   background: rgba(0, 0, 0, 0.05); padding: 15px; border-radius: 8px;
   border: 1px solid var(--border); margin-bottom: 20px;
@@ -85,7 +85,6 @@ h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 900; }
 label { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; opacity: 0.8; }
 select, input { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--text); color: var(--text); font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
 
-/* Knobs */
 input[type=range].knob { -webkit-appearance: none; height: 4px; background: var(--text); border-radius: 2px; }
 input[type=range].knob::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); border-color: white; }
@@ -95,8 +94,8 @@ input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); b
 .performance-container {
   display: grid;
   grid-template-columns: 45px 1fr;
-  /* GAP FIX: Separate Groups from Pads */
-  gap: 30px !important; 
+  /* FIX: Huge gap between Group Buttons and Pads */
+  gap: 50px !important; 
   min-width: 0;
 }
 
@@ -112,8 +111,8 @@ input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); b
 .ep-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* GAP FIX: Tighten the numpad */
-  gap: 4px !important; 
+  /* FIX: Very tight pads */
+  gap: 2px !important; 
 }
 
 .pad-btn {
@@ -131,20 +130,21 @@ input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); b
 /* --- 6. EDITOR PANEL (Right Deck) --- */
 .editor-panel {
   background: rgba(0, 0, 0, 0.03); border: 2px solid var(--border);
-  padding: 15px; border-radius: 8px; flex-grow: 1; display: flex; flex-direction: column;
+  padding: 20px; /* Increased padding */
+  border-radius: 8px; flex-grow: 1; display: flex; flex-direction: column;
 }
 
 .editor-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;
 }
 
 /* BIGGER MODE TOGGLES */
 .editor-header > div { display: flex; gap: 10px; }
 #pad-mode-drum, #pad-mode-chord {
   width: auto !important;
-  min-width: 90px !important; /* Force width */
-  padding: 10px 20px !important; /* Force chunky size */
+  min-width: 100px !important;
+  padding: 12px 24px !important;
   font-size: 0.9rem !important;
   border-width: 2px;
   text-transform: uppercase;
@@ -167,39 +167,41 @@ input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); b
 .kb-white.is-root, .kb-black.is-root { background: var(--accent) !important; }
 .kb-white.is-chord, .kb-black.is-chord { background: var(--ghost) !important; }
 
-/* --- 8. SEQUENCER GRID (Full Width) --- */
+/* --- 8. SEQUENCER GRID (Full Width Fix) --- */
 .step-container {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 3px;
+  gap: 2px;
   
-  /* FILL THE CONTAINER */
+  /* FIX: Force Full Width and let boxes grow */
   width: 100% !important;
-  max-width: none !important; /* Remove constraints */
-  margin-top: 15px;
-  
+  max-width: none !important; 
+  margin-top: 20px;
   overflow: visible;
 }
 
 .step-box {
-  /* Force square shape */
-  aspect-ratio: 1/1;
+  /* Remove fixed aspect ratio to allow stretching if needed, 
+     but 1/1 usually looks best. Let's try min-height to ensure they are big. */
+  aspect-ratio: 1/1; 
+  min-height: 40px; /* Ensure they aren't tiny */
+  
   border: 2px solid var(--text);
   display: flex; align-items: center; justify-content: center;
   
-  /* Font size scales with box size */
-  font-size: clamp(0.7rem, 2vw, 1.1rem);
+  /* Large font */
+  font-size: 1rem;
   
   cursor: pointer; font-weight: 900; border-radius: 4px;
   opacity: 0.6; transition: 0.1s;
 }
 
-.step-box:hover { opacity: 0.9; transform: scale(0.95); box-shadow: 0 0 8px var(--accent); }
+.step-box:hover { opacity: 0.9; transform: scale(0.98); box-shadow: 0 0 8px var(--accent); }
 .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
 .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
 .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
 
-/* --- 9. BUTTONS & MODAL --- */
+/* --- 9. BUTTONS --- */
 .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: auto; padding-top: 20px; }
 .btn-main { background: var(--text); color: var(--bg); border: none; padding: 20px; font-weight: 900; cursor: pointer; border-radius: 4px; letter-spacing: 1px; font-size: 0.9rem; width: 100%; border-bottom: 4px solid rgba(0,0,0,0.2); }
 .btn-main.primary { background: var(--accent); color: white; }
@@ -209,7 +211,6 @@ input[type=range].magic-knob::-webkit-slider-thumb { background: var(--magic); b
 .btn-layout { background: transparent; border: 2px solid var(--text); color: var(--text); font-weight: bold; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
 .btn-toggle-on { background: var(--lcd-text) !important; color: black !important; border-color: var(--lcd-text) !important; }
 
-/* Feedback */
 #feedback-btn { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--bg); border: 2px solid var(--border); padding: 10px 20px; font-weight: 900; border-radius: 30px; cursor: pointer; z-index: 100; }
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
 .modal-box { background: var(--bg); border: 2px solid var(--accent); width: 90%; max-width: 400px; padding: 30px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px; color: var(--text); }
