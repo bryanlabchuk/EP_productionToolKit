@@ -679,3 +679,28 @@ input[type=range].magic-knob::-webkit-slider-thumb {
   gap: 10px;
   justify-content: flex-end;
 }
+
+/* --- FIX: Bigger Mode Toggles --- */
+.editor-header {
+  /* Ensure the header handles taller buttons gracefully */
+  align-items: center; 
+  gap: 10px;
+}
+
+/* Target the container of the two buttons */
+.editor-header > div {
+  display: flex;
+  gap: 8px; /* Space between DRUM and CHORD */
+}
+
+/* Target the specific Drum/Chord buttons to make them chunkier */
+#pad-mode-drum, 
+#pad-mode-chord {
+  width: auto !important;      /* Override 100% width default */
+  min-width: 80px;             /* Ensure they feel substantial */
+  font-size: 0.85rem;          /* Readable text size (up from 0.65rem) */
+  padding: 8px 16px;           /* Larger click target */
+  border-width: 2px;           /* Thicker border matches the robust look */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
