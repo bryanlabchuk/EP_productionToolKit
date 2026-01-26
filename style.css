@@ -480,42 +480,43 @@ input[type=range].magic-knob::-webkit-slider-thumb {
   transform: translateY(2px);
 }
 
-/* --- 8. STEP SEQUENCER GRID (Fixed Overflow) --- */
+/* 64-step grid as 8x8 */
 .step-container {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 4px; /* Reduced gap */
+  gap: 3px; /* Tight gap */
   margin-top: 10px;
-  flex-grow: 1;
   
-  /* Scroll Fix */
-  max-height: 320px; 
-  overflow-y: auto;
-  border-top: 1px solid rgba(0,0,0,0.1);
-  padding-top: 5px;
-  padding-right: 4px;
+  /* FIX: Remove scrollbars, constrain width instead */
+  width: 100%;
+  max-width: 360px; /* Limits height effectively since aspect-ratio is 1/1 */
+  margin-left: auto;
+  margin-right: auto; /* Centers the grid */
+  
+  /* Ensure it doesn't overlap action buttons */
+  margin-bottom: 10px;
 }
 
-/* Custom Scrollbar */
-.step-container::-webkit-scrollbar { width: 6px; }
-.step-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-.step-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
 .step-box {
-  aspect-ratio: 1/1;
+  aspect-ratio: 1/1; /* Keeps them perfectly square */
   border: 2px solid var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem; /* Slightly smaller text */
+  font-size: 0.7rem; 
   cursor: pointer;
   font-weight: 900;
-  border-radius: 3px;
+  border-radius: 2px;
   opacity: 0.6;
   transition: 0.1s;
 }
 
-.step-box:hover { opacity: 0.8; transform: scale(0.95); }
+.step-box:hover {
+  opacity: 0.9;
+  transform: scale(0.95);
+  box-shadow: 0 0 5px var(--accent);
+}
+
 .step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
 .step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
 .step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
