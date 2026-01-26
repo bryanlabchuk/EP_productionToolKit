@@ -18,7 +18,10 @@ const ui = {
     octaveDisp: document.getElementById('octave-display'),
     tempo: document.getElementById('tempo'),
     editorTitle: document.getElementById('editor-title'),
-    chordRoot: document.getElementById('chord-root')
+    chordRoot: document.getElementById('chord-root'),
+    // NEW:
+    kitSel: document.getElementById('preset-kit-select'),
+    padSel: document.getElementById('preset-pad-select')
 };
 
 // --- INITIALIZATION ---
@@ -209,26 +212,47 @@ function log(msg) {
 // --- PRESETS & SETTINGS ---
 
 function populatePresets() {
-    const sel = document.getElementById('preset-select');
-    if (!sel) return;
-    sel.innerHTML = '<option value="">-- LOAD PRESET --</option>';
+    if (!ui.kitSel || !ui.padSel) return;
+
+    // Reset menus
+    ui.kitSel.innerHTML = '<option value="">-- LOAD KIT --</option>';
+    ui.padSel.innerHTML = '<option value="">-- LOAD PATTERN --</option>';
 
     for (const [category, patterns] of Object.entries(PRESETS)) {
+        // Create the group (optgroup)
         const group = document.createElement('optgroup');
         group.label = category;
+
         patterns.forEach(pat => {
             const opt = document.createElement('option');
             opt.value = JSON.stringify(pat);
             opt.innerText = pat.name;
             group.appendChild(opt);
         });
-        sel.appendChild(group);
+
+        // SORTING LOGIC:
+        // If the category name contains "KIT" or it's a multi-track preset, goes to Left Menu.
+        // Otherwise, it goes to Right Menu.
+        const isKit = category.toUpperCase().includes('KIT') || (patterns[0] && patterns[0].type === 'multi');
+
+        if (isKit) {
+            ui.kitSel.appendChild(group);
+        } else {
+            ui.padSel.appendChild(group);
+        }
     }
 
-    sel.onchange = (e) => {
+    // Bind Event Listeners
+    ui.kitSel.onchange = (e) => {
         if (!e.target.value) return;
         loadPreset(JSON.parse(e.target.value));
-        e.target.value = "";
+        e.target.value = ""; // Reset dropdown after selection
+    };
+
+    ui.padSel.onchange = (e) => {
+        if (!e.target.value) return;
+        loadPreset(JSON.parse(e.target.value));
+        e.target.value = ""; // Reset dropdown
     };
 }
 
