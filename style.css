@@ -1,4 +1,8 @@
-/* --- VARIABLES --- */
+/* =========================================
+   XOZY-EP STYLESHEET v1.1
+   ========================================= */
+
+/* --- 1. VARIABLES & THEMES --- */
 :root {
   --bg: linear-gradient(135deg, #d8d4c9 0%, #b1b1b1 33%, #c9b98d 66%, #a1a1a1 100%);
   --accent: #ff3e00;
@@ -59,6 +63,7 @@ body.dark-mode {
   --key-black: #000;
 }
 
+/* --- 2. GLOBAL LAYOUT --- */
 body {
   background: var(--bg);
   background-attachment: fixed;
@@ -73,7 +78,6 @@ body {
   transition: all 0.4s ease;
 }
 
-/* --- CHASSIS --- */
 .chassis {
   background: var(--panel-bg);
   border: 2px solid var(--border);
@@ -84,202 +88,14 @@ body {
   box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   transition: max-width 0.4s ease;
+  margin: 20px 0; /* Add margin so it doesn't touch edges on small screens */
 }
 
 .chassis.skinny-mode {
   max-width: 480px;
 }
 
-/* --- PIANO MODULE (fat keys, 1 octave, 12 semitones) --- */
-.piano-wrapper {
-  display: flex;
-  align-items: stretch;
-  gap: 14px;
-  margin-bottom: 15px;
-  height: 190px;
-}
-
-.octave-stack {
-  width: 62px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.oct-btn {
-  flex: 0 0 58px;
-  background: rgba(0, 0, 0, 0.05);
-  border: 2px solid var(--text);
-  color: var(--text);
-  font-weight: 900;
-  cursor: pointer;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  line-height: 1;
-  transition: 0.1s;
-}
-
-.oct-btn:active {
-  background: var(--text);
-  color: var(--bg);
-}
-
-.oct-readout {
-  flex: 1;
-  border: 2px solid var(--border);
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  font-size: 0.70rem;
-  text-transform: uppercase;
-}
-
-.oct-readout span {
-  font-size: 1.15rem;
-  letter-spacing: 0;
-}
-
-/* Frame */
-.keyboard-frame {
-  flex-grow: 1;
-  border: 2px solid var(--text);
-  border-radius: 14px;
-  padding: 14px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* One octave layout (7 white + 5 black overlay) */
-.kb-octave {
-  position: relative;
-  width: 100%;
-  height: 170px;
-  border-radius: 14px;
-}
-
-/* White keys: fat capsules */
-.kb-whites {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
-}
-
-.kb-white {
-  position: relative;
-  flex: 1;
-  background: var(--key-white);
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  cursor: pointer;
-  user-select: none;
-}
-
-/* small dot at bottom like screenshot */
-.kb-white::after {
-  content: '';
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.25);
-  background: rgba(255, 255, 255, 0.35);
-  opacity: 0.35;
-}
-
-/* Black keys: fat shorter capsules sitting on top */
-.kb-blacks {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  /* allow only black key itself to be clickable */
-}
-
-.kb-black {
-  position: absolute;
-  top: 8px;
-  height: 90px;
-  width: 10.5%;
-  /* tuned for “fat” look */
-  border-radius: 999px;
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  /* thinner + subtle */
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    /* inner edge */
-    0 2px 3px rgba(0, 0, 0, 0.35);
-  /* lift */
-  ;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-/* Key “active” indicators */
-.kb-white.is-root,
-.kb-black.is-root {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--ghost);
-}
-
-.kb-white.is-chord,
-.kb-black.is-chord {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--ghost);
-}
-
-.kb-white:active,
-.kb-black:active {
-  transform: translateY(2px);
-}
-
-/* --- COMPONENTS --- */
-input[type=range].magic-knob::-webkit-slider-thumb {
-  background: var(--magic);
-  border-color: white;
-}
-
-.magic-label {
-  color: var(--magic);
-  font-weight: 900;
-  letter-spacing: 1px;
-}
-
-.knob {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 4px;
-  background: var(--text);
-  outline: none;
-  border-radius: 2px;
-  margin-top: 5px;
-}
-
-.knob::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  background: var(--accent);
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
+/* --- 3. HEADER & LCD --- */
 .header-row {
   display: flex;
   justify-content: space-between;
@@ -324,24 +140,7 @@ h1 {
   padding: 2px 0;
 }
 
-.lcd-overlay {
-  font-size: 2rem;
-  text-align: center;
-  color: var(--accent);
-  font-weight: 900;
-  animation: pulse 0.5s infinite alternate;
-}
-
-@keyframes pulse {
-  from {
-    opacity: 0.6;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
+/* --- 4. MAIN DECK LAYOUT --- */
 .main-deck {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
@@ -352,6 +151,7 @@ h1 {
   grid-template-columns: 1fr;
 }
 
+/* --- 5. LEFT DECK (Controls & Pads) --- */
 .control-group {
   background: rgba(0, 0, 0, 0.05);
   padding: 15px;
@@ -398,6 +198,40 @@ input[type="number"] {
   box-sizing: border-box;
 }
 
+/* Knobs & Sliders */
+input[type=range].magic-knob::-webkit-slider-thumb {
+  background: var(--magic);
+  border-color: white;
+}
+
+.magic-label {
+  color: var(--magic);
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.knob {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--text);
+  outline: none;
+  border-radius: 2px;
+  margin-top: 5px;
+}
+
+.knob::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Performance Pads Area */
 .performance-container {
   display: grid;
   grid-template-columns: 50px 1fr;
@@ -486,6 +320,7 @@ input[type="number"] {
   background: white;
 }
 
+/* --- 6. RIGHT DECK (Editor) --- */
 .editor-panel {
   background: rgba(0, 0, 0, 0.03);
   border: 2px solid var(--border);
@@ -505,14 +340,153 @@ input[type="number"] {
   padding-bottom: 10px;
 }
 
-/* 64-step grid as 8x8 */
+/* --- 7. PIANO KEYBOARD --- */
+.piano-wrapper {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  margin-bottom: 15px;
+  height: 190px;
+}
+
+.octave-stack {
+  width: 62px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oct-btn {
+  flex: 0 0 58px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px solid var(--text);
+  color: var(--text);
+  font-weight: 900;
+  cursor: pointer;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  line-height: 1;
+  transition: 0.1s;
+}
+
+.oct-btn:active {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.oct-readout {
+  flex: 1;
+  border: 2px solid var(--border);
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-size: 0.70rem;
+  text-transform: uppercase;
+}
+
+.oct-readout span {
+  font-size: 1.15rem;
+  letter-spacing: 0;
+}
+
+.kb-octave {
+  position: relative;
+  width: 100%;
+  height: 170px;
+  border-radius: 14px;
+}
+
+.kb-whites {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.kb-white {
+  position: relative;
+  flex: 1;
+  background: var(--key-white);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kb-white::after {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.35);
+  opacity: 0.35;
+}
+
+.kb-blacks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.kb-black {
+  position: absolute;
+  top: 8px;
+  height: 90px;
+  width: 10.5%;
+  border-radius: 999px;
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 3px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.kb-white.is-root,
+.kb-black.is-root {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ghost);
+}
+
+.kb-white:active,
+.kb-black:active {
+  transform: translateY(2px);
+}
+
+/* --- 8. STEP SEQUENCER GRID (Fixed Overflow) --- */
 .step-container {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 6px;
+  gap: 4px; /* Reduced gap */
   margin-top: 10px;
   flex-grow: 1;
+  
+  /* Scroll Fix */
+  max-height: 320px; 
+  overflow-y: auto;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 5px;
+  padding-right: 4px;
 }
+
+/* Custom Scrollbar */
+.step-container::-webkit-scrollbar { width: 6px; }
+.step-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+.step-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 .step-box {
   aspect-ratio: 1/1;
@@ -520,7 +494,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.75rem; /* Slightly smaller text */
   cursor: pointer;
   font-weight: 900;
   border-radius: 3px;
@@ -528,32 +502,18 @@ input[type="number"] {
   transition: 0.1s;
 }
 
-.step-box.on-x {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  opacity: 1;
-}
+.step-box:hover { opacity: 0.8; transform: scale(0.95); }
+.step-box.on-x { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
+.step-box.on-y { background: #555; color: white; border-color: #555; opacity: 1; }
+.step-box.on-z { color: var(--accent); border-color: var(--accent); border-style: dashed; opacity: 1; }
 
-.step-box.on-y {
-  background: #555;
-  color: white;
-  border-color: #555;
-  opacity: 1;
-}
-
-.step-box.on-z {
-  color: var(--accent);
-  border-color: var(--accent);
-  border-style: dashed;
-  opacity: 1;
-}
-
+/* --- 9. ACTION BUTTONS & MODALS --- */
 .action-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: auto;
+  padding-top: 15px; /* Separation from scroll area */
 }
 
 .btn-main {
@@ -611,6 +571,7 @@ input[type="number"] {
   border-color: var(--lcd-text) !important;
 }
 
+/* Feedback Modal */
 #feedback-btn {
   position: fixed;
   bottom: 20px;
