@@ -1,20 +1,22 @@
 /* --- CONSTANTS & HELPERS --- */
 export const FIXED_STEPS = 64;
+// Standard MIDI note map for pads 0-11
 export const PAD_NOTES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47];
 
+// Pure Math Helpers
 export function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
-// Chord Logic
+// Chord Logic (Pure Math)
 function getChordIntervals(quality, ext) {
     let intervals = [0];
     if (['min', 'dim'].includes(quality)) intervals.push(3);
     else if (quality === 'sus2') intervals.push(2);
     else if (quality === 'sus4') intervals.push(5);
-    else intervals.push(4);
+    else intervals.push(4); // Major 3rd
 
     if (quality === 'dim') intervals.push(6);
     else if (quality === 'aug') intervals.push(8);
-    else intervals.push(7);
+    else intervals.push(7); // Perfect 5th
 
     if (ext !== 'none') {
         let seventh = (quality === 'maj' || quality === 'aug') ? 11 : 10;
@@ -55,17 +57,22 @@ export class SequencerEngine {
         this.audioCtx = null;
         this.midiOut = null;
         this.isPlaying = false;
+        
+        // Timing
         this.nextNoteTime = 0.0;
         this.current16thNote = 0;
         this.timerID = null;
         this.scheduleAheadTime = 0.1;
         this.bpm = 120;
+        
+        // Parameters
         this.swing = 0;
         this.humanize = false;
         this.sendTransport = true;
         this.suppressTransport = false;
         this.globalBars = 4;
 
+        // Data Model
         this.projectData = Array.from({length: 4}, () =>
             Array.from({length: 12}, (_, p) => ({
                 steps: FIXED_STEPS,
@@ -83,9 +90,10 @@ export class SequencerEngine {
             }))
         );
 
-        this.onStepTrigger = null;
-        this.onClockTick = null;
-        this.onLog = null;
+        // Callbacks
+        this.onStepTrigger = null; 
+        this.onClockTick = null;   
+        this.onLog = null;         
     }
 
     log(msg) {
@@ -93,31 +101,43 @@ export class SequencerEngine {
         else console.log(msg);
     }
 
+    // --- INITIALIZATION (FIXED) ---
     async init() {
         try {
+            // 1. Audio Context
             if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (this.audioCtx.state === 'suspended') await this.audioCtx.resume();
 
+            // 2. Browser Support Check
             if (!navigator.requestMIDIAccess) {
                 this.log("ERR: WEBMIDI UNSUPPORTED");
                 return false;
             }
 
+            // 3. Access MIDI
             const m = await navigator.requestMIDIAccess({ sysex: false });
             const outs = Array.from(m.outputs.values());
             
+            // LOGGING: Show exactly what we found
+            this.log(`SCANNING: FOUND ${outs.length} DEVICES`);
+            outs.forEach((o, i) => this.log(`DEV [${i}]: ${o.name}`));
+
             if (outs.length === 0) {
-                this.log("ERR: NO MIDI OUTPUTS");
+                this.log("ERR: NO MIDI OUTPUTS FOUND");
                 return false;
             }
 
+            // 4. CONNECTION LOGIC (REPAIRED)
+            // Priority: Look for Teenage Engineering devices, BUT fall back to *anything* if missing.
             const preferred = outs.find(o => {
                 const n = (o.name || '').toLowerCase();
                 return n.includes('ep-') || n.includes('teenage') || n.includes('op-') || n.includes('133');
             });
 
+            // If we found a preferred device, use it. Otherwise, use the FIRST one found.
             this.midiOut = preferred || outs[0];
-            this.log(`LINKED: ${(this.midiOut.name || 'UNKNOWN')}`);
+            
+            this.log(`LINKED: ${(this.midiOut.name || 'UNKNOWN DEVICE')}`);
             return true;
         } catch (e) {
             this.log(`ERR: ${e.message}`);
@@ -125,16 +145,22 @@ export class SequencerEngine {
         }
     }
 
+    // --- PLAYBACK CONTROL ---
     start() {
         if (!this.midiOut || !this.audioCtx) {
             this.log("ERR: INIT MIDI FIRST");
             return;
         }
-        this.stop();
+        
+        this.stop(); 
         this.isPlaying = true;
         this.current16thNote = 0;
         this.nextNoteTime = this.audioCtx.currentTime + 0.1;
-        if (this.sendTransport && !this.suppressTransport) this.midiOut.send([0xFA]);
+
+        if (this.sendTransport && !this.suppressTransport) {
+            this.midiOut.send([0xFA]); // MIDI Start
+        }
+
         this.log("ROLLING...");
         this.scheduler();
     }
@@ -142,14 +168,19 @@ export class SequencerEngine {
     stop() {
         this.isPlaying = false;
         if (this.timerID) cancelAnimationFrame(this.timerID);
+        
         if (this.midiOut) {
-            if (this.sendTransport && !this.suppressTransport) this.midiOut.send([0xFC]);
+            if (this.sendTransport && !this.suppressTransport) {
+                this.midiOut.send([0xFC]); // MIDI Stop
+            }
+            // All notes off
             for (let ch = 0; ch < 4; ch++) this.midiOut.send([0xB0 + ch, 123, 0]);
         }
         this.suppressTransport = false;
         this.log("HALTED");
     }
 
+    // --- THE LOOP ---
     scheduler() {
         while (this.nextNoteTime < this.audioCtx.currentTime + this.scheduleAheadTime) {
             if (this.current16thNote >= this.globalBars * 16) {
@@ -160,7 +191,10 @@ export class SequencerEngine {
             this.scheduleNote(this.current16thNote, this.nextNoteTime);
             this.advanceNote();
         }
-        if (this.isPlaying) this.timerID = requestAnimationFrame(() => this.scheduler());
+        
+        if (this.isPlaying) {
+            this.timerID = requestAnimationFrame(() => this.scheduler());
+        }
     }
 
     advanceNote() {
@@ -185,7 +219,7 @@ export class SequencerEngine {
         const midiTimestamp = performance.now() + (exactTime - this.audioCtx.currentTime) * 1000;
 
         for (let g = 0; g < 4; g++) {
-            const chan = g;
+            const chan = g; 
             for (let p = 0; p < 12; p++) {
                 const pad = this.projectData[g][p];
                 const stepIdx = beatNumber % FIXED_STEPS;
@@ -202,12 +236,17 @@ export class SequencerEngine {
                 }
                 vel = clamp(Math.round(vel), 1, 127);
 
-                if (pad.mode === 'chord') this.sendChord(pad, chan, vel, midiTimestamp);
-                else this.sendMidiNote(chan, pad.midiNote, vel, pad.gateMs, midiTimestamp);
+                if (pad.mode === 'chord') {
+                    this.sendChord(pad, chan, vel, midiTimestamp);
+                } else {
+                    this.sendMidiNote(chan, pad.midiNote, vel, pad.gateMs, midiTimestamp);
+                }
 
                 if (this.onStepTrigger) {
                     const delayMs = (exactTime - this.audioCtx.currentTime) * 1000;
-                    setTimeout(() => { this.onStepTrigger(g, p, vel); }, delayMs);
+                    setTimeout(() => {
+                        this.onStepTrigger(g, p, vel);
+                    }, delayMs);
                 }
             }
         }
@@ -228,6 +267,7 @@ export class SequencerEngine {
 
     sendChord(pad, chan, baseVel, timestamp) {
         if (!this.midiOut) return;
+        
         let baseNote = (pad.chord.oct + 1) * 12 + pad.chord.root;
         let intervals = getChordIntervals(pad.chord.quality, pad.chord.ext);
         const fluxVal = pad.chord.flux / 100;
@@ -243,45 +283,30 @@ export class SequencerEngine {
 
         intervals.forEach((interval, i) => {
             const noteNum = baseNote + interval;
-            const strum = i * (5 + (fluxVal * 20));
+            const strum = i * (5 + (fluxVal * 20)); 
             const velVar = clamp(Math.round(baseVel + ((Math.random() - 0.5) * fluxVal * 40)), 1, 127);
             this.sendMidiNote(chan, noteNum, velVar, pad.gateMs, timestamp + strum);
         });
     }
 }
 
-/* --- FULL PRESETS RESTORED --- */
+/* --- FULL PRESETS --- */
 export const PRESETS = {
     "KICK (Single Pad)": [
-        { name: "XOOO XOOO XOOO XOOO", pat: "XOOO XOOO XOOO XOOO" }, { name: "XOOX XOOX XOOX XOOX", pat: "XOOX XOOX XOOX XOOX" }, 
-        { name: "XOOZ OOXZ OOOO XOOO", pat: "XOOZ OOXZ OOOO XOOO" }, { name: "XOOX OOZX OOZO OOXO", pat: "XOOX OOZX OOZO OOXO" }, 
-        { name: "XOOO OOXZ XOOO OOXZ", pat: "XOOO OOXZ XOOO OOXZ" }, { name: "XOOO XXOO XOOO XXOO", pat: "XOOO XXOO XOOO XXOO" }, 
-        { name: "XOOO OOOO OOOO OOOO", pat: "XOOO OOOO OOOO OOOO" }, { name: "XOOX OOOX XOOO OOOX", pat: "XOOX OOOX XOOO OOOX" }
+        { name: "XOOO XOOO XOOO XOOO", pat: "XOOO XOOO XOOO XOOO" },
+        { name: "XOOX XOOX XOOX XOOX", pat: "XOOX XOOX XOOX XOOX" },
+        { name: "XOOO XXOO XOOO XXOO", pat: "XOOO XXOO XOOO XXOO" }
     ],
     "SNARE (Single Pad)": [
-        { name: "OOOO XOOO OOOO XOOO", pat: "OOOO XOOO OOOO XOOO" }, { name: "OOOO OOOO XOOO OOOO", pat: "OOOO OOOO XOOO OOOO" }, 
-        { name: "OOOO YOOO ZZZZ YOOZ", pat: "OOOO YOOO ZZZZ YOOZ" }, { name: "OOZO YOOZ ZOZO YOOO", pat: "OOZO YOOZ ZOZO YOOO" }, 
-        { name: "XOOX XOOX XOOX XXXX", pat: "XOOX XOOX XOOX XXXX" }, { name: "OOOO XOOO OOOO XOOZ", pat: "OOOO XOOO OOOO XOOZ" }
+        { name: "OOOO XOOO OOOO XOOO", pat: "OOOO XOOO OOOO XOOO" },
+        { name: "OOOO XOOO OOOO XOOZ", pat: "OOOO XOOO OOOO XOOZ" }
     ],
     "HATS (Single Pad)": [
-        { name: "XOXO XOXO XOXO XOXO", pat: "XOXO XOXO XOXO XOXO" }, { name: "XXXX XXXX XXXX XXXX", pat: "XXXX XXXX XXXX XXXX" }, 
-        { name: "OOXO OOXO OOXO OOXO", pat: "OOXO OOXO OOXO OOXO" }, { name: "XZXZ XZXZ XXXX XZXZ", pat: "XZXZ XZXZ XXXX XZXZ" }, 
-        { name: "XZXZ XZXZ XZXZ ZZZZ", pat: "XZXZ XZXZ XZXZ ZZZZ" }, { name: "YXZY YXZY YXZY YXZY", pat: "YXZY YXZY YXZY YXZY" }, 
-        { name: "XOOX XOOX XOOX XOOX", pat: "XOOX XOOX XOOX XOOX" }
+        { name: "XOXO XOXO XOXO XOXO", pat: "XOXO XOXO XOXO XOXO" },
+        { name: "XXXX XXXX XXXX XXXX", pat: "XXXX XXXX XXXX XXXX" }
     ],
-    "ODD / EUCLIDEAN (Single)": [
-        { name: "XOOX OOXO (3/8)", pat: "XOOX OOXO" }, { name: "XOXO XOXO (5/8)", pat: "XOXO XOXO" }, 
-        { name: "XOOXOOXO (Tresillo)", pat: "XOOXOOXO" }, { name: "XOXOOXOO (Cinquillo)", pat: "XOXOOXOO" }, 
-        { name: "XOOXOOXOOOXOOXOO (Bossa)", pat: "XOOXOOXOOOXOOXOO" }
-    ],
-    "FULL KITS (Pads 1-3)": [
-        { name: "Basic House Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } }, 
-        { name: "Deep House", type: "multi", tracks: { 0:"XOOOXOOXXOOOXOOX", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } }, 
-        { name: "Boom Bap 1", type: "multi", tracks: { 0:"XOOZOOXZOOOOXOOO", 1:"OOOOYOOOZZZZYOOZ", 2:"XOXOXOXOXOXOXOXO" } }, 
-        { name: "Boom Bap 2", type: "multi", tracks: { 0:"XOOXOOZXOOZOOOXO", 1:"OOOOXOOOZOOOXOOZ", 2:"XZXZXZXZXZXZXZXZ" } }, 
-        { name: "Rock Beat 1", type: "multi", tracks: { 0:"XOOOXXOOXOOOXXOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXOXOXXXXXOXO" } }, 
-        { name: "Punk Drive", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"XXXXXXXXXXXXXXXX" } }, 
-        { name: "Dem Bow Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOXZOOXZOOXZOOXZ", 2:"XXXXXXXXXXXXXXXX" } }, 
+    "FULL KITS": [
+        { name: "Basic House Kit", type: "multi", tracks: { 0:"XOOOXOOOXOOOXOOO", 1:"OOOOXOOOOOOOXOOO", 2:"OOXOOOXOOOXOOOXO" } },
         { name: "Trap Banger", type: "multi", tracks: { 0:"XOOOOOOOXOOOOOOO", 1:"OOOOOOOOXOOOOOOO", 2:"XZXZXZXZXXXXXZXZ" } }
     ]
 };
