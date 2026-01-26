@@ -231,17 +231,21 @@ input[type=range].magic-knob::-webkit-slider-thumb {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* Performance Pads Area */
+/* --- REPLACEMENT: Performance Pads Area --- */
+
 .performance-container {
   display: grid;
-  grid-template-columns: 50px 1fr;
-  gap: 12px;
+  /* 40px for the A/B/C/D strip, the rest for pads */
+  grid-template-columns: 40px 1fr; 
+  gap: 8px;
+  /* Ensure it doesn't blow out the parent width */
+  min-width: 0; 
 }
 
 .group-strip {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   height: 100%;
 }
 
@@ -256,8 +260,9 @@ input[type=range].magic-knob::-webkit-slider-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   transition: 0.2s;
+  padding: 0; /* Remove padding to fit text */
 }
 
 .group-btn.active {
@@ -269,49 +274,57 @@ input[type=range].magic-knob::-webkit-slider-thumb {
 
 .ep-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr); /* Force 3 columns */
+  gap: 6px; /* Tighter gap */
 }
 
 .pad-btn {
   background: rgba(0, 0, 0, 0.05);
   border: 2px solid var(--border);
-  height: 80px;
+  
+  /* FIX: Change fixed 80px height to a responsive aspect ratio */
+  /* This makes them square (like the piano grid) and scale with width */
+  aspect-ratio: 4/3; 
+  /* Fallback height limit so they don't get huge on wide screens */
+  max-height: 60px;
+  
   border-radius: 6px;
   cursor: pointer;
   position: relative;
   transition: 0.05s;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .pad-btn.active-pad {
   border-color: var(--accent);
   background: var(--accent) !important;
   color: white;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
   transform: translateY(1px);
 }
 
 .pad-btn.hit {
   filter: brightness(1.5);
   transform: translateY(2px);
+  box-shadow: none;
 }
 
 .legend-tag {
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 4px;
+  right: 6px;
   font-weight: 900;
-  font-size: 0.85rem;
+  font-size: 0.7rem; /* Smaller text */
+  opacity: 0.7;
 }
 
 .pad-btn-sq::before {
   content: '';
   position: absolute;
-  top: 11%;
-  left: 11%;
-  width: 14.4%;
-  height: 14.4%;
+  top: 15%;
+  left: 10%;
+  width: 12%;
+  height: 16%;
   background: var(--accent);
   border-radius: 1px;
 }
